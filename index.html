@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LB Study Tracker | Pro Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Scripts -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #006FEE;
+            --primary-glow: rgba(0, 111, 238, 0.3);
+            --bg-dark: #F4F7FF;
+            --navbar-bg: rgba(0, 28, 57, 0.95);
+            --card-bg: #FFFFFF;
+            --text-main: #001C39;
+            --text-dim: #64748B;
+            --border: rgba(0, 28, 57, 0.08);
+            --gradient: linear-gradient(135deg, #006FEE 0%, #7828C8 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9999; pointer-events: none; opacity: 0.03;
+            background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+        }
+
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; display: block; position: relative; }
+
+        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #F4F7FF; }
+        .blob { position: absolute; width: 800px; height: 800px; filter: blur(120px); border-radius: 50%; animation: move 30s infinite alternate cubic-bezier(0.45, 0, 0.55, 1); }
+        .blob-1 { top: -200px; right: -200px; background: rgba(0, 111, 238, 0.2); }
+        .blob-2 { bottom: -300px; left: -300px; background: rgba(120, 40, 200, 0.2); }
+        .blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: rgba(0, 212, 255, 0.1); animation-duration: 20s; }
+        @keyframes move { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 50% { transform: translate(150px, -50px) scale(1.1) rotate(180deg); } 100% { transform: translate(-50px, 150px) scale(1) rotate(360deg); } }
+
+        /* Navbar - Top Ribbon Style */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%; height: 70px;
+            background: var(--navbar-bg); backdrop-filter: blur(15px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 2rem; z-index: 2000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container { width: 100%; max-width: 96%; display: flex; align-items: center; justify-content: space-between; }
+
+        .nav-brand { display: flex; align-items: center; gap: 15px; color: white; text-decoration: none; }
+        .nav-logo { 
+            width: 50px; height: 50px; background: var(--gradient); border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; font-weight: 900; 
+            font-size: 1.4rem; box-shadow: 0 0 20px rgba(0, 111, 238, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-title { font-family: 'Outfit'; font-weight: 800; letter-spacing: 2px; font-size: 1.6rem; background: white; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .nav-links { display: flex; gap: 1rem; align-items: center; }
+        .nav-link { 
+            color: rgba(255, 255, 255, 0.7); text-decoration: none; padding: 8px 16px; 
+            border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: 0.3s; cursor: pointer;
+        }
+        .nav-link.active { color: white; background: rgba(255, 255, 255, 0.1); }
+        .nav-link:hover { color: white; background: rgba(255, 255, 255, 0.05); }
+
+        .nav-btn-danger { color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; cursor: pointer; font-weight: 600; margin-left: 10px; transition: 0.3s; }
+        .nav-btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
+
+        .main-content { width: 100%; padding: 120px 0 5rem 0; display: flex; flex-direction: column; align-items: center; }
+
+        .dashboard-wrapper {
+            width: 95%; max-width: 1400px; margin: 0 auto;
+            position: relative; box-shadow: 0 20px 80px rgba(0, 28, 57, 0.05);
+            border-radius: 40px; padding: 3rem; background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .greeting { margin-bottom: 2.5rem; margin-top: -1rem; }
+        .greeting h1 { 
+            font-family: 'Outfit'; font-size: 3rem; font-weight: 800; 
+            background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        .greeting p { color: var(--text-dim); font-size: 1.1rem; font-weight: 500; margin-top: 5px; opacity: 0.8; }
+
+        .countdown-card {
+            background: rgba(0, 111, 238, 0.08); backdrop-filter: blur(20px);
+            border-radius: 32px; padding: 2.5rem; border: 1px solid rgba(0, 111, 238, 0.15);
+            display: flex; justify-content: space-around; margin-bottom: 2.5rem;
+            box-shadow: 0 15px 35px rgba(0, 111, 238, 0.05); color: var(--primary);
+        }
+
+        .cd-val { font-family: 'Outfit'; font-size: 3rem; font-weight: 800; line-height: 1; }
+        .cd-lbl { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; opacity: 0.7; }
+
+        .dash-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; }
+
+        .card {
+            background: var(--card-bg); border-radius: 32px; padding: 2.2rem;
+            border: 1px solid var(--border); height: 100%;
+            box-shadow: 0 10px 30px rgba(0, 28, 57, 0.03); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s;
+        }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0, 28, 57, 0.08); border-color: rgba(0, 111, 238, 0.3); }
+        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; margin-bottom: 1.5rem; }
+
+        .tracker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 30px; margin-top: 25px; }
+        .hour-btn {
+            aspect-ratio: 1; background: #F1F5F9; border: 1px solid var(--border);
+            border-radius: 30px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-weight: 900; color: var(--text-dim); font-size: 2.8rem;
+        }
+        .hour-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 10px 20px var(--primary-glow); }
+
+        .stat-card { background: #F8FAFC; padding: 1.5rem; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 1.2rem; }
+        .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        .stat-lbl { font-size: 0.9rem; color: var(--text-dim); }
+
+        input, select { background: #F1F5F9; border: 1px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 10px; outline: none; font-weight: 600; }
+        button.btn-primary { background: var(--gradient); border: none; color: white; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; transition: 0.3s; }
+        button.btn-primary:hover { transform: scale(1.02); box-shadow: 0 5px 15px var(--primary-glow); }
+
+        .marks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .subject-section { margin-bottom: 3rem; }
+        .subject-title { font-family: 'Outfit'; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .chart-box { height: 200px; margin-top: 10px; }
+
+        @media (max-width: 768px) {
+            .navbar { height: 60px; padding: 0 1rem; }
+            .nav-logo { width: 35px; height: 35px; font-size: 1rem; border-radius: 10px; }
+            .nav-title { font-size: 1.1rem; }
+            .nav-link { padding: 6px 10px; font-size: 0.8rem; }
+            .nav-btn-danger { padding: 6px 10px; font-size: 0.7rem; }
+
+            .main-content { padding-top: 80px; }
+            .dashboard-wrapper { padding: 1.5rem; border-radius: 20px; }
+            .greeting h1 { font-size: 1.8rem; }
+            .greeting p { font-size: 0.9rem; }
+
+            .countdown-card { padding: 1.5rem; border-radius: 20px; flex-wrap: wrap; gap: 1rem; }
+            .cd-val { font-size: 1.8rem; }
+            .cd-lbl { font-size: 0.7rem; }
+
+            .dash-grid { grid-template-columns: 1fr !important; gap: 1rem; }
+            .card { padding: 1.5rem; border-radius: 20px; min-width: 100% !important; }
+            
+            .tracker-grid { gap: 12px; margin-top: 15px; grid-template-columns: repeat(5, 1fr); }
+            .hour-btn { border-radius: 12px; font-size: 1.1rem; }
+
+            .stat-val { font-size: 1.4rem; }
+            .stat-card { padding: 1rem; }
+
+            .anim-stagger { grid-template-columns: repeat(2, 1fr) !important; }
+            .anim-stagger > *:last-child { grid-column: span 2; }
+        }
+
+        @media (max-width: 480px) {
+            .tracker-grid { grid-template-columns: repeat(4, 1fr); }
+            .anim-stagger { grid-template-columns: 1fr !important; }
+            .anim-stagger > *:last-child { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('dashboard');
+            const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]);
+            const [modal, setModal] = useState({ open: false, title: '', msg: '', onConfirm: null });
+            
+            const [history, setHistory] = useState(() => {
+                const saved = localStorage.getItem('apStudyHistoryV2');
+                return saved ? JSON.parse(saved) : {};
+            });
+            const [todayHours, setTodayHours] = useState(new Array(15).fill(false));
+            
+            const [marksData, setMarksData] = useState(() => {
+                const saved = localStorage.getItem('apStudyMarksV1');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+
+            useEffect(() => {
+                const data = history[viewDate] || new Array(15).fill(false);
+                setTodayHours(data);
+            }, [viewDate, history]);
+
+            useEffect(() => {
+                const target = new Date('2026-08-01T00:00:00');
+                const timer = setInterval(() => {
+                    const diff = target - new Date();
+                    if (diff > 0) {
+                        setTimeLeft({
+                            d: Math.floor(diff / 86400000), h: Math.floor((diff / 3600000) % 24),
+                            m: Math.floor((diff / 60000) % 60), s: Math.floor((diff / 1000) % 60)
+                        });
+                    }
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const toggleHour = (index) => {
+                const updated = [...todayHours];
+                updated[index] = !updated[index];
+                setTodayHours(updated);
+                const newHistory = { ...history, [viewDate]: updated };
+                setHistory(newHistory);
+                localStorage.setItem('apStudyHistoryV2', JSON.stringify(newHistory));
+            };
+
+            const addMark = (mark) => {
+                let updated;
+                if (mark.id && marksData.find(m => m.id === mark.id)) {
+                    updated = marksData.map(m => m.id === mark.id ? mark : m);
+                } else {
+                    updated = [...marksData, { ...mark, id: Date.now() }];
+                }
+                setMarksData(updated);
+                localStorage.setItem('apStudyMarksV1', JSON.stringify(updated));
+            };
+
+            const deleteMark = (id) => {
+                setModal({
+                    open: true,
+                    title: 'ලකුණු මකන්නද?',
+                    msg: 'ඔබට මෙම පේපර් එකේ ලකුණු ඉවත් කිරීමට අවශ්‍ය බව විශ්වාසද?',
+                    onConfirm: () => {
+                        const updated = marksData.filter(m => m.id !== id);
+                        setMarksData(updated);
+                        localStorage.setItem('apStudyMarksV1', JSON.stringify(updated));
+                        setModal({ ...modal, open: false });
+                    }
+                });
+            };
+
+            const clearAllData = () => {
+                setModal({
+                    open: true,
+                    title: 'සියල්ල මකන්නද?',
+                    msg: 'ඔබේ සියලුම ඉගෙනීමේ දත්ත සහ ලකුණු ස්ථිරවම මකන්නද?',
+                    onConfirm: () => {
+                        localStorage.removeItem('apStudyHistoryV2');
+                        localStorage.removeItem('apStudyMarksV1');
+                        setHistory({}); setMarksData([]);
+                        setTodayHours(new Array(15).fill(false));
+                        setModal({ ...modal, open: false });
+                    }
+                });
+            };
+
+            return (
+                <div>
+                    <div className="noise"></div>
+                    {modal.open && (
+                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="card" style={{ maxWidth: '420px', width: '90%', height: 'auto', textAlign: 'center', padding: '2rem', transform: 'scale(1)', animation: 'modalIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+                                <div style={{ fontSize: '2.5rem', marginBottom: '0.8rem' }}>⚠️</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontSize: '1.4rem', marginBottom: '10px' }}>{modal.title}</h2>
+                                <p style={{ color: 'var(--text-dim)', marginBottom: '1.5rem', fontSize: '0.95rem' }}>{modal.msg}</p>
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                                    <button className="btn-primary" style={{ padding: '10px 24px' }} onClick={modal.onConfirm}>ඔව්, මකන්න</button>
+                                    <button className="btn-primary" style={{ background: '#E2E8F0', color: 'var(--text-main)', padding: '10px 24px' }} onClick={() => setModal({ ...modal, open: false })}>එපා</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    <style>{`
+                        @keyframes modalIn {
+                            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+                            to { opacity: 1; transform: scale(1) translateY(0); }
+                        }
+                    `}</style>
+                    <div className="live-bg">
+                        <div className="blob blob-1"></div><div className="blob blob-2"></div>
+                    </div>
+                    
+                    <header className="navbar">
+                        <div className="nav-container">
+                            <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
+                                <div className="nav-logo">LB</div>
+                                <span className="nav-title">TRACKER</span>
+                            </div>
+                            <div className="nav-links">
+                                <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
+                                <div className={`nav-link ${currentPage === 'marks' ? 'active' : ''}`} onClick={() => setCurrentPage('marks')}>Marks Analysis</div>
+                                <div className="nav-btn-danger" onClick={clearAllData}>Clear Data</div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="main-content">
+                        {currentPage === 'dashboard' ? (
+                            <DashboardView history={history} todayHours={todayHours} toggleHour={toggleHour} timeLeft={timeLeft} viewDate={viewDate} setViewDate={setViewDate} />
+                        ) : (
+                            <MarksView marksData={marksData} addMark={addMark} deleteMark={deleteMark} />
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const DashboardView = ({ history, todayHours, toggleHour, timeLeft, viewDate, setViewDate }) => {
+            useEffect(() => {
+                gsap.from(".anim-stagger", { y: 30, opacity: 0, duration: 0.8, stagger: 0.1, ease: "power3.out" });
+            }, []);
+
+            const todayCount = todayHours.filter(Boolean).length;
+            const getSum = (period) => {
+                let s = 0; const now = new Date();
+                for(let i=0; i<period; i++) {
+                    const d = new Date(); d.setDate(now.getDate() - i);
+                    const k = d.toISOString().split('T')[0];
+                    if(history[k]) s += history[k].filter(Boolean).length;
+                }
+                return s;
+            };
+
+            return (
+                <div className="dashboard-wrapper">
+                    <div className="top-bar anim-stagger">
+                        <div className="greeting">
+                            <h1>2026 A/L Polonnaruwa</h1>
+                            <p>දිස්ත්‍රික් ප්‍රථමයා වීමේ සිහිනය කරා...</p>
+                        </div>
+                    </div>
+
+                    {/* 1. Countdown at Top */}
+                    <section className="countdown-card anim-stagger">
+                        <CDUnit v={timeLeft.d} l="Days" /><CDUnit v={timeLeft.h} l="Hours" /><CDUnit v={timeLeft.m} l="Minutes" /><CDUnit v={timeLeft.s} l="Seconds" />
+                    </section>
+
+                    {/* 2. Top Stats below Countdown */}
+                    <div className="anim-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                        <StatBox val={todayCount} lbl="Today's Hours" sub="අද වැඩ කරපු පැය" />
+                        <StatBox val={15 - todayCount} lbl="Missed Hours" sub="අතපසු වූ පැය" color="#ef4444" />
+                        <StatBox val={getSum(7)} lbl="Weekly Hours" sub="මේ සතියේ පැය" />
+                        <StatBox val={getSum(30)} lbl="Monthly Hours" sub="මේ මාසයේ පැය" />
+                        <StatBox val={Object.values(history).reduce((a, c) => a + c.filter(Boolean).length, 0)} lbl="Total Hours" sub="මුළු පැය ගණන" />
+                    </div>
+
+                    <div className="dash-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', marginBottom: '1.2rem' }}>
+                        <div className="card anim-stagger" style={{ minWidth: '550px' }}>
+                            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span className="card-title">Study Grid</span>
+                                <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{todayCount} / 15 hrs</span>
+                            </div>
+                            <div className="tracker-grid">
+                                {todayHours.map((isActive, i) => (
+                                    <div key={i} className={`hour-btn hour-btn-${i} ${isActive ? 'active' : ''}`} onClick={() => toggleHour(i)}>
+                                        {i + 1}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="card anim-stagger">
+                            <span className="card-title">Daily Progress</span>
+                            <div style={{ marginTop: '1rem' }}>
+                                <input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} />
+                                <div className="stat-card" style={{ marginTop: '1.2rem', marginBottom: '1.2rem' }}>
+                                    <div className="stat-val">{Math.round((todayCount / 15) * 100)}%</div>
+                                    <div className="stat-lbl">Progress Achieved</div>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {[...Array(5)].map((_, i) => {
+                                        const d = new Date(); d.setDate(d.getDate() - i);
+                                        const k = d.toISOString().split('T')[0];
+                                        const hrs = history[k] ? history[k].filter(Boolean).length : 0;
+                                        return (
+                                            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(0,111,238,0.05)', borderRadius: '10px', fontSize: '0.85rem' }}>
+                                                <span style={{ fontWeight: '600', color: 'var(--text-dim)' }}>{d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                                                <span style={{ fontWeight: '800', color: 'var(--primary)' }}>{hrs}h</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Chart full width at bottom */}
+                    <div className="card anim-stagger" style={{ height: '350px', padding: '2rem' }}>
+                        <span className="card-title">Study Trends</span>
+                        <div className="chart-container" style={{ height: '240px', marginTop: '1.5rem' }}>
+                            <HistoryChart history={history} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MarksView = ({ marksData, addMark, deleteMark }) => {
+            const [form, setForm] = useState({ id: null, subject: 'ICT', mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            const subjects = ['ICT', 'ET', 'SFT'];
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(!form.mcq || !form.str || !form.esy) return;
+                const total = parseFloat(form.mcq) + parseFloat(form.str) + parseFloat(form.esy);
+                addMark({ ...form, total: parseFloat(total) });
+                setForm({ id: null, subject: 'ICT', mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            };
+
+            return (
+                <div className="dashboard-wrapper">
+                    <div className="top-bar">
+                        <div className="greeting">
+                            <h1>Marks Analysis</h1>
+                            <p>ඔබේ විභාග ලකුණු සහ ප්‍රගතිය පරීක්ෂා කරන්න.</p>
+                        </div>
+                    </div>
+                    <div className="dash-grid">
+                        <div className="card">
+                            <span className="card-title">{form.id ? 'Edit Marks' : 'Add Paper Marks'}</span>
+                            <form onSubmit={handleSubmit}>
+                                <select value={form.subject} onChange={e => setForm({...form, subject: e.target.value})}>
+                                    {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                                <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} />
+                                <input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({...form, mcq: e.target.value})} />
+                                <input type="number" placeholder="Structured" value={form.str} onChange={e => setForm({...form, str: e.target.value})} />
+                                <input type="number" placeholder="Essay" value={form.esy} onChange={e => setForm({...form, esy: e.target.value})} />
+                                <button type="submit" className="btn-primary">{form.id ? 'Update' : 'Add'}</button>
+                            </form>
+                        </div>
+                        <div className="card" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <span className="card-title">Paper History</span>
+                            {[...marksData].sort((a,b) => new Date(b.date) - new Date(a.date)).map(m => (
+                                <div key={m.id} className="stat-card" style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem' }}>
+                                    <div><div style={{ fontWeight: '700' }}>{m.subject} - {m.total}</div><div style={{ fontSize: '0.7rem' }}>{m.date}</div></div>
+                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                        <button onClick={() => setForm({...m})} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer' }}>Edit</button>
+                                        <button onClick={() => deleteMark(m.id)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '5px', cursor: 'pointer' }}>Del</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div style={{ marginTop: '3rem' }}>
+                        {subjects.map(s => (
+                            <div key={s} className="subject-section">
+                                <div className="subject-title"> {s} Progress </div>
+                                <div className="marks-grid">
+                                    <MarkChart title="MCQ" data={marksData.filter(m => m.subject === s)} field="mcq" color="#006FEE" />
+                                    <MarkChart title="STR" data={marksData.filter(m => m.subject === s)} field="str" color="#7828C8" />
+                                    <MarkChart title="ESY" data={marksData.filter(m => m.subject === s)} field="esy" color="#FF4D4D" />
+                                    <MarkChart title="Total" data={marksData.filter(m => m.subject === s)} field="total" color="#00C853" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const MarkChart = ({ title, data, field, color }) => {
+            const chartRef = useRef(null); const chartInst = useRef(null);
+            useEffect(() => {
+                if (!chartRef.current) return; if (chartInst.current) chartInst.current.destroy();
+                const ctx = chartRef.current.getContext('2d');
+                const sorted = [...data].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-10);
+                chartInst.current = new Chart(ctx, {
+                    type: 'line', data: {
+                        labels: sorted.map(m => m.date.split('-')[2]),
+                        datasets: [{ data: sorted.map(m => m[field]), borderColor: color, backgroundColor: color + '22', fill: true, tension: 0.4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                });
+            }, [data]);
+            return <div className="card" style={{ padding: '1.2rem' }}><div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--text-dim)' }}>{title}</div><div className="chart-box"><canvas ref={chartRef}></canvas></div></div>;
+        };
+
+        const StatBox = ({ val, lbl, sub, color }) => (
+            <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', borderColor: color ? color + '44' : 'var(--border)' }}>
+                <div style={{ fontSize: '2.2rem', fontWeight: '800', color: color || 'var(--text-main)', fontFamily: 'Outfit' }}>{val}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: '600', marginTop: '5px' }}>{lbl}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{sub}</div>
+            </div>
+        );
+
+        const CDUnit = ({ v, l }) => (
+            <div style={{ textAlign: 'center' }}>
+                <div className="cd-val">{String(v).padStart(2, '0')}</div>
+                <div className="cd-lbl" style={{ fontSize: '0.7rem', opacity: 0.8 }}>{l}</div>
+            </div>
+        );
+
+        const HistoryChart = ({ history }) => {
+            const chartRef = useRef(null); const chartInst = useRef(null);
+            useEffect(() => {
+                if (!chartRef.current) return; if (chartInst.current) chartInst.current.destroy();
+                const ctx = chartRef.current.getContext('2d');
+                const last7 = [...Array(7)].map((_, i) => {
+                    const d = new Date(); d.setDate(d.getDate() - (6 - i));
+                    return d.toISOString().split('T')[0];
+                });
+                const data = last7.map(d => history[d] ? history[d].filter(Boolean).length : 0);
+                chartInst.current = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: last7.map(d => d.split('-')[2]),
+                        datasets: [{ 
+                            data, 
+                            borderColor: '#006FEE', 
+                            backgroundColor: 'rgba(0, 111, 238, 0.1)', 
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#006FEE'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { 
+                            y: { beginAtZero: true, max: 15, display: false }, 
+                            x: { grid: { display: false }, ticks: { color: '#94A3B8' } } 
+                        }
+                    }
+                });
+            }, [history]);
+            return <canvas ref={chartRef}></canvas>;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
