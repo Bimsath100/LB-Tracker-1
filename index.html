@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LB Study Tracker | The Elite Student Dashboard Sri Lanka</title>
+    <meta name="description" content="LB Study Tracker is the most advanced, cloud-synced study dashboard designed for Sri Lankan A/L students. Track your hours, analyze marks, and achieve your district rank.">
+    <meta name="keywords" content="LB Study Tracker, Study Tracker Sri Lanka, A/L Study Tracker, Exam Countdown, Sri Lanka Education, Student Dashboard, 2026 A/L">
+    <meta name="author" content="LB Tracker">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://lb-tracker.vercel.app/">
+    <meta property="og:title" content="LB Study Tracker | The Elite Student Dashboard">
+    <meta property="og:description" content="Track your study hours, manage paper marks, and achieve your A/L goals with cloud-synced progress.">
+    <meta property="og:image" content="https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/assets/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="LB Study Tracker | The Elite Student Dashboard">
+    <meta property="twitter:description" content="Track your study hours and manage paper marks with ease.">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Scripts -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --bg-dark: #050505;
+            --navbar-bg: rgba(5, 5, 5, 0.7);
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --text-main: #FFFFFF;
+            --text-dim: #94A3B8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --gradient: linear-gradient(135deg, #8B5CF6 0%, #D946EF 100%);
+            --input-bg: rgba(255, 255, 255, 0.04);
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            --chart-grid: rgba(255, 255, 255, 0.06);
+            --chart-text: #71717A;
+        }
+
+        [data-theme="light"] {
+            --primary: #6366F1;
+            --bg-dark: #F8FAFC;
+            --navbar-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-dim: #64748B;
+            --border: rgba(15, 23, 42, 0.08);
+            --glass-border: 1px solid rgba(15, 23, 42, 0.08);
+            --input-bg: #F1F5F9;
+            --gradient: linear-gradient(135deg, #6366F1 0%, #A855F7 100%);
+            --card-shadow: 0 15px 40px rgba(0, 30, 80, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; transition: background 0.5s; }
+
+        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #050505; }
+        .blob { position: absolute; width: 600px; height: 600px; filter: blur(100px); border-radius: 50%; opacity: 0.35; animation: move 20s infinite alternate; }
+        .blob-1 { top: -200px; right: -100px; background: var(--primary); }
+        .blob-2 { bottom: -200px; left: -100px; background: #D946EF; }
+        @keyframes move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 100px) scale(1.1); } }
+
+        .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); }
+
+        /* Navbar */
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: var(--navbar-bg); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); }
+        .nav-container { width: 92%; max-width: 1400px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .nav-logo { width: 42px; height: 42px; background: var(--gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; }
+        .nav-links { display: flex; gap: 10px; align-items: center; }
+        .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; }
+        .nav-link.active { background: var(--input-bg); color: var(--text-main); border: var(--glass-border); }
+        .nav-link:hover { color: var(--text-main); background: var(--border); }
+
+        .main-content { width: 100%; padding: 110px 0 100px 0; }
+        .container { width: 92%; max-width: 1400px; margin: 0 auto; }
+
+        /* Landing Page */
+        .hero { min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .hero h1 { font-family: 'Outfit'; font-size: 4.5rem; font-weight: 800; letter-spacing: -2px; line-height: 1.1; margin-bottom: 1.5rem; }
+        .hero p { font-size: 1.3rem; color: var(--text-dim); max-width: 700px; margin-bottom: 3rem; }
+        .btn-google { background: white; color: black; padding: 16px 32px; border-radius: 16px; font-weight: 700; font-size: 1.1rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; box-shadow: 0 10px 30px rgba(255,255,255,0.1); }
+        .btn-google:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255,255,255,0.2); }
+
+        /* Setup Wizard */
+        .setup-card { max-width: 500px; margin: 2rem auto; padding: 3rem; }
+        .setup-title { font-family: 'Outfit'; font-size: 2rem; margin-bottom: 0.5rem; }
+        .setup-subtitle { color: var(--text-dim); margin-bottom: 2.5rem; font-size: 0.95rem; }
+        
+        input, select { background: var(--input-bg); border: var(--glass-border); color: var(--text-main); padding: 16px; border-radius: 14px; width: 100%; margin-bottom: 15px; outline: none; transition: 0.3s; font-size: 1rem; font-weight: 500; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+        .btn-primary { background: var(--gradient); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: 0.3s; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
+
+        /* Dashboard Grid */
+        .dash-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 2rem; }
+        .card { padding: 2.2rem; margin-bottom: 2rem; height: 100%; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .stat-card { padding: 1.5rem; text-align: center; }
+        .stat-val { font-family: 'Outfit'; font-size: 2.5rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-lbl { font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+
+        /* Tracker Grid */
+        .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; }
+        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 800; font-size: 1.5rem; font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s; }
+        .hour-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 25px var(--primary-glow); }
+
+        /* Subject Cards */
+        .subject-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+
+        /* Floating Settings */
+        .floating-settings { position: fixed; bottom: 95px; right: 25px; width: 55px; height: 55px; background: var(--card-bg); backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.4s; }
+        .floating-settings:hover { transform: rotate(90deg) scale(1.1); border-color: var(--primary); }
+        .settings-menu { position: fixed; bottom: 165px; right: 25px; width: 280px; padding: 2rem; z-index: 1501; animation: menuIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes menuIn { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* Mobile Nav */
+        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; }
+        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-dim); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; padding: 12px; border-radius: 16px; min-width: 75px; }
+        .mobile-item.active { color: var(--primary); background: var(--input-bg); }
+        .mobile-item-icon { font-size: 1.4rem; }
+
+        /* Responsive */
+        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-nav { display: flex; }
+            .hero h1 { font-size: 2.8rem; }
+            .hero p { font-size: 1.1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-content { padding-bottom: 120px; }
+        }
+
+        /* Subjects Float BG */
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.2; }
+        .float-icon { position: absolute; font-size: 5rem; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Supabase Config ---
+        const SB_URL = "https://gemcglmmjbicgbvdhdee.supabase.co"; 
+        const SB_KEY = "sb_publishable_XhYi9wPvuOOLjRdpjaqUWg_xKXL2Dg6";
+        const sb = supabase.createClient(SB_URL, SB_KEY);
+
+        const SUBJECT_ICONS = {
+            'ICT': '💻', 'Physics': '⚛️', 'Chemistry': '🧪', 'Biology': '🧬', 'Combined Maths': '📐',
+            'ET': '⚙️', 'SFT': '🔬', 'Accounting': '📊', 'Economics': '📈', 'Business Studies': '💼',
+            'Logic': '🧠', 'Political Science': '⚖️', 'Sinhala': '✍️', 'English': '🔤', 'History': '📜',
+            'Japanese': '🎌', 'French': '🇫🇷', 'Media': '🎥', 'Art': '🎨', 'Dancing': '💃'
+        };
+
+        const DISTRICTS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle"];
+
+        const SUBJECT_LIST = Object.keys(SUBJECT_ICONS);
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [profile, setProfile] = useState(null); // { name, district, subjects: [] }
+            const [loading, setLoading] = useState(true);
+            const [currentPage, setCurrentPage] = useState('dashboard');
+            const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]);
+            const [history, setHistory] = useState({});
+            const [marks, setMarks] = useState([]);
+            const [theme, setTheme] = useState(localStorage.getItem('appTheme') || 'dark');
+            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+
+            useEffect(() => {
+                // Auth Listener
+                sb.auth.getSession().then(({ data: { session } }) => {
+                    if (session) {
+                        setUser(session.user);
+                        fetchUserData(session.user.id);
+                    } else {
+                        setLoading(false);
+                    }
+                });
+
+                const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+                    if (session) {
+                        setUser(session.user);
+                        fetchUserData(session.user.id);
+                    } else {
+                        setUser(null);
+                        setProfile(null);
+                        setLoading(false);
+                    }
+                });
+
+                return () => subscription.unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('appTheme', theme);
+            }, [theme]);
+
+            const fetchUserData = async (userId) => {
+                const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', userId).single();
+                if (data) {
+                    setProfile({ name: data.name, district: data.district, subjects: data.subjects });
+                    setHistory(data.history || {});
+                    setMarks(data.marks || []);
+                }
+                setLoading(false);
+            };
+
+            const handleLogin = async () => {
+                await sb.auth.signInWithOAuth({ provider: 'google' });
+            };
+
+            const handleLogout = async () => {
+                await sb.auth.signOut();
+                window.location.reload();
+            };
+
+            const saveProfile = async (p) => {
+                setLoading(true);
+                const { error } = await sb.from('study_tracker_v2').upsert({
+                    user_id: user.id,
+                    name: p.name,
+                    district: p.district,
+                    subjects: p.subjects,
+                    history: history,
+                    marks: marks
+                });
+                if (!error) setProfile(p);
+                setLoading(false);
+            };
+
+            const pushData = async (h, m) => {
+                if (!user) return;
+                await sb.from('study_tracker_v2').upsert({
+                    user_id: user.id,
+                    name: profile.name,
+                    district: profile.district,
+                    subjects: profile.subjects,
+                    history: h,
+                    marks: m
+                });
+            };
+
+            // Countdown Logic
+            useEffect(() => {
+                const target = new Date('2026-08-01T00:00:00');
+                const timer = setInterval(() => {
+                    const diff = target - new Date();
+                    if (diff > 0) {
+                        setTimeLeft({
+                            d: Math.floor(diff / 86400000), h: Math.floor((diff / 3600000) % 24),
+                            m: Math.floor((diff / 60000) % 60), s: Math.floor((diff / 1000) % 60)
+                        });
+                    }
+                }, 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            if (loading) return <LoadingScreen />;
+
+            if (!user) return <LandingPage onLogin={handleLogin} />;
+
+            if (!profile) return <SetupWizard onComplete={saveProfile} />;
+
+            const currentSubjects = profile.subjects;
+
+            return (
+                <div>
+                    <div className="live-bg">
+                        <div className="blob blob-1"></div>
+                        <div className="blob blob-2"></div>
+                    </div>
+                    <SubjectBackground subject={currentPage === 'dashboard' ? 'General' : currentPage} />
+
+                    <header className="navbar">
+                        <div className="nav-container">
+                            <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
+                                <div className="nav-logo">LB</div>
+                                <span>TRACKER</span>
+                            </div>
+                            <div className="nav-links">
+                                <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
+                                {currentSubjects.map(sub => (
+                                    <div key={sub} className={`nav-link ${currentPage === sub ? 'active' : ''}`} onClick={() => setCurrentPage(sub)}>{sub}</div>
+                                ))}
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="floating-settings" onClick={() => setIsSettingsOpen(!isSettingsOpen)}>
+                        {isSettingsOpen ? '✕' : '⚙️'}
+                    </div>
+
+                    {isSettingsOpen && (
+                        <div className="glass settings-menu">
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '8px' }}>APPEARANCE</div>
+                                <select value={theme} onChange={e => setTheme(e.target.value)} style={{ marginBottom: 0 }}>
+                                    <option value="dark">Dark Theme</option>
+                                    <option value="light">Light Theme</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-dim)', marginBottom: '8px' }}>ACCOUNT</div>
+                                <div style={{ fontSize: '0.85rem', marginBottom: '10px' }}>{user.email}</div>
+                                <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', fontSize: '0.9rem', padding: '10px' }} onClick={handleLogout}>Logout</button>
+                            </div>
+                        </div>
+                    )}
+
+                    <nav className="mobile-nav">
+                        <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
+                        {currentSubjects.map(sub => (
+                            <MobileItem key={sub} active={currentPage === sub} icon={SUBJECT_ICONS[sub] || '📚'} label={sub} onClick={() => setCurrentPage(sub)} />
+                        ))}
+                    </nav>
+
+                    <main className="main-content">
+                        <div className="container">
+                            {currentPage === 'dashboard' ? (
+                                <DashboardView profile={profile} history={history} marks={marks} viewDate={viewDate} setViewDate={setViewDate} setHistory={(h) => { setHistory(h); pushData(h, marks); }} timeLeft={timeLeft} />
+                            ) : (
+                                <SubjectView subject={currentPage} marks={marks} setMarks={(m) => { setMarks(m); pushData(history, m); }} />
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const LoadingScreen = () => (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: '#050505', display: 'flex', alignItems: 'center', justifyCenter: 'center', zIndex: 9999 }}>
+                <div style={{ fontSize: '2rem', fontFamily: 'Outfit', fontWeight: '800', color: 'white', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
+                <style>{`@keyframes pulse { 0% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.5; transform: scale(0.95); } }`}</style>
+            </div>
+        );
+
+        const LandingPage = ({ onLogin }) => (
+            <div className="hero">
+                <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
+                <div className="nav-logo" style={{ width: '80px', height: '80px', fontSize: '2rem', marginBottom: '2rem' }}>LB</div>
+                <h1>Empowering <span style={{ color: '#8B5CF6' }}>Sri Lankan</span><br />A/L Students</h1>
+                <p>ඔබේ ඉලක්කයට හඹා යන ගමනේ දියුණුම තාක්ෂණික සහකරු. ලකුණු, කාලය සහ ප්‍රගතිය එකම තැනකින් කළමනාකරණය කරන්න.</p>
+                <button className="btn-google" onClick={onLogin}>
+                    <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Sign in with Google
+                </button>
+                <div style={{ marginTop: '4rem', display: 'flex', gap: '3rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                    <div>✨ Personalized Dashboard</div>
+                    <div>☁️ Cloud Sync</div>
+                    <div>📊 Smart Analytics</div>
+                </div>
+            </div>
+        );
+
+        const SetupWizard = ({ onComplete }) => {
+            const [step, setStep] = useState(1);
+            const [form, setForm] = useState({ name: '', district: 'Colombo', subjects: [] });
+
+            const toggleSubject = (s) => {
+                if (form.subjects.includes(s)) setForm({ ...form, subjects: form.subjects.filter(x => x !== s) });
+                else if (form.subjects.length < 3) setForm({ ...form, subjects: [...form.subjects, s] });
+            };
+
+            return (
+                <div className="hero">
+                    <div className="glass setup-card">
+                        {step === 1 ? (
+                            <div>
+                                <h2 className="setup-title">Hello! 👋</h2>
+                                <p className="setup-subtitle">ඔබේ විස්තර ඇතුළත් කරමු.</p>
+                                <input type="text" placeholder="ඔබේ නම (Name)" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>
+                                    {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                                <button className="btn-primary" onClick={() => form.name && setStep(2)}>ඊළඟ පියවර</button>
+                            </div>
+                        ) : (
+                            <div>
+                                <h2 className="setup-title">Subjects 📚</h2>
+                                <p className="setup-subtitle">ඔබ ඉගෙන ගන්නා විෂයන් 3 තෝරන්න.</p>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', maxHeight: '300px', overflowY: 'auto', marginBottom: '2rem', padding: '5px' }}>
+                                    {SUBJECT_LIST.map(s => (
+                                        <div key={s} onClick={() => toggleSubject(s)} style={{ padding: '12px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', transition: '0.2s' }}>
+                                            <span style={{ fontSize: '1.2rem', display: 'block' }}>{SUBJECT_ICONS[s]}</span>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>{s}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>වැඩේ පටන් ගමු!</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const DashboardView = ({ profile, history, marks, viewDate, setViewDate, setHistory, timeLeft }) => {
+            const todayCount = (history[viewDate] || []).filter(Boolean).length;
+            const now = new Date();
+            const hrs = now.getHours();
+            let greeting = "Good Evening";
+            if (hrs < 12) greeting = "Good Morning";
+            else if (hrs < 17) greeting = "Good Afternoon";
+
+            const toggleHour = (i) => {
+                const dayHistory = [...(history[viewDate] || new Array(15).fill(false))];
+                dayHistory[i] = !dayHistory[i];
+                setHistory({ ...history, [viewDate]: dayHistory });
+            };
+
+            return (
+                <div>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <h1 style={{ fontSize: '3rem', fontFamily: 'Outfit' }}>{greeting}, {profile.name}! ✨</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem' }}>{profile.district} දිස්ත්‍රික්කයේ පලවෙනියා වීමේ සිහිනය කරා...</p>
+                    </div>
+
+                    <div className="stats-grid">
+                        <StatItem val={todayCount} lbl="Today's Hours" sub="අද වැඩ කරපු පැය" />
+                        <StatItem val={15 - todayCount} lbl="Goal Remaining" sub="තව අවශ්‍ය පැය" color="#ef4444" />
+                        <StatItem val={timeLeft.d} lbl="Days to Exam" sub="විභාගයට ඉතිරි දින" />
+                        <StatItem val={Object.values(history).reduce((a, b) => a + b.filter(Boolean).length, 0)} lbl="Total Hours" sub="මුළු පැය ගණන" color="#10B981" />
+                    </div>
+
+                    <div className="dash-grid">
+                        <div className="glass card">
+                            <div className="card-header">
+                                <span className="card-title">Study Grid (15h Target)</span>
+                                <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{todayCount} / 15 hrs</span>
+                            </div>
+                            <div className="hour-grid">
+                                {Array.from({ length: 15 }).map((_, i) => (
+                                    <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleHour(i)}>{i + 1}</div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="glass card">
+                            <span className="card-title">Calendar & History</span>
+                            <input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1.5rem' }} />
+                            <div style={{ marginTop: '1.5rem' }}>
+                                {[...Array(5)].map((_, i) => {
+                                    const d = new Date(); d.setDate(d.getDate() - i);
+                                    const k = d.toISOString().split('T')[0];
+                                    const h = history[k] ? history[k].filter(Boolean).length : 0;
+                                    return (
+                                        <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px', fontSize: '0.9rem' }}>
+                                            <span style={{ fontWeight: '600' }}>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                                            <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{h}h</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="glass card" style={{ height: '400px', marginTop: '2rem' }}>
+                        <span className="card-title">Activity Trend (Last 30 Days)</span>
+                        <div style={{ height: '300px', marginTop: '1rem' }}>
+                            <TrendChart history={history} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SubjectView = ({ subject, marks, setMarks }) => {
+            const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            const data = marks.filter(m => m.subject === subject);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0);
+                if (total === 0) return;
+                setMarks([...marks, { ...form, id: Date.now(), subject, total }]);
+                setForm({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            };
+
+            return (
+                <div>
+                    <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{SUBJECT_ICONS[subject]}</div>
+                        <h1 style={{ fontSize: '3rem', fontFamily: 'Outfit' }}>{subject} Analysis</h1>
+                        <p style={{ color: 'var(--text-dim)' }}>ඔබේ {subject} විෂයේ ප්‍රගතිය මෙතැනින් පරීක්ෂා කරන්න.</p>
+                    </div>
+
+                    <div className="dash-grid">
+                        <div className="glass card">
+                            <span className="card-title">Add Paper Marks</span>
+                            <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
+                                <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} />
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                                    <input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({...form, mcq: e.target.value})} />
+                                    <input type="number" placeholder="STR" value={form.str} onChange={e => setForm({...form, str: e.target.value})} />
+                                    <input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({...form, esy: e.target.value})} />
+                                </div>
+                                <button type="submit" className="btn-primary">පේපර් එක ඇතුළත් කරන්න</button>
+                            </form>
+                        </div>
+                        <div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <span className="card-title">Marks History</span>
+                            <div style={{ marginTop: '1rem' }}>
+                                {data.sort((a,b) => new Date(b.date) - new Date(a.date)).map(m => (
+                                    <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '10px' }}>
+                                        <div>
+                                            <div style={{ fontWeight: '800', fontSize: '1.1rem' }}>{m.total} Marks</div>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{m.date}</div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', color: 'var(--text-dim)', alignItems: 'center' }}>
+                                            <span>M:{m.mcq}</span><span>S:{m.str}</span><span>E:{m.esy}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StatItem = ({ val, lbl, sub, color }) => (
+            <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}>
+                <div className="stat-val" style={{ background: color ? 'none' : 'var(--gradient)', color: color || 'inherit' }}>{val}</div>
+                <div className="stat-lbl">{lbl}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div>
+            </div>
+        );
+
+        const MobileItem = ({ active, icon, label, onClick }) => (
+            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}>
+                <span className="mobile-item-icon">{icon}</span>
+                <span>{label}</span>
+            </div>
+        );
+
+        const SubjectBackground = ({ subject }) => {
+            const icon = SUBJECT_ICONS[subject] || '📚';
+            return (
+                <div className="floating-bg">
+                    {Array.from({ length: 15 }).map((_, i) => (
+                        <div key={i} className="float-icon" style={{ left: `${Math.random() * 100}%`, animationDuration: `${15 + Math.random() * 20}s`, animationDelay: `${-Math.random() * 20}s` }}>{icon}</div>
+                    ))}
+                </div>
+            );
+        };
+
+        const TrendChart = ({ history }) => {
+            const chartRef = useRef(null);
+            useEffect(() => {
+                const ctx = chartRef.current.getContext('2d');
+                const last30 = [...Array(30)].map((_, i) => {
+                    const d = new Date(); d.setDate(d.getDate() - (29 - i));
+                    return d.toISOString().split('T')[0];
+                });
+                const data = last30.map(k => history[k] ? history[k].filter(Boolean).length : 0);
+                
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: last30.map(d => d.split('-')[2]),
+                        datasets: [{
+                            data: data,
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { 
+                            y: { beginAtZero: true, max: 15, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A' } },
+                            x: { grid: { display: false }, ticks: { color: '#71717A' } }
+                        }
+                    }
+                });
+                return () => chart.destroy();
+            }, [history]);
+            return <canvas ref={chartRef}></canvas>;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
