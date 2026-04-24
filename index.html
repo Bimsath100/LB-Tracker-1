@@ -162,6 +162,7 @@
             const [history, setHistory] = useState({});
             const [marks, setMarks] = useState([]);
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [isEditMode, setIsEditMode] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
             useEffect(() => {
@@ -213,6 +214,7 @@
                     alert("Error saving profile: " + error.message);
                 } else {
                     setProfile(p);
+                    setIsEditMode(false);
                 }
                 setLoading(false);
             };
@@ -245,7 +247,7 @@
 
             if (loading) return <LoadingScreen />;
             if (!user) return <LandingPage onLogin={handleLogin} />;
-            if (!profile) return <SetupWizard onComplete={saveProfile} />;
+            if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
 
             return (
                 <div>
@@ -270,6 +272,7 @@
                         <div className="glass settings-menu">
                             <div style={{ marginBottom: '1.5rem' }}>
                                 <div style={{ fontSize: '0.85rem', marginBottom: '10px' }}>{user.email}</div>
+                                <button className="btn-primary" style={{ marginBottom: '10px' }} onClick={() => { setIsEditMode(true); setIsSettingsOpen(false); }}>👤 Edit Profile</button>
                                 <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>Logout</button>
                             </div>
                         </div>
@@ -312,9 +315,9 @@
             </div>
         );
 
-        const SetupWizard = ({ onComplete }) => {
+        const SetupWizard = ({ onComplete, initialData, onCancel }) => {
             const [step, setStep] = useState(1);
-            const [form, setForm] = useState({ name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August' });
+            const [form, setForm] = useState(initialData ? { ...initialData } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August' });
             const [customSub, setCustomSub] = useState('');
             const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < 3 ? [...f.subjects, s] : f.subjects) }));
             const addCustom = () => { if(customSub && form.subjects.length < 3) { toggleS(customSub); setCustomSub(''); } };
@@ -323,7 +326,7 @@
                     <div className="glass setup-card">
                         {step === 1 ? (
                             <div>
-                                <h2 className="setup-title">Welcome! 👋</h2>
+                                <h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2>
                                 <p className="setup-subtitle">Let's set up your profile.</p>
                                 <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                                 <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
@@ -332,6 +335,7 @@
                                     <input type="number" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: parseInt(e.target.value) || 2026 })} />
                                 </div>
                                 <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step</button>
+                                {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
                             </div>
                         ) : (
                             <div>
@@ -345,7 +349,8 @@
                                     <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom}>+</button>
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '1rem', fontWeight: '700' }}>Selected: {form.subjects.join(', ')}</div>
-                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>Start Tracking</button>
+                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes' : 'Start Tracking'}</button>
+                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={() => setStep(1)}>Back</button>
                             </div>
                         )}
                     </div>
