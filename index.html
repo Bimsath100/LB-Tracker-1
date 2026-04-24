@@ -8,6 +8,12 @@
     <meta name="keywords" content="LB Study Tracker, Study Tracker Sri Lanka, A/L Study Tracker, Exam Countdown, Sri Lanka Education, Student Dashboard, 2026 A/L">
     <meta name="author" content="LB Tracker">
     
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#8B5CF6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LB Tracker">
+
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://lb-tracker-1.vercel.app/">
     <meta property="og:title" content="LB Study Tracker | The Elite Student Dashboard">
@@ -146,6 +152,13 @@
         const DISTRICTS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle"];
         const SUBJECT_LIST = [...Object.keys(SUBJECT_ICONS)];
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
 
         const Reveal = ({ children, delay = 0 }) => {
             const ref = useRef(null);
