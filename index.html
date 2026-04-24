@@ -195,18 +195,7 @@
                 const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
                     if (session) { setUser(session.user); fetchUserData(session.user.id); } else { setUser(null); setProfile(null); setLoading(false); }
                 });
-
-                const checkPrompt = setInterval(() => {
-                    if (window.deferredPrompt) {
-                        setInstallReady(true);
-                        clearInterval(checkPrompt);
-                    }
-                }, 1000);
-
-                return () => {
-                    subscription.unsubscribe();
-                    clearInterval(checkPrompt);
-                };
+                return () => subscription.unsubscribe();
             }, []);
 
             const fetchUserData = async (uid) => {
@@ -269,16 +258,6 @@
                 return () => clearInterval(timer);
             }, [profile]);
 
-            const handleInstall = async () => {
-                if (window.deferredPrompt) {
-                    window.deferredPrompt.prompt();
-                    const { outcome } = await window.deferredPrompt.userChoice;
-                    if (outcome === 'accepted') { window.deferredPrompt = null; setInstallReady(false); }
-                } else {
-                    alert("Instructions:\n\n1. Look for the [Install] icon in your browser's address bar (Computer icon).\n2. Or click the 3-dots menu and select 'Install' / 'Add to Home Screen'.");
-                }
-            };
-
             if (loading) return <LoadingScreen />;
             if (!user) return <LandingPage onLogin={handleLogin} />;
             if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
@@ -306,10 +285,10 @@
                         <div className="glass settings-menu">
                             <div style={{ fontSize: '0.75rem', marginBottom: '15px', color: 'var(--text-dim)', textAlign: 'center' }}>{user.email}</div>
                             <button className="btn-primary" style={{ marginBottom: '10px' }} onClick={() => { setIsEditMode(true); setIsSettingsOpen(false); }}>👤 Edit Profile</button>
-                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--primary-glow)', color: 'white', border: '1px solid var(--primary)' }} onClick={handleInstall}>📱 Install App</button>
                             <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>🚪 Logout</button>
                         </div>
                     )}
+
 
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
