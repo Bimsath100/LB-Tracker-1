@@ -495,7 +495,7 @@
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field3B82F6="str" color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
                         <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
                         <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
                     </div>
@@ -511,7 +511,7 @@
                 if (inst.current) inst.current.destroy();
                 inst.current = new Chart(ctx, {
                     type: 'line', data: { labels: sorted.map((_, i) => 'P' + (i + 1)), datasets: [{ data: sorted.map(m => m[field]), borderColor: color, backgroundColor: color + '20', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: color }] },
-                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#71717A', font: { size: 10 } } } } }
+                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { color: '#71717A', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#71717A', font: { size: 10 } } } } }
                 });
             }, [JSON.stringify(data)]);
             return <div className="glass card" style={{ padding: '1.2rem' }}><div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>{title}</div><div className="chart-box"><canvas ref={ref}></canvas></div></div>;
