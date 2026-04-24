@@ -175,12 +175,20 @@
             }, []);
 
             const fetchUserData = async (uid) => {
-                const { data } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
-                if (data) {
-                    setProfile({ name: data.name, district: data.district, subjects: data.subjects, examYear: data.exam_year || 2026, examMonth: data.exam_month || "August" });
-                    setHistory(data.history || {});
-                    setMarks(data.marks || []);
-                }
+                try {
+                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
+                    if (data) {
+                        setProfile({ 
+                            name: data.name, 
+                            district: data.district, 
+                            subjects: data.subjects, 
+                            examYear: data.exam_year, 
+                            examMonth: data.exam_month 
+                        });
+                        setHistory(data.history || {});
+                        setMarks(data.marks || []);
+                    }
+                } catch (e) { console.error("Fetch Error:", e); }
                 setLoading(false);
             };
 
@@ -189,14 +197,38 @@
 
             const saveProfile = async (p) => {
                 setLoading(true);
-                await sb.from('study_tracker_v2').upsert({ user_id: user.id, ...p, exam_year: p.examYear, exam_month: p.examMonth, history, marks });
-                setProfile(p);
+                const payload = {
+                    user_id: user.id,
+                    name: p.name,
+                    district: p.district,
+                    subjects: p.subjects,
+                    exam_year: p.examYear,
+                    exam_month: p.examMonth,
+                    history: history,
+                    marks: marks
+                };
+                const { error } = await sb.from('study_tracker_v2').upsert(payload);
+                if (error) {
+                    console.error("Save Error:", error);
+                    alert("Error saving profile: " + error.message);
+                } else {
+                    setProfile(p);
+                }
                 setLoading(false);
             };
 
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
-                await sb.from('study_tracker_v2').upsert({ user_id: user.id, ...profile, exam_year: profile.examYear, exam_month: profile.examMonth, history: h, marks: m });
+                await sb.from('study_tracker_v2').upsert({ 
+                    user_id: user.id, 
+                    name: profile.name,
+                    district: profile.district,
+                    subjects: profile.subjects,
+                    exam_year: profile.examYear,
+                    exam_month: profile.examMonth,
+                    history: h, 
+                    marks: m 
+                });
             };
 
             useEffect(() => {
