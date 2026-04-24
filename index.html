@@ -460,7 +460,7 @@
                             </div>
                         </Reveal>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+                    <div className="marks-grid" style={{ marginBottom: '2.5rem' }}>
                         <Reveal delay={0.1}><StatCardCircle label="MCQ Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.mcq)||0),0)/data.length || 0)} max={50} color="#3B82F6" /></Reveal>
                         <Reveal delay={0.2}><StatCardCircle label="STR Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.str)||0),0)/data.length || 0)} max={100} color="#8B5CF6" /></Reveal>
                         <Reveal delay={0.3}><StatCardCircle label="ESY Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.esy)||0),0)/data.length || 0)} max={300} color="#F43F5E" /></Reveal>
