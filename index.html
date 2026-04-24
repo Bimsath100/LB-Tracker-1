@@ -430,7 +430,11 @@
             const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
             return (
                 <div>
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}><div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)' }}>{SUBJECT_ICONS[subject] || '📚'}</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)' }}>{subject}</h1></div>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <div style={{ fontSize: 'clamp(3.5rem, 12vw, 4.5rem)', marginBottom: '0.5rem', filter: 'drop-shadow(0 10px 20px var(--primary-glow))' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.8rem, 10vw, 4rem)', fontWeight: '900', letterSpacing: '-1px', background: 'linear-gradient(to bottom, #fff 30%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', lineHeight: 1 }}>{subject}</h1>
+                        <div style={{ display: 'inline-block', marginTop: '12px', padding: '6px 16px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: 'white', textTransform: 'uppercase' }}>Core Study Module</div>
+                    </div>
                     <div className="dash-grid">
                         <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
                         <Reveal delay={0.1}>
@@ -447,6 +451,11 @@
                                 </div>
                             </div>
                         </Reveal>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+                        <Reveal delay={0.1}><StatCardCircle label="MCQ Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.mcq)||0),0)/data.length || 0)} max={50} color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.2}><StatCardCircle label="STR Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.str)||0),0)/data.length || 0)} max={100} color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.3}><StatCardCircle label="ESY Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.esy)||0),0)/data.length || 0)} max={300} color="#F43F5E" /></Reveal>
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
@@ -500,6 +509,24 @@
                 return () => chart.destroy();
             }, [history]);
             return <canvas ref={ref}></canvas>;
+        };
+
+        const StatCardCircle = ({ label, value, max, color }) => {
+            const percent = Math.min(100, Math.round((value / max) * 100)) || 0;
+            const r = 36; const c = 2 * Math.PI * r; const offset = c - (percent / 100) * c;
+            return (
+                <div className="glass card" style={{ padding: '1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '10px' }}>
+                        <svg width="80" height="80" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                            <circle cx="50" cy="50" r={r} stroke="rgba(255,255,255,0.05)" strokeWidth="8" fill="none" />
+                            <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="8" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
+                        </svg>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontWeight: '800', fontSize: '0.9rem' }}>{percent}%</div>
+                    </div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</div>
+                    <div style={{ fontSize: '1rem', fontWeight: '800', marginTop: '4px' }}>{value} / {max}</div>
+                </div>
+            );
         };
 
         const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
