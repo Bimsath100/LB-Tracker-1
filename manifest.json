@@ -2,21 +2,22 @@
   "name": "LB Study Tracker",
   "short_name": "LB Tracker",
   "description": "Elite cloud-synced study dashboard for Sri Lankan A/L students.",
-  "start_url": "./index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#8B5CF6",
   "icons": [
     {
-      "src": "https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/assets/icon-192.png",
+      "src": "https://img.icons8.com/fluency/192/000000/graduation-cap.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/assets/icon-512.png",
+      "src": "https://img.icons8.com/fluency/512/000000/graduation-cap.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

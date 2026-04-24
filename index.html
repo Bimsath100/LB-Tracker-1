@@ -8,8 +8,9 @@
     <meta name="keywords" content="LB Study Tracker, Study Tracker Sri Lanka, A/L Study Tracker, Exam Countdown, Sri Lanka Education, Student Dashboard, 2026 A/L">
     <meta name="author" content="LB Tracker">
     
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#8B5CF6">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LB Tracker">
@@ -20,7 +21,7 @@
     <meta property="og:description" content="Track your study hours, manage paper marks, and achieve your A/L goals with cloud-synced progress.">
     <meta property="og:image" content="https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/assets/og-image.png">
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <link rel="icon" href="https://img.icons8.com/fluency/48/000000/graduation-cap.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -93,9 +94,6 @@
         .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: clamp(10px, 2vw, 16px); font-weight: 800; font-size: clamp(1rem, 4vw, 1.5rem); font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s; }
         .hour-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 25px var(--primary-glow); }
 
-        .chart-box { height: 250px; margin-top: 10px; width: 100%; }
-        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(1rem, 3vw, 1.5rem); margin-top: 2rem; }
-
         .floating-settings { position: fixed; bottom: 100px; right: 25px; width: clamp(50px, 12vw, 60px); height: clamp(50px, 12vw, 60px); background: var(--card-bg); backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.4s; }
         .settings-menu { position: fixed; bottom: 175px; right: 25px; width: min(90vw, 300px); padding: 1.5rem; z-index: 1501; animation: menuIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: bottom right; }
         @keyframes menuIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -151,11 +149,17 @@
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt event fired');
+            e.preventDefault();
+            deferredPrompt = e;
+        });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed:', err));
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW Registered', reg);
+                }).catch(err => console.log('SW registration failed:', err));
             });
         }
 
@@ -181,7 +185,6 @@
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isEditMode, setIsEditMode] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
-            const [canInstall, setCanInstall] = useState(false);
 
             useEffect(() => {
                 sb.auth.getSession().then(({ data: { session } }) => {
@@ -190,10 +193,7 @@
                 const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
                     if (session) { setUser(session.user); fetchUserData(session.user.id); } else { setUser(null); setProfile(null); setLoading(false); }
                 });
-                
-                const checkInstall = () => { if(deferredPrompt) setCanInstall(true); };
-                const interval = setInterval(checkInstall, 1000);
-                return () => { subscription.unsubscribe(); clearInterval(interval); };
+                return () => subscription.unsubscribe();
             }, []);
 
             const fetchUserData = async (uid) => {
@@ -260,9 +260,9 @@
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') { deferredPrompt = null; setCanInstall(false); }
+                    if (outcome === 'accepted') { deferredPrompt = null; }
                 } else {
-                    alert("To install: Click your browser menu (3 dots) and select 'Install App' or 'Add to Home Screen'.");
+                    alert("Instructions:\n1. Use Chrome or Safari browser.\n2. In Chrome: Click 3-dots menu > 'Install App'.\n3. In Safari: Click Share button > 'Add to Home Screen'.");
                 }
             };
 
@@ -342,7 +342,6 @@
             const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < 3 ? [...f.subjects, s] : f.subjects) }));
             const addCustom = () => { if(customSub && form.subjects.length < 3 && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
             const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
-
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
                     <div className="glass setup-card">
