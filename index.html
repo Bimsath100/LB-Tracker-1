@@ -262,7 +262,7 @@
                     const { outcome } = await deferredPrompt.userChoice;
                     if (outcome === 'accepted') { deferredPrompt = null; }
                 } else {
-                    alert("Instructions:\n1. Use Chrome or Safari browser.\n2. In Chrome: Click 3-dots menu > 'Install App'.\n3. In Safari: Click Share button > 'Add to Home Screen'.");
+                    alert("To Install:\n\n1. Look for the [Install] icon in your browser's address bar.\n2. Or click the 3-dots menu and select 'Install' / 'Add to Home Screen'.");
                 }
             };
 
@@ -454,7 +454,7 @@
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field3B82F6="str" color="#8B5CF6" /></Reveal>
                         <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
                         <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
                     </div>
