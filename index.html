@@ -61,8 +61,10 @@
 
         .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: var(--navbar-bg); backdrop-filter: blur(30px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); }
         .nav-container { width: 92%; max-width: 1400px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { display: flex; align-items: center; gap: 14px; font-family: 'Outfit'; font-weight: 900; font-size: clamp(1.4rem, 4vw, 1.8rem); letter-spacing: -1px; background: linear-gradient(to bottom, #fff, #94A3B8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .nav-logo { width: 45px; height: 45px; background: var(--gradient); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; filter: drop-shadow(0 0 15px var(--primary-glow)); -webkit-text-fill-color: white; }
+        .nav-brand { display: flex; align-items: center; gap: 15px; font-family: 'Outfit'; font-weight: 900; font-size: clamp(1.4rem, 4vw, 1.8rem); letter-spacing: -1px; }
+        .nav-logo { width: 48px; height: 48px; background: var(--gradient); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; filter: drop-shadow(0 0 20px var(--primary-glow)); transform: rotate(-5deg); transition: 0.4s; }
+        .nav-logo:hover { transform: rotate(0deg) scale(1.1); }
+        .nav-tracker { background: linear-gradient(to bottom, #fff, #94A3B8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
         .nav-links { display: flex; gap: 12px; align-items: center; }
         .nav-link { padding: 12px 22px; border-radius: 14px; cursor: pointer; transition: 0.4s; font-weight: 700; color: var(--text-dim); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
         .nav-link.active { background: rgba(255,255,255,0.05); color: var(--text-main); border: var(--glass-border); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -289,18 +291,20 @@
                     <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                     <SubjectBackground subject={currentPage} />
 
-                    <header className="navbar">
+                    <nav className="navbar">
                         <div className="nav-container">
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
-                                <span>TRACKER</span>
+                                <span className="nav-tracker">Tracker</span>
                             </div>
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
-                                {profile.subjects.map(s => <div key={s} className={`nav-link ${currentPage === s ? 'active' : ''}`} onClick={() => setCurrentPage(s)}>{s}</div>)}
+                                {profile.subjects.map(s => (
+                                    <div key={s} className={`nav-link ${currentPage === s ? 'active' : ''}`} onClick={() => setCurrentPage(s)}>{s}</div>
+                                ))}
                             </div>
                         </div>
-                    </header>
+                    </nav>
 
                     <div className="floating-settings" onClick={() => setIsSettingsOpen(!isSettingsOpen)}>{isSettingsOpen ? '✕' : '⚙️'}</div>
                     {isSettingsOpen && (
@@ -456,12 +460,12 @@
 
             return (
                 <div>
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <div style={{ fontSize: 'clamp(3.5rem, 12vw, 4.5rem)', marginBottom: '0.5rem', filter: 'drop-shadow(0 10px 20px var(--primary-glow))' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.8rem, 10vw, 4rem)', fontWeight: '900', letterSpacing: '-1px', background: 'linear-gradient(to bottom, #fff 30%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', lineHeight: 1 }}>{subject}</h1>
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '12px' }}>
-                            <div style={{ padding: '6px 16px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: 'white', textTransform: 'uppercase' }}>Core Study Module</div>
-                            <div style={{ padding: '6px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10B981', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: '#10B981', textTransform: 'uppercase' }}>{avgMastery}% Mastery</div>
+                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                        <div style={{ fontSize: 'clamp(4rem, 15vw, 5.5rem)', marginBottom: '1rem', filter: 'drop-shadow(0 15px 30px var(--primary-glow))', animation: 'floatUp 3s ease-in-out infinite alternate' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(3rem, 12vw, 4.5rem)', fontWeight: '900', letterSpacing: '-2px', background: 'linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', lineHeight: 0.9 }}>{subject}</h1>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
+                            <div className="glass" style={{ padding: '8px 20px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', textTransform: 'uppercase' }}>Core Study Module</div>
+                            <div className="glass" style={{ padding: '8px 20px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.3)', textTransform: 'uppercase' }}>{avgMastery}% Mastery</div>
                         </div>
                     </div>
                     <div className="dash-grid">
