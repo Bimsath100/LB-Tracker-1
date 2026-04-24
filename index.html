@@ -74,14 +74,14 @@
         .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
 
         .dash-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: clamp(1rem, 3vw, 2rem); }
-        .card { padding: clamp(1.2rem, 4vw, 2.2rem); margin-bottom: 2rem; }
+        .card { padding: clamp(1.2rem, 4vw, 2.2rem); margin-bottom: 2rem; overflow: hidden; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .card-title { font-family: 'Outfit'; font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 700; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(0.8rem, 2vw, 1.5rem); margin-bottom: 2.5rem; }
-        .stat-card { padding: 1.5rem 1rem; text-align: center; display: flex; flex-direction: column; justify-content: center; }
-        .stat-val { font-family: 'Outfit'; font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
-        .stat-lbl { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
+        .stat-card { padding: 1.5rem 0.5rem; text-align: center; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .stat-val { font-family: 'Outfit'; font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; word-break: break-all; }
+        .stat-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(8px, 2vw, 12px); }
         .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: clamp(10px, 2vw, 16px); font-weight: 800; font-size: clamp(1rem, 4vw, 1.5rem); font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s; }
@@ -99,10 +99,10 @@
         .mobile-item.active { color: var(--primary); background: var(--input-bg); }
         .mobile-item span:first-child { font-size: 1.4rem; }
 
-        .countdown-container { display: flex; gap: clamp(8px, 2vw, 15px); justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
-        .countdown-box { background: var(--input-bg); padding: 10px clamp(8px, 2vw, 15px); border-radius: 12px; border: var(--glass-border); min-width: clamp(60px, 18vw, 75px); text-align: center; flex: 1; max-width: 90px; }
-        .countdown-num { font-family: 'Outfit'; font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 800; color: var(--primary); display: block; }
-        .countdown-label { font-size: 0.55rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+        .countdown-container { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+        .countdown-box { background: var(--input-bg); padding: 10px 5px; border-radius: 12px; border: var(--glass-border); min-width: 60px; text-align: center; flex: 1; max-width: 80px; }
+        .countdown-num { font-family: 'Outfit'; font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 800; color: var(--primary); display: block; }
+        .countdown-label { font-size: 0.5rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
 
         /* Floating Background Icons */
         .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.15; overflow: hidden; }
@@ -114,8 +114,24 @@
             100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
         }
 
-        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .stats-grid { gap: 0.8rem; } .stat-card { padding: 1.2rem 0.5rem; } .nav-brand span { display: none; } .mobile-nav { display: flex; } .marks-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { 
+            .dash-grid { grid-template-columns: 1fr; } 
+            .stats-grid { grid-template-columns: repeat(2, 1fr); } 
+        }
+        @media (max-width: 600px) { 
+            .stats-grid { gap: 0.6rem; margin-bottom: 1.5rem; } 
+            .stat-card { padding: 1rem 0.3rem; border-radius: 18px; } 
+            .stat-val { font-size: 1.8rem; }
+            .nav-brand span { display: none; } 
+            .mobile-nav { display: flex; } 
+            .marks-grid { grid-template-columns: 1fr; } 
+            .main-content { padding-top: 85px; padding-bottom: 100px; }
+            .countdown-box { min-width: 50px; }
+        }
+        @media (max-width: 350px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-val { font-size: 2.2rem; }
+        }
     </style>
 </head>
 <body>
