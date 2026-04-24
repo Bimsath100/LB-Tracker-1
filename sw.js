@@ -1,18 +1,19 @@
-const CACHE_NAME = 'lb-tracker-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json'
-];
-
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((k) => caches.delete(k)));
+    })
   );
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', (e) => {
+  // Network first strategy to ensure latest updates
   e.respondWith(
-    caches.match(e.request).then((res) => res || fetch(e.request))
+    fetch(e.request).catch(() => caches.match(e.request))
   );
 });
