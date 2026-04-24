@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LB Study Tracker | The Elite Student Dashboard Sri Lanka</title>
     <meta name="description" content="LB Study Tracker is the most advanced, cloud-synced study dashboard designed for Sri Lankan A/L students. Track your hours, analyze marks, and achieve your district rank.">
     <meta name="keywords" content="LB Study Tracker, Study Tracker Sri Lanka, A/L Study Tracker, Exam Countdown, Sri Lanka Education, Student Dashboard, 2026 A/L">
@@ -40,85 +40,94 @@
             --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; line-height: 1.5; }
 
         .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #050505; }
-        .blob { position: absolute; width: 600px; height: 600px; filter: blur(100px); border-radius: 50%; opacity: 0.35; animation: move 20s infinite alternate; }
-        .blob-1 { top: -200px; right: -100px; background: var(--primary); }
-        .blob-2 { bottom: -200px; left: -100px; background: #D946EF; }
-        @keyframes move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 100px) scale(1.1); } }
+        .blob { position: absolute; width: min(60vw, 600px); height: min(60vw, 600px); filter: blur(min(10vw, 100px)); border-radius: 50%; opacity: 0.35; animation: move 20s infinite alternate; }
+        .blob-1 { top: -10%; right: -10%; background: var(--primary); }
+        .blob-2 { bottom: -10%; left: -10%; background: #D946EF; }
+        @keyframes move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); }
 
         .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: var(--navbar-bg); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); }
         .nav-container { width: 92%; max-width: 1400px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: clamp(1.2rem, 4vw, 1.5rem); letter-spacing: -0.5px; }
         .nav-logo { width: 42px; height: 42px; background: var(--gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; }
         .nav-links { display: flex; gap: 10px; align-items: center; }
         .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; }
         .nav-link.active { background: var(--input-bg); color: var(--text-main); border: var(--glass-border); }
         .nav-link:hover { color: var(--text-main); background: var(--border); }
 
-        .main-content { width: 100%; padding: 110px 0 100px 0; }
-        .container { width: 92%; max-width: 1400px; margin: 0 auto; }
+        .main-content { width: 100%; padding: 110px 0 120px 0; min-height: 100vh; }
+        .container { width: min(94%, 1400px); margin: 0 auto; }
 
-        .setup-card { max-width: 500px; width: 90%; margin: 2rem auto; padding: 2.5rem; position: relative; z-index: 100; }
-        .setup-title { font-family: 'Outfit'; font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
+        .setup-card { max-width: 500px; width: min(92%, 500px); margin: 2rem auto; padding: clamp(1.5rem, 5vw, 2.5rem); position: relative; z-index: 100; }
+        .setup-title { font-family: 'Outfit'; font-size: clamp(1.5rem, 6vw, 2rem); margin-bottom: 0.5rem; text-align: center; }
         .setup-subtitle { color: var(--text-dim); margin-bottom: 2rem; font-size: 0.95rem; text-align: center; }
         
         input, select { background: var(--input-bg); border: var(--glass-border); color: var(--text-main); padding: 16px; border-radius: 14px; width: 100%; margin-bottom: 12px; outline: none; transition: 0.3s; font-size: 1rem; color-scheme: dark; }
         option { background: #18181b; color: white; }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
-        .btn-primary { background: var(--gradient); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: 0.3s; margin-top: 10px; position: relative; z-index: 10; }
+        .btn-primary { background: var(--gradient); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: 0.3s; margin-top: 10px; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
 
-        .dash-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 2rem; }
-        .card { padding: 2.2rem; margin-bottom: 2rem; }
+        .dash-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: clamp(1rem, 3vw, 2rem); }
+        .card { padding: clamp(1.2rem, 4vw, 2.2rem); margin-bottom: 2rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; }
+        .card-title { font-family: 'Outfit'; font-size: clamp(1.1rem, 4vw, 1.4rem); font-weight: 700; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
-        .stat-card { padding: 1.5rem; text-align: center; }
-        .stat-val { font-family: 'Outfit'; font-size: 2.5rem; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .stat-lbl { font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(0.8rem, 2vw, 1.5rem); margin-bottom: 2.5rem; }
+        .stat-card { padding: 1.5rem 1rem; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .stat-val { font-family: 'Outfit'; font-size: clamp(1.8rem, 5vw, 2.5rem); font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+        .stat-lbl { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
 
-        .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 800; font-size: 1.5rem; font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s; }
+        .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(8px, 2vw, 12px); }
+        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: clamp(10px, 2vw, 16px); font-weight: 800; font-size: clamp(1rem, 4vw, 1.5rem); font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s; }
         .hour-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 25px var(--primary-glow); }
 
-        .chart-box { height: 250px; margin-top: 10px; }
-        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem; }
+        .chart-box { height: 250px; margin-top: 10px; width: 100%; }
+        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(1rem, 3vw, 1.5rem); margin-top: 2rem; }
 
-        .floating-settings { position: fixed; bottom: 95px; right: 25px; width: 55px; height: 55px; background: var(--card-bg); backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.4s; }
-        .settings-menu { position: fixed; bottom: 165px; right: 25px; width: 280px; padding: 2rem; z-index: 1501; animation: menuIn 0.3s ease-out; }
-        @keyframes menuIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .floating-settings { position: fixed; bottom: 100px; right: 25px; width: clamp(50px, 12vw, 60px); height: clamp(50px, 12vw, 60px); background: var(--card-bg); backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.4s; }
+        .settings-menu { position: fixed; bottom: 175px; right: 25px; width: min(90vw, 280px); padding: 2rem; z-index: 1501; animation: menuIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: bottom right; }
+        @keyframes menuIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; }
-        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-dim); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; cursor: pointer; padding: 12px; border-radius: 16px; min-width: 75px; }
+        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 85px; background: var(--navbar-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 10px 15px 10px; }
+        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; cursor: pointer; padding: 10px 5px; border-radius: 16px; min-width: 65px; flex: 1; }
         .mobile-item.active { color: var(--primary); background: var(--input-bg); }
+        .mobile-item span:first-child { font-size: 1.4rem; }
 
-        .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.2; }
-        .float-icon { position: absolute; font-size: 5rem; animation: floatUp linear infinite; }
-        @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; } }
+        .countdown-container { display: flex; gap: clamp(8px, 2vw, 15px); justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+        .countdown-box { background: var(--input-bg); padding: 10px clamp(8px, 2vw, 15px); border-radius: 12px; border: var(--glass-border); min-width: clamp(60px, 18vw, 75px); text-align: center; flex: 1; max-width: 90px; }
+        .countdown-num { font-family: 'Outfit'; font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 800; color: var(--primary); display: block; }
+        .countdown-label { font-size: 0.55rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
 
-        .btn-google { background: white; color: black; padding: 16px 32px; border-radius: 16px; font-weight: 700; font-size: 1.1rem; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; box-shadow: 0 10px 30px rgba(255,255,255,0.1); margin: 0 auto; }
-        
-        .delete-btn { color: #ef4444; cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.2s; }
-        .delete-btn:hover { background: rgba(239, 68, 68, 0.1); }
-
-        .countdown-container { display: flex; gap: 15px; justify-content: center; margin-top: 1rem; }
-        .countdown-box { background: var(--input-bg); padding: 10px 15px; border-radius: 12px; border: var(--glass-border); min-width: 70px; text-align: center; }
-        .countdown-num { font-family: 'Outfit'; font-size: 1.8rem; font-weight: 800; color: var(--primary); display: block; }
-        .countdown-label { font-size: 0.6rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
-
-        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .mobile-nav { display: flex; }
+        /* Tablet Breakpoint */
+        @media (max-width: 1024px) {
+            .dash-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .main-content { padding-bottom: 120px; }
+        }
+
+        /* Mobile Breakpoint */
+        @media (max-width: 600px) {
+            .stats-grid { gap: 0.8rem; }
+            .stat-card { padding: 1.2rem 0.5rem; }
+            .nav-brand span { display: none; }
+            .nav-logo { width: 38px; height: 38px; }
+            .navbar { height: 65px; }
+            .main-content { padding-top: 85px; }
+            .mobile-nav { display: flex; }
             .marks-grid { grid-template-columns: 1fr; }
+            .countdown-box { min-width: 55px; padding: 8px 5px; }
+            .hour-grid { gap: 8px; }
+        }
+
+        /* Large Screen Optimizations */
+        @media (min-width: 1600px) {
+            .container { max-width: 1500px; }
+            :root { font-size: 18px; }
         }
     </style>
 </head>
@@ -150,7 +159,7 @@
                 if(ref.current) obs.observe(ref.current);
                 return () => obs.disconnect();
             }, []);
-            return ( <div ref={ref} style={{ opacity: visible ? 1 : 0, transition: `opacity 0.8s ease-out ${delay}s` }}>{children}</div> );
+            return ( <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s` }}>{children}</div> );
         };
 
         const App = () => {
@@ -270,10 +279,10 @@
                     <div className="floating-settings" onClick={() => setIsSettingsOpen(!isSettingsOpen)}>{isSettingsOpen ? '✕' : '⚙️'}</div>
                     {isSettingsOpen && (
                         <div className="glass settings-menu">
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <div style={{ fontSize: '0.85rem', marginBottom: '10px' }}>{user.email}</div>
+                            <div style={{ marginBottom: '0.5rem' }}>
+                                <div style={{ fontSize: '0.75rem', marginBottom: '15px', color: 'var(--text-dim)', textAlign: 'center' }}>{user.email}</div>
                                 <button className="btn-primary" style={{ marginBottom: '10px' }} onClick={() => { setIsEditMode(true); setIsSettingsOpen(false); }}>👤 Edit Profile</button>
-                                <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>Logout</button>
+                                <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>🚪 Logout</button>
                             </div>
                         </div>
                     )}
@@ -298,16 +307,16 @@
 
         const LoadingScreen = () => (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                <div style={{ fontSize: '2.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'white', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
+                <div style={{ fontSize: '2rem', fontFamily: 'Outfit', fontWeight: '800', color: 'white', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
             </div>
         );
 
         const LandingPage = ({ onLogin }) => (
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem' }}>
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem' }}>
                 <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
-                <div className="nav-logo" style={{ width: '80px', height: '80px', fontSize: '2rem', marginBottom: '2rem' }}>LB</div>
-                <h1 style={{ fontFamily: 'Outfit', fontSize: '4rem', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: '1.2rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
+                <div className="nav-logo" style={{ width: 'clamp(60px, 15vw, 80px)', height: 'clamp(60px, 15vw, 80px)', fontSize: '2rem', marginBottom: '2rem' }}>LB</div>
+                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
+                <p style={{ fontSize: 'clamp(1rem, 3vw, 1.2rem)', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
                 <button className="btn-google" onClick={onLogin}>
                     <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>
                     Sign in with Google
@@ -334,7 +343,7 @@
                                     <select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
                                     <input type="number" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: parseInt(e.target.value) || 2026 })} />
                                 </div>
-                                <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step</button>
+                                <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
                                 {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
                             </div>
                         ) : (
@@ -349,8 +358,8 @@
                                     <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom}>+</button>
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '1rem', fontWeight: '700' }}>Selected: {form.subjects.join(', ')}</div>
-                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes' : 'Start Tracking'}</button>
-                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={() => setStep(1)}>Back</button>
+                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
+                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
                             </div>
                         )}
                     </div>
@@ -360,13 +369,29 @@
 
         const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft }) => {
             const todayCount = (history[viewDate] || []).filter(Boolean).length;
+            
+            const calcHours = (days) => {
+                let total = 0;
+                for(let i=0; i<days; i++) {
+                    const d = new Date(); d.setDate(d.getDate() - i);
+                    const k = d.toISOString().split('T')[0];
+                    total += (history[k] || []).filter(Boolean).length;
+                }
+                return total;
+            };
+
+            const weekHrs = calcHours(7);
+            const monthHrs = calcHours(30);
+            const totalHrs = Object.values(history).reduce((a, b) => a + (b || []).filter(Boolean).length, 0);
+
             const greet = new Date().getHours() < 12 ? "Good Morning" : (new Date().getHours() < 17 ? "Good Afternoon" : "Good Evening");
             const toggleH = (i) => { const h = [...(history[viewDate] || new Array(15).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
+            
             return (
                 <div>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: '3.5rem' }}>{greet}, {profile.name}! ✨</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', marginBottom: '1.5rem' }}>Towards {profile.examYear} {profile.examMonth} A/L Exam in {profile.district}...</p>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 6vw, 3.5rem)' }}>{greet}, {profile.name}! ✨</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)', marginBottom: '1.5rem' }}>Towards {profile.examYear} {profile.examMonth} A/L Exam in {profile.district}...</p>
                         <div className="countdown-container">
                             <CountdownBox val={timeLeft.d} lbl="Days" />
                             <CountdownBox val={timeLeft.h} lbl="Hours" />
@@ -375,17 +400,17 @@
                         </div>
                     </div>
                     <div className="stats-grid">
-                        <StatBox val={todayCount} lbl="Today's Hours" sub="අද වැඩ කරපු පැය" />
-                        <StatBox val={15 - todayCount} lbl="Goal Remaining" sub="තව අවශ්‍ය පැය" color="#ef4444" />
-                        <StatBox val={timeLeft.d} lbl="Days to Exam" sub="විභාගයට ඉතිරි දින" />
-                        <StatBox val={Object.values(history).reduce((a, b) => a + b.filter(Boolean).length, 0)} lbl="Total Hours" sub="මුළු පැය ගණන" color="#10B981" />
+                        <StatBox val={todayCount} lbl="Today" sub="අද" />
+                        <StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" />
+                        <StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" />
+                        <StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" />
                     </div>
                     <div className="dash-grid">
-                        <Reveal><div className="glass card"><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
-                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(5)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = d.toISOString().split('T')[0]; return <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800' }}>{history[k]?.filter(Boolean).length || 0}h</span></div>; })}</div></div></Reveal>
+                        <Reveal><div className="glass card"><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(5)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = d.toISOString().split('T')[0]; return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{history[k]?.filter(Boolean).length || 0}h</span></div>; })}</div></div></Reveal>
                     </div>
-                    <Reveal delay={0.2}><div className="glass card" style={{ height: '400px', marginTop: '2rem' }}><span className="card-title">Monthly Progress Breakdown</span><div style={{ height: '300px', marginTop: '1rem' }}><ProgressChart history={history} /></div></div></Reveal>
-                    <Reveal delay={0.3}><div className="glass card" style={{ height: '400px', marginTop: '2rem' }}><span className="card-title">Activity Trend (Last 30 Days)</span><div style={{ height: '300px', marginTop: '1rem' }}><TrendChart history={history} /></div></div></Reveal>
+                    <Reveal delay={0.2}><div className="glass card" style={{ minHeight: '350px', marginTop: '1rem' }}><span className="card-title">Monthly Progress Breakdown</span><div className="chart-box"><ProgressChart history={history} /></div></div></Reveal>
+                    <Reveal delay={0.3}><div className="glass card" style={{ minHeight: '350px', marginTop: '1rem' }}><span className="card-title">Activity Trend (Last 30 Days)</span><div className="chart-box"><TrendChart history={history} /></div></div></Reveal>
                 </div>
             );
         };
@@ -398,33 +423,33 @@
 
             return (
                 <div>
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}><div style={{ fontSize: '4rem' }}>{SUBJECT_ICONS[subject] || '📚'}</div><h1 style={{ fontFamily: 'Outfit', fontSize: '3.5rem' }}>{subject}</h1></div>
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}><div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)' }}>{SUBJECT_ICONS[subject] || '📚'}</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)' }}>{subject}</h1></div>
                     <div className="dash-grid">
-                        <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper</button></form></div></Reveal>
+                        <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
                         <Reveal delay={0.1}>
                             <div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}>
                                 <span className="card-title">Paper History</span>
                                 <div style={{ marginTop: '1rem' }}>
                                     {data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => (
                                         <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}>
-                                            <div><div style={{ fontWeight: '800' }}>{m.total} Marks</div><div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{m.date}</div></div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq} S:{m.str} E:{m.esy}</div>
+                                            <div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq} S:{m.str} E:{m.esy}</div>
                                                 <div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div>
                                             </div>
                                         </div>
                                     ))}
+                                    {data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}
                                 </div>
                             </div>
                         </Reveal>
                     </div>
                     <div className="marks-grid">
-                        <Reveal delay={0.2}><MarkChart title="MCQ" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.3}><MarkChart title="Structured" data={data} field="str" color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.4}><MarkChart title="Essay" data={data} field="esy" color="#F43F5E" /></Reveal>
+                        <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
                         <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
                     </div>
-                    <Reveal delay={0.6}><div style={{ marginTop: '2rem' }}><SubjectSummaryCard subject={subject} data={data} /></div></Reveal>
                 </div>
             );
         };
@@ -437,22 +462,10 @@
                 if (inst.current) inst.current.destroy();
                 inst.current = new Chart(ctx, {
                     type: 'line', data: { labels: sorted.map((_, i) => 'P' + (i + 1)), datasets: [{ data: sorted.map(m => m[field]), borderColor: color, backgroundColor: color + '20', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: color }] },
-                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A' } }, x: { grid: { display: false }, ticks: { color: '#71717A' } } } }
+                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#71717A', font: { size: 10 } } } } }
                 });
             }, [JSON.stringify(data)]);
-            return <div className="glass card" style={{ padding: '1.5rem' }}><div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>{title}</div><div className="chart-box"><canvas ref={ref}></canvas></div></div>;
-        };
-
-        const SubjectSummaryCard = ({ subject, data }) => {
-            const ref = useRef(null); const inst = useRef(null);
-            const sorted = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
-            const avg = sorted.length ? (sorted.reduce((a, c) => a + c.total, 0) / sorted.length).toFixed(1) : 0;
-            const perf = Math.min(Math.round((avg / 100) * 100), 100);
-            useEffect(() => {
-                const ctx = ref.current.getContext('2d'); if (inst.current) inst.current.destroy();
-                inst.current = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [perf, 100 - perf], backgroundColor: ['#8B5CF6', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '80%' }] }, options: { animation: false, responsive: true, maintainAspectRatio: true, plugins: { tooltip: { enabled: false } } } });
-            }, [perf]);
-            return ( <div className="glass card" style={{ display: 'flex', alignItems: 'center', gap: '3rem', padding: '3rem' }}><div style={{ position: 'relative', width: '200px' }}><canvas ref={ref}></canvas><div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}><div style={{ fontSize: '2.5rem', fontWeight: '800' }}>{perf}%</div><div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Efficiency</div></div></div><div><h2 style={{ fontFamily: 'Outfit', fontSize: '2rem' }}>{subject} Rank Analytics</h2><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}><div><div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Papers Done</div><div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{sorted.length}</div></div><div><div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Avg. Score</div><div style={{ fontSize: '1.5rem', fontWeight: '700' }}>{avg}</div></div></div></div></div> );
+            return <div className="glass card" style={{ padding: '1.2rem' }}><div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>{title}</div><div className="chart-box"><canvas ref={ref}></canvas></div></div>;
         };
 
         const ProgressChart = ({ history }) => {
@@ -472,10 +485,10 @@
                 const chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: ['3 Weeks Ago', '2 Weeks Ago', 'Last Week', 'This Week'],
-                        datasets: [{ data: last4Weeks, backgroundColor: ['rgba(139, 92, 246, 0.2)', 'rgba(139, 92, 246, 0.4)', 'rgba(139, 92, 246, 0.6)', '#8B5CF6'], borderRadius: 10 }]
+                        labels: ['W4', 'W3', 'W2', 'W1'],
+                        datasets: [{ data: last4Weeks, backgroundColor: ['rgba(139, 92, 246, 0.2)', 'rgba(139, 92, 246, 0.4)', 'rgba(139, 92, 246, 0.6)', '#8B5CF6'], borderRadius: 8 }]
                     },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
                 });
                 return () => chart.destroy();
             }, [history]);
@@ -487,7 +500,7 @@
             useEffect(() => {
                 const ctx = ref.current.getContext('2d');
                 const l30 = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.toISOString().split('T')[0]; });
-                const chart = new Chart(ctx, { type: 'line', data: { labels: l30.map(d => d.split('-')[2]), datasets: [{ data: l30.map(k => history[k]?.filter(Boolean).length || 0), borderColor: '#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] }, options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A' } }, x: { grid: { display: false }, ticks: { color: '#71717A' } } } } });
+                const chart = new Chart(ctx, { type: 'line', data: { labels: l30.map(d => d.split('-')[2]), datasets: [{ data: l30.map(k => history[k]?.filter(Boolean).length || 0), borderColor: '#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] }, options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#71717A', font: { size: 8 } } } } } });
                 return () => chart.destroy();
             }, [history]);
             return <canvas ref={ref}></canvas>;
@@ -500,8 +513,8 @@
             </div>
         );
 
-        const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
-        const MobileItem = ({ active, icon, label, onClick }) => ( <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}><span>{icon}</span><span style={{ fontSize: '0.6rem' }}>{label}</span></div> );
+        const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
+        const MobileItem = ({ active, icon, label, onClick }) => ( <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}><span>{icon}</span><span>{label}</span></div> );
         const SubjectBackground = ({ subject }) => { const icon = SUBJECT_ICONS[subject] || '📚'; return <div className="floating-bg">{Array.from({ length: 15 }).map((_, i) => <div key={i} className="float-icon" style={{ left: `${Math.random() * 100}%`, animationDuration: `${15 + Math.random() * 20}s`, animationDelay: `${-Math.random() * 20}s` }}>{icon}</div>)}</div>; };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
