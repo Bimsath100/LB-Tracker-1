@@ -104,38 +104,25 @@
         .countdown-num { font-family: 'Outfit'; font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 800; color: var(--primary); display: block; }
         .countdown-label { font-size: 0.55rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
 
-        /* Tablet Breakpoint */
-        @media (max-width: 1024px) {
-            .dash-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        /* Floating Background Icons */
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.15; overflow: hidden; }
+        .float-icon { position: absolute; font-size: clamp(2rem, 10vw, 5rem); bottom: -100px; animation: floatUp linear infinite; }
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
         }
 
-        /* Mobile Breakpoint */
-        @media (max-width: 600px) {
-            .stats-grid { gap: 0.8rem; }
-            .stat-card { padding: 1.2rem 0.5rem; }
-            .nav-brand span { display: none; }
-            .nav-logo { width: 38px; height: 38px; }
-            .navbar { height: 65px; }
-            .main-content { padding-top: 85px; }
-            .mobile-nav { display: flex; }
-            .marks-grid { grid-template-columns: 1fr; }
-            .countdown-box { min-width: 55px; padding: 8px 5px; }
-            .hour-grid { gap: 8px; }
-        }
-
-        /* Large Screen Optimizations */
-        @media (min-width: 1600px) {
-            .container { max-width: 1500px; }
-            :root { font-size: 18px; }
-        }
+        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .stats-grid { gap: 0.8rem; } .stat-card { padding: 1.2rem 0.5rem; } .nav-brand span { display: none; } .mobile-nav { display: flex; } .marks-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         const SB_URL = "https://gemcglmmjbicgbvdhdee.supabase.co"; 
         const SB_KEY = "sb_publishable_XhYi9wPvuOOLjRdpjaqUWg_xKXL2Dg6";
@@ -515,7 +502,24 @@
 
         const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
         const MobileItem = ({ active, icon, label, onClick }) => ( <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}><span>{icon}</span><span>{label}</span></div> );
-        const SubjectBackground = ({ subject }) => { const icon = SUBJECT_ICONS[subject] || '📚'; return <div className="floating-bg">{Array.from({ length: 15 }).map((_, i) => <div key={i} className="float-icon" style={{ left: `${Math.random() * 100}%`, animationDuration: `${15 + Math.random() * 20}s`, animationDelay: `${-Math.random() * 20}s` }}>{icon}</div>)}</div>; };
+        
+        const SubjectBackground = ({ subject }) => { 
+            const icon = SUBJECT_ICONS[subject] || '🎓'; 
+            const icons = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({
+                id: i,
+                left: `${Math.random() * 100}%`,
+                duration: `${15 + Math.random() * 20}s`,
+                delay: `${-Math.random() * 20}s`
+            })), [subject]);
+
+            return (
+                <div className="floating-bg">
+                    {icons.map(ic => (
+                        <div key={ic.id} className="float-icon" style={{ left: ic.left, animationDuration: ic.duration, animationDelay: ic.delay }}>{icon}</div>
+                    ))}
+                </div>
+            );
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
