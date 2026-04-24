@@ -448,12 +448,21 @@
             const data = marks.filter(m => m.subject === subject);
             const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] }); };
             const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
+            
+            const peakMCQ = Math.max(...data.map(m => parseFloat(m.mcq) || 0), 0);
+            const peakSTR = Math.max(...data.map(m => parseFloat(m.str) || 0), 0);
+            const peakESY = Math.max(...data.map(m => parseFloat(m.esy) || 0), 0);
+            const avgMastery = Math.round(data.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/data.length / 450 * 100 || 0);
+
             return (
                 <div>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <div style={{ fontSize: 'clamp(3.5rem, 12vw, 4.5rem)', marginBottom: '0.5rem', filter: 'drop-shadow(0 10px 20px var(--primary-glow))' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.8rem, 10vw, 4rem)', fontWeight: '900', letterSpacing: '-1px', background: 'linear-gradient(to bottom, #fff 30%, rgba(255,255,255,0.6) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', lineHeight: 1 }}>{subject}</h1>
-                        <div style={{ display: 'inline-block', marginTop: '12px', padding: '6px 16px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: 'white', textTransform: 'uppercase' }}>Core Study Module</div>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '12px' }}>
+                            <div style={{ padding: '6px 16px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: 'white', textTransform: 'uppercase' }}>Core Study Module</div>
+                            <div style={{ padding: '6px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10B981', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '800', letterSpacing: '2px', color: '#10B981', textTransform: 'uppercase' }}>{avgMastery}% Mastery</div>
+                        </div>
                     </div>
                     <div className="dash-grid">
                         <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
@@ -473,9 +482,9 @@
                         </Reveal>
                     </div>
                     <div className="stats-grid-3">
-                        <Reveal delay={0.1}><StatCardCircle label="MCQ Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.mcq)||0),0)/data.length || 0)} max={50} color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.2}><StatCardCircle label="STR Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.str)||0),0)/data.length || 0)} max={100} color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.3}><StatCardCircle label="ESY Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.esy)||0),0)/data.length || 0)} max={300} color="#F43F5E" /></Reveal>
+                        <Reveal delay={0.1}><StatCardCircle label="Peak MCQ" value={peakMCQ} max={50} color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.2}><StatCardCircle label="Peak STR" value={peakSTR} max={100} color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.3}><StatCardCircle label="Peak ESY" value={peakESY} max={300} color="#F43F5E" /></Reveal>
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
