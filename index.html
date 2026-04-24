@@ -104,6 +104,13 @@
         .countdown-num { font-family: 'Outfit'; font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 800; color: var(--primary); display: block; }
         .countdown-label { font-size: 0.5rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
 
+        /* Subject Selection Chips */
+        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+        .subject-chip { background: var(--primary-glow); border: 1px solid var(--primary); color: white; padding: 8px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; animation: chipIn 0.3s ease-out; }
+        .chip-remove { cursor: pointer; opacity: 0.7; transition: 0.2s; font-size: 1.1rem; }
+        .chip-remove:hover { opacity: 1; transform: scale(1.1); }
+        @keyframes chipIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         /* Floating Background Icons */
         .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.15; overflow: hidden; }
         .float-icon { position: absolute; font-size: clamp(2rem, 10vw, 5rem); bottom: -100px; animation: floatUp linear infinite; }
@@ -114,27 +121,10 @@
             100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
         }
 
-        @media (max-width: 1024px) { 
-            .dash-grid { grid-template-columns: 1fr; } 
-            .stats-grid { grid-template-columns: repeat(2, 1fr); } 
-        }
-        @media (max-width: 768px) {
-            .nav-links { display: none; } /* Hide top links on tablet/mobile */
-        }
-        @media (max-width: 600px) { 
-            .stats-grid { gap: 0.6rem; margin-bottom: 1.5rem; } 
-            .stat-card { padding: 1rem 0.3rem; border-radius: 18px; } 
-            .stat-val { font-size: 1.8rem; }
-            .nav-brand span { display: none; } 
-            .mobile-nav { display: flex; } 
-            .marks-grid { grid-template-columns: 1fr; } 
-            .main-content { padding-top: 85px; padding-bottom: 100px; }
-            .countdown-box { min-width: 50px; }
-        }
-        @media (max-width: 350px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .stat-val { font-size: 2.2rem; }
-        }
+        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+        @media (max-width: 600px) { .stats-grid { gap: 0.6rem; margin-bottom: 1.5rem; } .stat-card { padding: 1rem 0.3rem; border-radius: 18px; } .stat-val { font-size: 1.8rem; } .nav-brand span { display: none; } .mobile-nav { display: flex; } .marks-grid { grid-template-columns: 1fr; } .main-content { padding-top: 85px; padding-bottom: 100px; } .countdown-box { min-width: 50px; } }
+        @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } .stat-val { font-size: 2.2rem; } }
     </style>
 </head>
 <body>
@@ -230,6 +220,7 @@
                 } else {
                     setProfile(p);
                     setIsEditMode(false);
+                    setCurrentPage('dashboard');
                 }
                 setLoading(false);
             };
@@ -335,7 +326,9 @@
             const [form, setForm] = useState(initialData ? { ...initialData } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August' });
             const [customSub, setCustomSub] = useState('');
             const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < 3 ? [...f.subjects, s] : f.subjects) }));
-            const addCustom = () => { if(customSub && form.subjects.length < 3) { toggleS(customSub); setCustomSub(''); } };
+            const addCustom = () => { if(customSub && form.subjects.length < 3 && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
+            const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
+
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
                     <div className="glass setup-card">
@@ -355,15 +348,26 @@
                         ) : (
                             <div>
                                 <h2 className="setup-title">Subjects 📚</h2>
-                                <p className="setup-subtitle">Choose or type 3 subjects.</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '180px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>
-                                    {SUBJECT_LIST.map(s => <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center' }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div></div>)}
+                                <p className="setup-subtitle">Choose exactly 3 subjects.</p>
+                                
+                                <div className="chip-container">
+                                    {form.subjects.map(s => (
+                                        <div key={s} className="subject-chip">
+                                            {s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span>
+                                        </div>
+                                    ))}
+                                    {form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}
                                 </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>
+                                    {SUBJECT_LIST.map(s => <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= 3 ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div></div>)}
+                                </div>
+                                
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
-                                    <input type="text" placeholder="Other Subject" value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} />
-                                    <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom}>+</button>
+                                    <input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} />
+                                    <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= 3}>+</button>
                                 </div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '1rem', fontWeight: '700' }}>Selected: {form.subjects.join(', ')}</div>
+
                                 <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
                                 <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
                             </div>
