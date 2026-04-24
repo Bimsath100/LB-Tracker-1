@@ -118,6 +118,9 @@
             .dash-grid { grid-template-columns: 1fr; } 
             .stats-grid { grid-template-columns: repeat(2, 1fr); } 
         }
+        @media (max-width: 768px) {
+            .nav-links { display: none; } /* Hide top links on tablet/mobile */
+        }
         @media (max-width: 600px) { 
             .stats-grid { gap: 0.6rem; margin-bottom: 1.5rem; } 
             .stat-card { padding: 1rem 0.3rem; border-radius: 18px; } 
