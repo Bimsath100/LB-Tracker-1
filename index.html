@@ -148,17 +148,18 @@
         const SUBJECT_LIST = [...Object.keys(SUBJECT_ICONS)];
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        let deferredPrompt;
+        // Global variable to catch the prompt
+        window.deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('beforeinstallprompt event fired');
+            console.log('Capture: beforeinstallprompt');
             e.preventDefault();
-            deferredPrompt = e;
+            window.deferredPrompt = e;
         });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('SW Registered', reg);
+                    console.log('SW Registered');
                 }).catch(err => console.log('SW registration failed:', err));
             });
         }
@@ -185,6 +186,7 @@
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isEditMode, setIsEditMode] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+            const [installReady, setInstallReady] = useState(false);
 
             useEffect(() => {
                 sb.auth.getSession().then(({ data: { session } }) => {
@@ -193,7 +195,18 @@
                 const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
                     if (session) { setUser(session.user); fetchUserData(session.user.id); } else { setUser(null); setProfile(null); setLoading(false); }
                 });
-                return () => subscription.unsubscribe();
+
+                const checkPrompt = setInterval(() => {
+                    if (window.deferredPrompt) {
+                        setInstallReady(true);
+                        clearInterval(checkPrompt);
+                    }
+                }, 1000);
+
+                return () => {
+                    subscription.unsubscribe();
+                    clearInterval(checkPrompt);
+                };
             }, []);
 
             const fetchUserData = async (uid) => {
@@ -257,12 +270,12 @@
             }, [profile]);
 
             const handleInstall = async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') { deferredPrompt = null; }
+                if (window.deferredPrompt) {
+                    window.deferredPrompt.prompt();
+                    const { outcome } = await window.deferredPrompt.userChoice;
+                    if (outcome === 'accepted') { window.deferredPrompt = null; setInstallReady(false); }
                 } else {
-                    alert("To Install:\n\n1. Look for the [Install] icon in your browser's address bar.\n2. Or click the 3-dots menu and select 'Install' / 'Add to Home Screen'.");
+                    alert("Instructions:\n\n1. Look for the [Install] icon in your browser's address bar (Computer icon).\n2. Or click the 3-dots menu and select 'Install' / 'Add to Home Screen'.");
                 }
             };
 
