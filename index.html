@@ -431,10 +431,15 @@
                 const grad = ctx.createLinearGradient(0, 0, 0, 200); grad.addColorStop(0, color + '40'); grad.addColorStop(1, color + '00');
                 inst.current = new Chart(ctx, {
                     type: 'line', data: { labels: sorted.map((_, i) => 'P' + (i + 1)), datasets: [{ data: sorted.map(m => m[field]), borderColor: color, backgroundColor: grad, fill: true, tension: 0.4, borderWidth: 3, pointRadius: 4, pointBackgroundColor: color }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A' } }, x: { grid: { display: false }, ticks: { color: '#71717A' } } } }
+                    options: { 
+                        responsive: true, maintainAspectRatio: false, 
+                        animation: false,
+                        plugins: { legend: { display: false } }, 
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#71717A' } }, x: { grid: { display: false }, ticks: { color: '#71717A' } } } 
+                    }
                 });
                 return () => inst.current?.destroy();
-            }, [data]);
+            }, [JSON.stringify(data)]);
             return <div className="glass card" style={{ padding: '1.5rem' }}><div style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>{title}</div><div className="chart-box"><canvas ref={ref}></canvas></div></div>;
         };
 
@@ -449,9 +454,13 @@
                 if (inst.current) inst.current.destroy();
                 inst.current = new Chart(ctx, {
                     type: 'doughnut', data: { datasets: [{ data: [perf, 100 - perf], backgroundColor: ['#8B5CF6', 'rgba(255,255,255,0.05)'], borderWidth: 0, cutout: '80%' }] },
-                    options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { enabled: false } } }
+                    options: { 
+                        responsive: true, maintainAspectRatio: true, 
+                        animation: false,
+                        plugins: { tooltip: { enabled: false } } 
+                    }
                 });
-            }, [data]);
+            }, [perf]);
 
             return (
                 <div className="glass card" style={{ display: 'flex', alignItems: 'center', gap: '3rem', padding: '3rem' }}>
