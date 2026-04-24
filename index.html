@@ -101,7 +101,9 @@
         .hour-btn:hover:not(.active) { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
 
         .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 2.5rem; }
+        .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.5rem; }
         .chart-box { height: 200px; width: 100%; margin-top: 15px; }
+        .chart-box-small { height: 180px; width: 100%; margin-top: 10px; }
 
         .floating-settings { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: var(--gradient); border: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.8rem; transition: 0.4s; box-shadow: 0 10px 30px var(--primary-glow); color: white; }
         .floating-settings:hover { transform: rotate(90deg) scale(1.1); }
@@ -132,9 +134,19 @@
             100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
         }
 
-        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .nav-links { display: none; } }
-        @media (max-width: 600px) { .stats-grid { gap: 0.6rem; margin-bottom: 1.5rem; } .stat-card { padding: 1rem 0.3rem; border-radius: 18px; } .stat-val { font-size: 1.8rem; } .nav-brand span { display: none; } .mobile-nav { display: flex; } .marks-grid { grid-template-columns: 1fr; } .main-content { padding-top: 85px; padding-bottom: 100px; } .countdown-box { min-width: 50px; } }
+        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .stats-grid-3 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 100px; } }
+        @media (max-width: 600px) { 
+            .stats-grid { gap: 0.8rem; margin-bottom: 2rem; } 
+            .stat-card { padding: 1.5rem 0.5rem; border-radius: 24px; } 
+            .stat-val { font-size: 2.2rem; } 
+            .nav-brand span { display: none; } 
+            .mobile-nav { display: flex; } 
+            .marks-grid { grid-template-columns: 1fr; } 
+            .stats-grid-3 { grid-template-columns: 1fr; }
+            .main-content { padding-top: 85px; padding-bottom: 120px; } 
+            .countdown-box { min-width: 50px; } 
+        }
         @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } .stat-val { font-size: 2.2rem; } }
     </style>
 </head>
@@ -460,7 +472,7 @@
                             </div>
                         </Reveal>
                     </div>
-                    <div className="marks-grid" style={{ marginBottom: '2.5rem' }}>
+                    <div className="stats-grid-3">
                         <Reveal delay={0.1}><StatCardCircle label="MCQ Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.mcq)||0),0)/data.length || 0)} max={50} color="#3B82F6" /></Reveal>
                         <Reveal delay={0.2}><StatCardCircle label="STR Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.str)||0),0)/data.length || 0)} max={100} color="#8B5CF6" /></Reveal>
                         <Reveal delay={0.3}><StatCardCircle label="ESY Avg" value={Math.round(data.reduce((a,b)=>a+(parseFloat(b.esy)||0),0)/data.length || 0)} max={300} color="#F43F5E" /></Reveal>
