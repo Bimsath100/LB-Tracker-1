@@ -80,6 +80,10 @@
         .btn-primary { background: var(--gradient); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: 0.3s; margin-top: 10px; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px var(--primary-glow); }
 
+        .btn-google { background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 14px 28px; border-radius: 16px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 14px; backdrop-filter: blur(10px); width: fit-content; margin: 0 auto; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        .btn-google:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 30px rgba(139, 92, 246, 0.25); }
+        .btn-google svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+
         .dash-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: clamp(1rem, 3vw, 2rem); }
         .card { padding: clamp(1.2rem, 4vw, 2.2rem); margin-bottom: 2rem; overflow: hidden; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
