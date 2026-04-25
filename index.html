@@ -559,7 +559,7 @@
                                     <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= 3}>+</button>
                                 </div>
                                 <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
-                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
+                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
                             </div>
                         )}
                     </div>
