@@ -388,7 +388,9 @@
                                 <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
                                     <select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                                    <input type="number" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: parseInt(e.target.value) || 2026 })} />
+                                    <select value={form.examYear} onChange={e => setForm({ ...form, examYear: parseInt(e.target.value) })}>
+                                        {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={y}>{y}</option>)}
+                                    </select>
                                 </div>
                                 <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
                                 {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
