@@ -242,7 +242,14 @@
                 const fetchFB = async () => {
                     try {
                         const { data, error } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }).limit(10);
-                        if(data && data.length > 0) setFeedbacks(data);
+                        if(data && data.length > 0) {
+                            setFeedbacks(prev => {
+                                // Filter out duplicates to avoid showing the same message twice
+                                const existingStrings = prev.map(f => f.name + f.text);
+                                const newFeedbacks = data.filter(f => !existingStrings.includes(f.name + f.text));
+                                return [...newFeedbacks, ...prev];
+                            });
+                        }
                     } catch(e) {}
                 };
                 fetchFB();
