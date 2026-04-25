@@ -720,5 +720,33 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
+    <script>
+        // Disable Right Click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Disable specific keyboard shortcuts
+        document.onkeydown = function(e) {
+            // F12
+            if (e.keyCode == 123) {
+                return false;
+            }
+            // Ctrl+Shift+I (Inspect)
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
+                return false;
+            }
+            // Ctrl+Shift+J (Console)
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 74) {
+                return false;
+            }
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && e.keyCode == 85) {
+                return false;
+            }
+            // Ctrl+Shift+C (Inspect Element)
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 67) {
+                return false;
+            }
+        };
+    </script>
 </body>
 </html>
