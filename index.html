@@ -33,123 +33,127 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary: #8B5CF6;
-            --primary-glow: rgba(139, 92, 246, 0.4);
-            --bg-dark: #050505;
-            --navbar-bg: rgba(5, 5, 5, 0.7);
-            --card-bg: rgba(20, 20, 20, 0.7);
+            --primary: #6366F1;
+            --primary-glow: rgba(99, 102, 241, 0.2);
+            --bg: #050505;
+            --navbar-bg: rgba(5, 5, 5, 0.8);
+            --card-bg: rgba(20, 20, 20, 0.6);
             --text-main: #FFFFFF;
             --text-dim: #94A3B8;
             --border: rgba(255, 255, 255, 0.08);
             --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --gradient: linear-gradient(135deg, #8B5CF6 0%, #D946EF 100%);
-            --input-bg: rgba(255, 255, 255, 0.04);
-            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            --gradient: #6366F1; /* Simplified to solid for minimalist look */
+            --input-bg: rgba(255, 255, 255, 0.03);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --success: #10B981;
+        }
+
+        body.light-mode {
+            --bg: #F8FAFC;
+            --navbar-bg: rgba(248, 250, 252, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #0F172A;
+            --text-dim: #64748B;
+            --border: rgba(0, 0, 0, 0.06);
+            --glass-border: 1px solid rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.02);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            color-scheme: light;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-dark); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; line-height: 1.5; }
+        body { background-color: var(--bg); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; transition: background 0.3s, color 0.3s; line-height: 1.5; }
 
-        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #050505; }
-        .blob { position: absolute; width: min(60vw, 600px); height: min(60vw, 600px); filter: blur(min(10vw, 100px)); border-radius: 50%; opacity: 0.35; animation: move 20s infinite alternate; }
+        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: var(--bg); }
+        .blob { position: absolute; width: min(60vw, 600px); height: min(60vw, 600px); filter: blur(min(10vw, 100px)); border-radius: 50%; opacity: 0.15; animation: move 20s infinite alternate; }
         .blob-1 { top: -10%; right: -10%; background: var(--primary); }
         .blob-2 { bottom: -10%; left: -10%; background: #D946EF; }
         @keyframes move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
 
-        .glass { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: var(--glass-border); border-radius: 28px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; }
-        .glass::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%); pointer-events: none; }
-
-        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 80px; background: var(--navbar-bg); backdrop-filter: blur(30px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); }
-        .nav-container { width: 92%; max-width: 1400px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { display: flex; align-items: center; gap: 15px; font-family: 'Outfit'; font-weight: 900; font-size: clamp(1.4rem, 4vw, 1.8rem); letter-spacing: -1px; }
-        .nav-logo { width: 48px; height: 48px; background: var(--gradient); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.3rem; filter: drop-shadow(0 0 20px var(--primary-glow)); transform: rotate(-5deg); transition: 0.4s; }
-        .nav-logo:hover { transform: rotate(0deg) scale(1.1); }
-        .nav-tracker { background: linear-gradient(to bottom, #fff, #94A3B8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; }
-        .nav-links { display: flex; gap: 12px; align-items: center; }
-        .nav-link { padding: 12px 22px; border-radius: 14px; cursor: pointer; transition: 0.4s; font-weight: 700; color: var(--text-dim); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-link.active { background: rgba(255,255,255,0.05); color: var(--text-main); border: var(--glass-border); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .nav-link:hover { color: var(--text-main); background: rgba(255,255,255,0.08); transform: translateY(-2px); }
-
-        .main-content { width: 100%; padding: 120px 0 120px 0; min-height: 100vh; }
-        .container { width: min(94%, 1400px); margin: 0 auto; }
-
-        .setup-card { max-width: 500px; width: min(92%, 500px); margin: 2rem auto; padding: clamp(2rem, 6vw, 3.5rem); position: relative; z-index: 100; }
-        .setup-title { font-family: 'Outfit'; font-size: clamp(2rem, 8vw, 2.8rem); font-weight: 900; margin-bottom: 0.5rem; text-align: center; letter-spacing: -1px; }
-        .setup-subtitle { color: var(--text-dim); margin-bottom: 2.5rem; font-size: 1rem; text-align: center; font-weight: 500; }
+        .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
-        input, select { background: rgba(255,255,255,0.03); border: var(--glass-border); color: var(--text-main); padding: 18px; border-radius: 16px; width: 100%; margin-bottom: 15px; outline: none; transition: 0.4s; font-size: 1rem; color-scheme: dark; font-weight: 600; }
-        option { background: #050505; color: white; }
-        input:focus, select:focus { border-color: var(--primary); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 5px var(--primary-glow); }
-        .btn-primary { background: var(--gradient); color: white; border: none; padding: 18px; border-radius: 16px; width: 100%; cursor: pointer; font-weight: 800; font-size: 1.1rem; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 15px; position: relative; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 25px var(--primary-glow); }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-4px); box-shadow: 0 15px 35px var(--primary-glow); }
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: var(--navbar-bg); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); transition: background 0.3s; }
+        .nav-container { width: 92%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .nav-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; transition: 0.4s; }
+        .nav-tracker { color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; font-weight: 800; }
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+        .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
+        .nav-link.active { background: var(--primary); color: white; }
+        .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); }
 
-        .btn-google { background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 16px 32px; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 1rem; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; gap: 15px; backdrop-filter: blur(20px); width: fit-content; margin: 2rem auto; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); text-transform: none; letter-spacing: 0; }
-        .btn-google:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); transform: translateY(-4px) scale(1.02); box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3); }
-        .btn-google svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); width: 24px; height: 24px; }
+        .main-content { width: 100%; padding: 100px 0 100px 0; min-height: 100vh; }
+        .container { width: min(94%, 1200px); margin: 0 auto; }
 
-        .dash-grid { display: grid; grid-template-columns: 1.85fr 1fr; gap: clamp(1.5rem, 4vw, 2.5rem); }
-        .card { padding: clamp(1.5rem, 5vw, 2.8rem); margin-bottom: 2.5rem; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .card-title { font-family: 'Outfit'; font-size: clamp(1.3rem, 5vw, 1.6rem); font-weight: 800; letter-spacing: -0.5px; }
+        .setup-card { max-width: 450px; width: min(92%, 450px); margin: 2rem auto; padding: 2.5rem; }
+        .setup-title { font-family: 'Outfit'; font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center; }
+        .setup-subtitle { color: var(--text-dim); margin-bottom: 2rem; text-align: center; font-size: 0.95rem; }
+        
+        input, select { background: var(--input-bg); border: var(--glass-border); color: var(--text-main); padding: 14px 18px; border-radius: 14px; width: 100%; margin-bottom: 12px; outline: none; transition: 0.3s; font-size: 1rem; font-weight: 500; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+        
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; width: 100%; cursor: pointer; font-weight: 700; font-size: 1rem; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1rem, 3vw, 1.8rem); margin-bottom: 3rem; }
-        .stat-card { padding: 2rem 1rem; text-align: center; border-radius: 32px; background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%); }
-        .stat-val { font-family: 'Outfit'; font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 900; background: linear-gradient(to bottom, #fff, #94A3B8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
-        .stat-lbl { font-size: 0.75rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 10px; }
+        .btn-google { background: var(--card-bg); color: var(--text-main); border: var(--glass-border); padding: 14px 28px; border-radius: 16px; cursor: pointer; font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; margin: 2rem auto; }
+        .btn-google:hover { border-color: var(--primary); transform: translateY(-2px); }
 
-        .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(10px, 3vw, 15px); }
-        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 20px; font-weight: 900; font-size: clamp(1.2rem, 5vw, 1.8rem); font-family: 'Outfit'; color: var(--text-dim); background: rgba(255,255,255,0.03); border: var(--glass-border); transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hour-btn.active { background: var(--gradient); color: white; border-color: transparent; box-shadow: 0 10px 30px var(--primary-glow); transform: scale(1.05); }
-        .hour-btn:hover:not(.active) { background: rgba(255,255,255,0.08); transform: translateY(-3px); }
+        .dash-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; }
+        .card { padding: 2rem; margin-bottom: 1.5rem; }
+        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; }
 
-        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 2.5rem; }
-        .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.5rem; }
-        .chart-box { height: 200px; width: 100%; margin-top: 15px; }
-        .chart-box-small { height: 180px; width: 100%; margin-top: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { padding: 1.5rem 1rem; text-align: center; border-radius: 24px; border: var(--glass-border); }
+        .stat-val { font-family: 'Outfit'; font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; }
+        .stat-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
 
-        .floating-settings { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: var(--gradient); border: none; border-radius: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.8rem; transition: 0.4s; box-shadow: 0 10px 30px var(--primary-glow); color: white; }
+        .hour-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 800; font-size: 1.4rem; font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .hour-btn.active { background: var(--primary); color: white; border-color: transparent; box-shadow: 0 8px 20px var(--primary-glow); transform: scale(1.05); }
+        .hour-btn:hover:not(.active) { border-color: var(--primary); transform: translateY(-2px); }
+
+        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem; }
+        .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem; }
+        .chart-box { height: 180px; width: 100%; margin-top: 15px; }
+
+        .floating-settings { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; background: var(--primary); border: none; border-radius: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.3s; box-shadow: 0 8px 20px var(--primary-glow); color: white; }
         .floating-settings:hover { transform: rotate(90deg) scale(1.1); }
-        .settings-menu { position: fixed; bottom: 110px; right: 30px; width: min(90vw, 320px); padding: 2rem; z-index: 1501; animation: menuIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: bottom right; }
-        @keyframes menuIn { from { opacity: 0; transform: scale(0.5) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .settings-menu { position: fixed; bottom: 95px; right: 25px; width: 280px; padding: 1.5rem; z-index: 1501; }
 
-        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 95px; background: rgba(5,5,5,0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 15px 20px 15px; }
-        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-dim); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; padding: 12px 8px; border-radius: 20px; min-width: 70px; flex: 1; transition: 0.3s; }
-        .mobile-item.active { color: white; background: var(--gradient); box-shadow: 0 8px 20px var(--primary-glow); }
-        .mobile-item span:first-child { font-size: 1.6rem; }
+        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 10px; }
+        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; cursor: pointer; padding: 10px; border-radius: 14px; flex: 1; transition: 0.3s; }
+        .mobile-item.active { color: var(--primary); background: var(--primary-glow); }
+        .mobile-item span:first-child { font-size: 1.4rem; }
 
-        .countdown-container { display: flex; gap: 8px; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
-        .countdown-box { background: var(--input-bg); padding: 10px 5px; border-radius: 12px; border: var(--glass-border); min-width: 60px; text-align: center; flex: 1; max-width: 80px; }
-        .countdown-num { font-family: 'Outfit'; font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 800; color: var(--primary); display: block; }
+        .countdown-container { display: flex; gap: 8px; justify-content: center; margin-top: 0.8rem; }
+        .countdown-box { background: var(--input-bg); padding: 8px; border-radius: 12px; border: var(--glass-border); min-width: 55px; text-align: center; }
+        .countdown-num { font-family: 'Outfit'; font-size: 1.3rem; font-weight: 800; color: var(--primary); display: block; }
         .countdown-label { font-size: 0.5rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
 
-        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
-        .subject-chip { background: var(--primary-glow); border: 1px solid var(--primary); color: white; padding: 8px 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; animation: chipIn 0.3s ease-out; }
-        .chip-remove { cursor: pointer; opacity: 0.7; transition: 0.2s; font-size: 1.1rem; }
-        .chip-remove:hover { opacity: 1; transform: scale(1.1); }
+        .subject-chip { background: var(--primary-glow); border: 1px solid var(--primary); color: var(--text-main); padding: 6px 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; }
+        .chip-remove { cursor: pointer; opacity: 0.7; }
 
-        .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.15; overflow: hidden; }
-        .float-icon { position: absolute; font-size: clamp(2rem, 10vw, 5rem); bottom: -100px; animation: floatUp linear infinite; }
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
-        }
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0.1; overflow: hidden; }
+        .float-icon { position: absolute; font-size: 3rem; bottom: -100px; animation: floatUp linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } }
 
-        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .stats-grid-3 { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 100px; } }
+        .delete-btn { cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .delete-btn:hover { opacity: 1; color: #EF4444; }
+
+        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 90px; } }
         @media (max-width: 600px) { 
-            .stats-grid { gap: 0.8rem; margin-bottom: 2rem; } 
-            .stat-card { padding: 1.5rem 0.5rem; border-radius: 24px; } 
-            .stat-val { font-size: 2.2rem; } 
-            .nav-brand span { display: none; } 
+            .stats-grid { gap: 0.6rem; } 
+            .stat-val { font-size: 1.8rem; } 
             .mobile-nav { display: flex; } 
-            .marks-grid { grid-template-columns: 1fr; } 
-            .stats-grid-3 { grid-template-columns: 1fr; }
-            .main-content { padding-top: 85px; padding-bottom: 120px; } 
-            .countdown-box { min-width: 50px; } 
+            .marks-grid, .stats-grid-3 { grid-template-columns: 1fr; }
+            .main-content { padding-bottom: 100px; } 
+            .hour-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+            .hour-btn { font-size: 1.1rem; border-radius: 12px; }
+            .card { padding: 1.5rem; }
         }
-        @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } .stat-val { font-size: 2.2rem; } }
+        @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -210,7 +214,12 @@
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isEditMode, setIsEditMode] = useState(false);
             const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
-            const [installReady, setInstallReady] = useState(false);
+            const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('theme') === 'light');
+
+            useEffect(() => {
+                document.body.classList.toggle('light-mode', isLightMode);
+                localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            }, [isLightMode]);
 
             useEffect(() => {
                 sb.auth.getSession().then(({ data: { session } }) => {
@@ -310,6 +319,9 @@
                     {isSettingsOpen && (
                         <div className="glass settings-menu">
                             <div style={{ fontSize: '0.75rem', marginBottom: '15px', color: 'var(--text-dim)', textAlign: 'center' }}>{user.email}</div>
+                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setIsLightMode(!isLightMode)}>
+                                {isLightMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                            </button>
                             <button className="btn-primary" style={{ marginBottom: '10px' }} onClick={() => { setIsEditMode(true); setIsSettingsOpen(false); }}>👤 Edit Profile</button>
                             <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>🚪 Logout</button>
                         </div>
@@ -338,17 +350,17 @@
         };
 
         const LoadingScreen = () => (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                <div style={{ fontSize: '2rem', fontFamily: 'Outfit', fontWeight: '800', color: 'white', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                <div style={{ fontSize: '1.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
             </div>
         );
 
         const LandingPage = ({ onLogin }) => (
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem' }}>
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
                 <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
-                <div className="nav-logo" style={{ width: 'clamp(60px, 15vw, 80px)', height: 'clamp(60px, 15vw, 80px)', fontSize: '2rem', marginBottom: '2rem' }}>LB</div>
-                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: 'clamp(1rem, 3vw, 1.2rem)', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
+                <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
+                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
                 <button className="btn-google" onClick={onLogin}>
                     <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>
                     Sign in with Google
@@ -463,12 +475,12 @@
 
             return (
                 <div>
-                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                        <div style={{ fontSize: 'clamp(4rem, 15vw, 5.5rem)', marginBottom: '1rem', filter: 'drop-shadow(0 15px 30px var(--primary-glow))', animation: 'floatUp 3s ease-in-out infinite alternate' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(3rem, 12vw, 4.5rem)', fontWeight: '900', letterSpacing: '-2px', background: 'linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textTransform: 'uppercase', lineHeight: 0.9 }}>{subject}</h1>
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
-                            <div className="glass" style={{ padding: '8px 20px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--primary)', border: '1px solid var(--primary-glow)', textTransform: 'uppercase' }}>Core Study Module</div>
-                            <div className="glass" style={{ padding: '8px 20px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.3)', textTransform: 'uppercase' }}>{avgMastery}% Mastery</div>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)', marginBottom: '0.5rem' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.2rem, 8vw, 3.5rem)', fontWeight: '800', letterSpacing: '-1px' }}>{subject}</h1>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '15px' }}>
+                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--primary)', border: '1px solid var(--primary-glow)' }}>STUDY MODULE</div>
+                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--success)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{avgMastery}% MASTERY</div>
                         </div>
                     </div>
                     <div className="dash-grid">
@@ -532,8 +544,8 @@
                 }).reverse();
                 const chart = new Chart(ctx, { 
                     type: 'bar', 
-                    data: { labels: ['W4', 'W3', 'W2', 'W1'], datasets: [{ data: last4Weeks, backgroundColor: ['rgba(139, 92, 246, 0.2)', 'rgba(139, 92, 246, 0.4)', 'rgba(139, 92, 246, 0.6)', '#8B5CF6'], borderRadius: 10 }] }, 
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 10 }, color: '#71717A' } }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#71717A' } } } } 
+                    data: { labels: ['W4', 'W3', 'W2', 'W1'], datasets: [{ data: last4Weeks, backgroundColor: ['rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0.4)', 'rgba(99, 102, 241, 0.6)', '#6366F1'], borderRadius: 10 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { font: { size: 10 }, color: '#94A3B8' } }, x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94A3B8' } } } } 
                 });
                 return () => chart.destroy();
             }, [history]);
@@ -547,8 +559,8 @@
                 const l30 = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.toISOString().split('T')[0]; });
                 const chart = new Chart(ctx, { 
                     type: 'line', 
-                    data: { labels: l30.map(d => d.split('-')[2]), datasets: [{ data: l30.map(k => history[k]?.filter(Boolean).length || 0), borderColor: '#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] }, 
-                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15, grid: { display: false }, ticks: { color: '#71717A', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#71717A', font: { size: 8 } } } } } 
+                    data: { labels: l30.map(d => d.split('-')[2]), datasets: [{ data: l30.map(k => history[k]?.filter(Boolean).length || 0), borderColor: '#6366F1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] }, 
+                    options: { animation: false, responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15, grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 10 } } }, x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 8 } } } } } 
                 });
                 return () => chart.destroy();
             }, [history]);
@@ -559,17 +571,16 @@
             const percent = Math.min(100, Math.round((value / max) * 100)) || 0;
             const r = 38; const c = 2 * Math.PI * r; const offset = c - (percent / 100) * c;
             return (
-                <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden', background: `linear-gradient(135deg, ${color}10 0%, rgba(20,20,20,0.8) 100%)` }}>
-                    <div style={{ position: 'absolute', top: '-20%', right: '-20%', width: '100px', height: '100px', background: color, filter: 'blur(60px)', opacity: 0.15 }}></div>
-                    <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 15px auto' }}>
-                        <svg width="90" height="90" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle cx="50" cy="50" r={r} stroke="rgba(255,255,255,0.03)" strokeWidth="10" fill="none" />
-                            <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="10" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)', filter: `drop-shadow(0 0 8px ${color})` }} />
+                <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 15px auto' }}>
+                        <svg width="80" height="80" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                            <circle cx="50" cy="50" r={r} stroke="var(--input-bg)" strokeWidth="10" fill="none" />
+                            <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="10" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
                         </svg>
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '900', fontSize: '1.1rem', background: 'linear-gradient(to bottom, #fff, #ccc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', color: 'var(--text-main)' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
                     </div>
-                    <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>{label}</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: '900', fontFamily: 'Outfit', color: 'white' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '600' }}>/ {max}</span></div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{label}</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>/ {max}</span></div>
                 </div>
             );
         };
