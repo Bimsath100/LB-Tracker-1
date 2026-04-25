@@ -92,6 +92,7 @@
         
         input, select { background: var(--input-bg); border: var(--glass-border); color: var(--text-main); padding: 12px 16px; border-radius: 12px; width: 100%; margin-bottom: 12px; outline: none; transition: 0.3s; font-size: 0.95rem; font-weight: 500; }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+        option { background: var(--bg); color: var(--text-main); }
         
         .btn-primary { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px var(--primary-glow); }
@@ -228,6 +229,9 @@
             const [errorMsg, setErrorMsg] = useState('');
             const [successMsg, setSuccessMsg] = useState('');
             const [feedbacks, setFeedbacks] = useState([
+                { name: "Kithmina", text: "Good", rating: 5 },
+                { name: "Dilanya", text: "Supiri vadak bro ♥️ thank you", rating: 5 },
+                { name: "Poorna Denuwan", text: "Amazing bro ❤", rating: 5 },
                 { name: "Gimhan Dananjaya", text: "Maru app eka bro! 🚀", rating: 5 },
                 { name: "Prasadi", text: "A/L walata godak watinawa", rating: 5 },
                 { name: "Thamoshi Wishwani", text: "UI eka lassanai, keep it up", rating: 5 },
@@ -534,22 +538,29 @@
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
                     <div className="glass setup-card">
-                        {step === 1 ? (
+                        {step === 1 && (
                             <div>
                                 <h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2>
                                 <p className="setup-subtitle">Let's set up your profile.</p>
                                 <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                                 <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
-                                    <select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                                    <select value={form.examYear} onChange={e => setForm({ ...form, examYear: parseInt(e.target.value) })}>
-                                        {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(y => <option key={y} value={y}>{y}</option>)}
-                                    </select>
-                                </div>
                                 <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
                                 {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
                             </div>
-                        ) : (
+                        )}
+                        {step === 2 && (
+                            <div>
+                                <h2 className="setup-title">Target Exam 🎯</h2>
+                                <p className="setup-subtitle">ඔයා A/L exam එක ලියන අවුරුද්ද සහ මාසය තෝරන්න.</p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}>
+                                    <select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })} style={{ marginBottom: 0 }}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                                    <input type="number" min="2024" max="999999" placeholder="Year (e.g. 2026)" value={form.examYear} onChange={e => setForm({ ...form, examYear: e.target.value ? parseInt(e.target.value) : '' })} style={{ marginBottom: 0 }} />
+                                </div>
+                                <button className="btn-primary" disabled={!form.examYear} onClick={() => setStep(3)}>Next Step ➡️</button>
+                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
+                            </div>
+                        )}
+                        {step === 3 && (
                             <div>
                                 <h2 className="setup-title">Subjects 📚</h2>
                                 <p className="setup-subtitle">Choose exactly 3 subjects.</p>
@@ -567,7 +578,7 @@
                                     <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= 3}>+</button>
                                 </div>
                                 <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
-                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
+                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button>
                             </div>
                         )}
                     </div>
