@@ -246,6 +246,9 @@
                 const fetchFB = async () => {
                     try {
                         const { data, error } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }).limit(10);
+                        if (error) {
+                            console.error("Supabase Error when fetching feedbacks:", error.message);
+                        }
                         if(data && data.length > 0) {
                             setFeedbacks(prev => {
                                 // Filter out duplicates to avoid showing the same message twice
@@ -254,7 +257,9 @@
                                 return [...newFeedbacks, ...prev];
                             });
                         }
-                    } catch(e) {}
+                    } catch(e) {
+                        console.error("fetchFB catch error:", e);
+                    }
                 };
                 fetchFB();
             }, []);
@@ -277,10 +282,15 @@
                 } catch(e) { console.log("Email error:", e); }
 
                 try {
-                    await sb.from('feedbacks').insert({ name: profile.name, rating, text: msg });
-                } catch(e) {}
+                    const { error } = await sb.from('feedbacks').insert({ name: profile.name, rating, text: msg });
+                    if (error) {
+                        console.error("Supabase Error when inserting feedback:", error.message);
+                    }
+                } catch(e) {
+                    console.error("submitFeedback catch error:", e);
+                }
 
-                setFeedbacks([{ name: profile.name, text: msg, rating }, ...feedbacks]);
+                setFeedbacks(prev => [{ name: profile.name, text: msg, rating }, ...prev]);
                 setStatus('');
                 setSuccessMsg('Thank You for your feedback! ✨');
                 setMsg(''); setRating(0);
