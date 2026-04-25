@@ -117,7 +117,7 @@
         .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem; }
         .chart-box { height: 180px; width: 100%; margin-top: 15px; }
 
-        .floating-settings { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; background: var(--primary); border: none; border-radius: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1500; font-size: 1.5rem; transition: 0.3s; box-shadow: 0 8px 20px var(--primary-glow); color: white; }
+        .floating-settings { position: fixed; bottom: 25px; right: 25px; width: 56px; height: 56px; background: var(--primary); border: none; border-radius: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2500; font-size: 1.5rem; transition: 0.3s; box-shadow: 0 8px 20px var(--primary-glow); color: white; }
         .floating-settings:hover { transform: rotate(90deg) scale(1.1); }
         .settings-menu { position: fixed; bottom: 95px; right: 25px; width: 280px; padding: 1.5rem; z-index: 1501; }
 
@@ -152,6 +152,8 @@
             .hour-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
             .hour-btn { font-size: 1.1rem; border-radius: 12px; }
             .card { padding: 1.5rem; }
+            .floating-settings { bottom: 90px; right: 20px; width: 50px; height: 50px; }
+            .settings-menu { bottom: 150px; right: 20px; }
         }
         @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } }
     </style>
