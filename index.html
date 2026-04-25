@@ -123,10 +123,10 @@
         .floating-settings:hover { transform: rotate(90deg) scale(1.1); }
         .settings-menu { position: fixed; bottom: 95px; right: 25px; width: 280px; padding: 1.5rem; z-index: 1501; }
 
-        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 10px; }
-        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; cursor: pointer; padding: 10px; border-radius: 14px; flex: 1; transition: 0.3s; }
+        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 5px; }
+        .mobile-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-dim); font-size: 0.55rem; font-weight: 700; text-transform: uppercase; cursor: pointer; padding: 8px 5px; border-radius: 14px; flex: 1; transition: 0.3s; }
         .mobile-item.active { color: var(--primary); background: var(--primary-glow); }
-        .mobile-item span:first-child { font-size: 1.4rem; }
+        .mobile-item span:first-child { font-size: 1.3rem; }
 
         .countdown-container { display: flex; gap: 8px; justify-content: center; margin-top: 0.8rem; }
         .countdown-box { background: var(--input-bg); padding: 8px; border-radius: 12px; border: var(--glass-border); min-width: 55px; text-align: center; }
@@ -331,6 +331,59 @@
             );
         };
 
+        const TutorialView = () => {
+            return (
+                <div style={{ paddingBottom: '2rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📖</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>How to Use</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>LB Tracker එක පාවිච්චි කරන විදිය මෙතනින් දැනගන්න.</p>
+                    </div>
+
+                    <div className="dash-grid" style={{ gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+                        <div className="glass card">
+                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span>1️⃣</span> Study Dashboard (15-Hour Grid)
+                            </h2>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
+                                Dashboard එකේ තියෙන <strong>Study Grid</strong> එකෙන් ඔයාට දවසකට පැය 15ක් දක්වා පාඩම් කරන වෙලාව track කරන්න පුලුවන්. 
+                                එක කොටුවකින් නිරූපණය වෙන්නෙ එක පැයක්. පාඩම් කරලා ඉවර උනාම කොටුවක් click කරලා mark කරන්න.
+                            </p>
+                        </div>
+
+                        <div className="glass card">
+                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span>2️⃣</span> Paper Marks & Progress
+                            </h2>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
+                                ඔයාගෙ subjects 3ට අදාලව වෙන වෙනම pages තියෙනවා (උදා: Physics, Chemistry). 
+                                ඒවට ගිහින් ඔයා කරන පේපර්ස් වල MCQ, Structured, Essay ලකුණු ඇතුලත් කරන්න පුලුවන්. 
+                                එතකොට ඔයාගෙ ප්‍රගතිය graphs මගින් බලාගන්න පුලුවන්.
+                            </p>
+                        </div>
+
+                        <div className="glass card">
+                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span>3️⃣</span> Past Dates Update
+                            </h2>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
+                                අද දවස විතරක් නෙවෙයි, Dashboard එකේ තියෙන <strong>Calendar</strong> එකෙන් පරණ දවසක් තෝරලා එදාට පාඩම් කරපු පැය ගානත් mark කරන්න පුලුවන්.
+                            </p>
+                        </div>
+
+                        <div className="glass card">
+                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span>4️⃣</span> Install as an App
+                            </h2>
+                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
+                                දකුණු පැත්තෙ පහල තියෙන <strong>Settings (⚙️)</strong> button එක click කරලා, "📱 Install App" කියන එක දෙන්න. එතකොට මේක ඔයාගෙ phone එකේ ඇප් එකක් වගේ පාවිච්චි කරන්න පුලුවන්.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             const [user, setUser] = useState(null);
             const [profile, setProfile] = useState(null);
@@ -457,6 +510,7 @@
                                 {profile.subjects.map(s => (
                                     <div key={s} className={`nav-link ${currentPage === s ? 'active' : ''}`} onClick={() => setCurrentPage(s)}>{s}</div>
                                 ))}
+                                <div className={`nav-link ${currentPage === 'tutorial' ? 'active' : ''}`} onClick={() => setCurrentPage('tutorial')}>How to Use</div>
                                 <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
                             </div>
                         </div>
@@ -471,6 +525,9 @@
                                     📱 Install App
                                 </button>
                             )}
+                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--primary-glow)', color: 'var(--text-main)', border: '1px solid var(--primary)' }} onClick={() => { setCurrentPage('tutorial'); setIsSettingsOpen(false); }}>
+                                📖 How to Use
+                            </button>
                             <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setIsLightMode(!isLightMode)}>
                                 {isLightMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
                             </button>
@@ -483,6 +540,7 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} label={s} onClick={() => setCurrentPage(s)} />)}
+                        <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Tutorial" onClick={() => setCurrentPage('tutorial')} />
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Feedback" onClick={() => setCurrentPage('feedback')} />
                     </nav>
 
@@ -492,6 +550,8 @@
                                 <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
+                            ) : currentPage === 'tutorial' ? (
+                                <TutorialView />
                             ) : (
                                 <SubjectView subject={currentPage} marks={marks} setMarks={m => { setMarks(m); pushData(history, m); }} />
                             )}
