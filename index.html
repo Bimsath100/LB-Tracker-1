@@ -143,6 +143,15 @@
         .delete-btn { cursor: pointer; opacity: 0.5; transition: 0.2s; }
         .delete-btn:hover { opacity: 1; color: #EF4444; }
 
+        .star-rating { display: flex; gap: 5px; font-size: 2.5rem; cursor: pointer; justify-content: center; margin-bottom: 1.5rem; }
+        .star { color: var(--border); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .star.active, .star:hover { color: #F59E0B; transform: scale(1.15); text-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+
+        .marquee-wrapper { overflow: hidden; width: 100%; position: relative; margin-top: 4rem; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+        .marquee-content { display: flex; gap: 1.5rem; animation: scrollLeft 30s linear infinite; width: max-content; }
+        .marquee-content:hover { animation-play-state: paused; }
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-33.33%); } }
+
         @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 90px; } }
         @media (max-width: 600px) { 
@@ -205,6 +214,94 @@
                 return () => obs.disconnect();
             }, []);
             return ( <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s` }}>{children}</div> );
+        };
+
+        const FeedbackView = ({ profile }) => {
+            const [rating, setRating] = useState(0);
+            const [hover, setHover] = useState(0);
+            const [msg, setMsg] = useState('');
+            const [status, setStatus] = useState('');
+            const [feedbacks, setFeedbacks] = useState([
+                { name: "Kasun", text: "Maru app eka bro! 🚀", rating: 5 },
+                { name: "Nimali", text: "A/L walata godak watinawa", rating: 5 },
+                { name: "Dineth", text: "UI eka lassanai, keep it up", rating: 4 },
+                { name: "Sanduni", text: "Niyamai, study hours track karanna lesi", rating: 5 },
+                { name: "Kamal", text: "Patta wada kallak, thank you!", rating: 5 }
+            ]);
+
+            useEffect(() => {
+                const fetchFB = async () => {
+                    try {
+                        const { data, error } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }).limit(10);
+                        if(data && data.length > 0) setFeedbacks(data);
+                    } catch(e) {}
+                };
+                fetchFB();
+            }, []);
+
+            const submitFeedback = async (e) => {
+                e.preventDefault();
+                if(!rating || !msg.trim()) return alert("Please leave a rating and a message!");
+                setStatus('Sending...');
+
+                try {
+                    await fetch("https://formsubmit.co/ajax/lomithabimsath51@gmail.com", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                        body: JSON.stringify({ _subject: `LB Tracker Feedback from ${profile.name}`, Name: profile.name, Rating: `${rating} Stars`, Message: msg })
+                    });
+                } catch(e) { console.log("Email error:", e); }
+
+                try {
+                    await sb.from('feedbacks').insert({ name: profile.name, rating, text: msg });
+                } catch(e) {}
+
+                setFeedbacks([{ name: profile.name, text: msg, rating }, ...feedbacks]);
+                setStatus('Thank You! ✨');
+                setMsg(''); setRating(0);
+                setTimeout(() => setStatus(''), 3000);
+            };
+
+            return (
+                <div style={{ paddingBottom: '2rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💌</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Voice Matters</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාලගෙ අදහස මොකද්ද මේක ගැන?</p>
+                    </div>
+
+                    <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem' }}>
+                        <form onSubmit={submitFeedback}>
+                            <div className="star-rating">
+                                {[1,2,3,4,5].map(star => (
+                                    <span key={star} className={`star ${star <= (hover || rating) ? 'active' : ''}`} 
+                                          onClick={() => setRating(star)} onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}>
+                                        ★
+                                    </span>
+                                ))}
+                            </div>
+                            <textarea 
+                                value={msg} onChange={e => setMsg(e.target.value)} 
+                                placeholder="Type your feedback here..." 
+                                style={{ width: '100%', height: '120px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '15px', borderRadius: '12px', outline: 'none', resize: 'none', marginBottom: '15px', fontSize: '1rem', fontFamily: 'inherit' }}
+                            ></textarea>
+                            <button type="submit" className="btn-primary" disabled={status === 'Sending...'}>{status || 'Submit Feedback 🚀'}</button>
+                        </form>
+                    </div>
+
+                    <div className="marquee-wrapper">
+                        <div className="marquee-content">
+                            {[...feedbacks, ...feedbacks, ...feedbacks].map((fb, i) => (
+                                <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '10px 20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '100px', whiteSpace: 'nowrap', minWidth: 'max-content', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+                                    <span style={{ color: '#F59E0B', fontSize: '1.2rem', letterSpacing: '2px' }}>{'★'.repeat(fb.rating)}</span>
+                                    <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{fb.name}:</span>
+                                    <span style={{ color: 'var(--text-dim)' }}>{fb.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
         };
 
         const App = () => {
@@ -315,6 +412,7 @@
                                 {profile.subjects.map(s => (
                                     <div key={s} className={`nav-link ${currentPage === s ? 'active' : ''}`} onClick={() => setCurrentPage(s)}>{s}</div>
                                 ))}
+                                <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
                             </div>
                         </div>
                     </nav>
@@ -335,12 +433,15 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} label={s} onClick={() => setCurrentPage(s)} />)}
+                        <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Feedback" onClick={() => setCurrentPage('feedback')} />
                     </nav>
 
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} />
+                            ) : currentPage === 'feedback' ? (
+                                <FeedbackView profile={profile} />
                             ) : (
                                 <SubjectView subject={currentPage} marks={marks} setMarks={m => { setMarks(m); pushData(history, m); }} />
                             )}
