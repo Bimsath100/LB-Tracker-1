@@ -147,7 +147,8 @@
         .star-rating { display: flex; gap: 5px; font-size: 2.5rem; cursor: pointer; justify-content: center; margin-bottom: 1.5rem; }
         .star { color: var(--border); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .star.active, .star:hover { color: #F59E0B; transform: scale(1.15); text-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
-        .error-toast { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; padding: 8px 24px; border-radius: 100px; font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); z-index: 10; animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .error-toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; padding: 12px 28px; border-radius: 100px; font-size: 0.95rem; font-weight: 700; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4); z-index: 9999; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+        .success-toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; padding: 12px 28px; border-radius: 100px; font-size: 0.95rem; font-weight: 700; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); z-index: 9999; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 
         .marquee-wrapper { overflow: hidden; width: 100%; position: relative; margin-top: 4rem; mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
         .marquee-content { display: flex; gap: 1.5rem; animation: scrollLeft 30s linear infinite; width: max-content; }
@@ -224,6 +225,7 @@
             const [msg, setMsg] = useState('');
             const [status, setStatus] = useState('');
             const [errorMsg, setErrorMsg] = useState('');
+            const [successMsg, setSuccessMsg] = useState('');
             const [feedbacks, setFeedbacks] = useState([
                 { name: "Gimhan Dananjaya", text: "Maru app eka bro! 🚀", rating: 5 },
                 { name: "Prasadi", text: "A/L walata godak watinawa", rating: 5 },
@@ -267,9 +269,10 @@
                 } catch(e) {}
 
                 setFeedbacks([{ name: profile.name, text: msg, rating }, ...feedbacks]);
-                setStatus('Thank You! ✨');
+                setStatus('');
+                setSuccessMsg('Thank You for your feedback! ✨');
                 setMsg(''); setRating(0);
-                setTimeout(() => setStatus(''), 3000);
+                setTimeout(() => setSuccessMsg(''), 3000);
             };
 
             return (
@@ -282,6 +285,7 @@
 
                     <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', position: 'relative' }}>
                         {errorMsg && <div className="error-toast">⚠️ {errorMsg}</div>}
+                        {successMsg && <div className="success-toast">✅ {successMsg}</div>}
                         <form onSubmit={submitFeedback}>
                             <div className="star-rating">
                                 {[1,2,3,4,5].map(star => (
