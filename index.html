@@ -437,6 +437,14 @@
         const NAV_LABELS = { 'ICT':'ICT','Physics':'PHY','Chemistry':'CHEM','Biology':'BIO','Combined Maths':'MATH','ET':'ET','SFT':'SFT','Accounting':'ACC','Economics':'ECO','Business Studies':'BIZ','Logic':'LOG','Political Science':'POL','Sinhala':'SIN','English':'ENG','History':'HIST' };
         const getNavLabel = (s) => NAV_LABELS[s] || s.slice(0,4).toUpperCase();
         
+        const RANKS = [
+            { name: 'Rising Star', icon: '✨', min: 0, color: '#6366F1' },
+            { name: 'Pro Student', icon: '🎓', min: 30, color: '#8B5CF6' },
+            { name: 'High Flyer', icon: '🚀', min: 100, color: '#D946EF' },
+            { name: 'Top Ranker', icon: '👑', min: 250, color: '#F59E0B' }
+        ];
+        const getRank = (hrs) => [...RANKS].reverse().find(r => hrs >= r.min) || RANKS[0];
+        
         const timeAgo = (date) => {
             if (!date) return '0 min ago';
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -561,7 +569,11 @@
             
             const fetchReal = async () => {
                 const today = new Date().toISOString().split('T')[0];
-                const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(40);
+                const { data } = await sb.from('study_tracker_v2')
+                    .select('name, district, history')
+                    .not(`history->${today}`, 'is', null)
+                    .order('history->last_updated', { ascending: false })
+                    .limit(100);
                 if (data && data.length > 0) {
                     const mapped = data
                         .map(u => {
@@ -631,7 +643,11 @@
             useEffect(() => {
                 const fetchStats = async () => {
                     const today = new Date().toISOString().split('T')[0];
-                    const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    const { data } = await sb.from('study_tracker_v2')
+                        .select('district, history')
+                        .not(`history->${today}`, 'is', null)
+                        .order('history->last_updated', { ascending: false })
+                        .limit(100);
                     const stats = (data || []).reduce((acc, row) => {
                         const hrs = (row.history && Array.isArray(row.history[today])) ? row.history[today].filter(Boolean).length : 0;
                         if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
@@ -664,15 +680,22 @@
             useEffect(() => {
                 const fetchLeaders = async () => {
                     const today = new Date().toISOString().split('T')[0];
-                    const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
+                    const { data } = await sb.from('study_tracker_v2')
+                        .select('name, district, history')
+                        .not(`history->${today}`, 'is', null)
+                        .order('history->last_updated', { ascending: false })
+                        .limit(100);
                     if (data && data.length > 0) {
                         const distMap = {};
-                        let bestP = { name: '', hrs: 0 };
+                        let bestP = { name: '', hrs: 0, time: 0 };
                         data.forEach(u => {
                             const hrs = (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0;
+                            const time = u.history?.last_updated ? new Date(u.history.last_updated).getTime() : 0;
                             if (hrs > 0) {
                                 distMap[u.district] = (distMap[u.district] || 0) + hrs;
-                                if (hrs > bestP.hrs) bestP = { name: u.name, hrs };
+                                if (hrs > bestP.hrs || (hrs === bestP.hrs && time > bestP.time)) {
+                                    bestP = { name: u.name, hrs, time };
+                                }
                             }
                         });
                         const topD = Object.entries(distMap).sort((a,b) => b[1] - a[1])[0];
@@ -698,6 +721,8 @@
             const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
+            const rank = getRank(totalHrs);
+
             const toggleH = (i) => { const h = [...(history[viewDate] || new Array(15).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
             const isEvening = new Date().getHours() >= 17;
             const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
@@ -719,6 +744,11 @@
                     {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '10px' }}>
+                            <div className="glass" style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', background: rank.color + '20', border: `1px solid ${rank.color}40`, color: rank.color }}>
+                                {rank.icon} {rank.name.toUpperCase()}
+                            </div>
+                        </div>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
@@ -735,6 +765,31 @@
                         <Reveal delay={0.4}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
                         <Reveal delay={0.5}><div className="glass card" style={{ padding: '1.5rem' }}><h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3><DistrictLeaderboard /></div></Reveal>
                     </div>
+
+                    <Reveal delay={0.6}>
+                        <div className="glass card" style={{ marginTop: '2rem', padding: '2rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '1.8rem' }}>📝</div>
+                                <h3 style={{ fontFamily: 'Outfit', margin: 0 }}>My Study Notes & Classes</h3>
+                            </div>
+                            <textarea 
+                                value={profile.notes || ''} 
+                                onChange={e => {
+                                    const newNotes = e.target.value;
+                                    setProfile(p => ({ ...p, notes: newNotes }));
+                                    // Debounced save would be better, but we'll use our existing pushData logic
+                                    pushData(history, marks, newNotes);
+                                }}
+                                placeholder="Type your class schedule or special study notes here... (Auto-saves)"
+                                style={{ 
+                                    width: '100%', minHeight: '150px', background: 'var(--input-bg)', 
+                                    border: '1px solid var(--border)', borderRadius: '16px', padding: '1.2rem', 
+                                    color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.6', 
+                                    outline: 'none', resize: 'vertical', fontFamily: 'inherit' 
+                                }}
+                            />
+                        </div>
+                    </Reveal>
                 </div>
             );
         };
@@ -788,6 +843,46 @@
             if (feedbacks.length === 0) return null;
             const fb = feedbacks[idx];
             return ( <div className="fb-slider-wrapper"><div className={`fb-slide-card glass ${visible ? 'visible' : 'hidden'}`}><div style={{ color: '#F59E0B', fontSize: '1.6rem', letterSpacing: '4px', marginBottom: '0.8rem' }}>{'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}</div><p style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.5' }}>"{fb.text}"</p><p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>— {fb.name} {fb.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', textTransform: 'uppercase' }}>OWNER</span>}</p></div><div className="fb-dots">{feedbacks.map((_, i) => ( <div key={i} className={`fb-dot ${i === idx ? 'active' : ''}`} onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 400); }} /> ))}</div></div> );
+        };
+
+        const ResourcesView = ({ resources }) => {
+            if (!resources || resources.length === 0) return (
+                <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                    <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>📂</div>
+                    <h2 style={{ fontFamily: 'Outfit' }}>Resources Hub is Empty</h2>
+                    <p style={{ color: 'var(--text-dim)' }}>Admin will add study materials here soon!</p>
+                </div>
+            );
+            const grouped = resources.reduce((acc, res) => {
+                acc[res.subject] = acc[res.subject] || [];
+                acc[res.subject].push(res);
+                return acc;
+            }, {});
+            return (
+                <div className="resources-container" style={{ paddingBottom: '4rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 2.5rem)' }}>Academic Resource Hub 📂</h1>
+                        <p style={{ color: 'var(--text-dim)' }}>Curated study materials, PDF links and notes by LB Admin</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {Object.entries(grouped).map(([sub, links]) => (
+                            <Reveal key={sub}>
+                                <div className="glass card" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', color: 'var(--primary)', marginBottom: '1.2rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.8rem' }}>{sub}</h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {links.map((l, i) => (
+                                            <a key={i} href={l.link} target="_blank" rel="noopener noreferrer" className="glass" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: '12px', textDecoration: 'none', color: 'var(--text-main)', fontSize: '0.9rem', fontWeight: '600', transition: 'all 0.2s ease' }}>
+                                                <span>{l.title}</span>
+                                                <span style={{ color: 'var(--primary)' }}>→</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            </Reveal>
+                        ))}
+                    </div>
+                </div>
+            );
         };
 
         const FeedbackView = ({ profile }) => {
@@ -907,9 +1002,49 @@
             const [announcement, setAnnouncement] = useState('');
             const [announcementInput, setAnnouncementInput] = useState('');
             const [showAnnounceModal, setShowAnnounceModal] = useState(false);
-            const [adminView, setAdminView] = useState(null); // 'live' or 'marked'
+            const [adminView, setAdminView] = useState(null); // 'live', 'marked', 'broadcast', 'resources'
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
+            
+            const [resources, setResources] = useState([]);
+            const [totalUsers, setTotalUsers] = useState(0);
+            const [resInput, setResInput] = useState({ title: '', link: '', subject: 'Physics' });
+
+            const fetchResources = async () => {
+                const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_RESOURCES').maybeSingle();
+                if (data && data.history?.items) setResources(data.history.items);
+            };
+            
+            const fetchTotalUsers = async () => {
+                const { count } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
+                setTotalUsers(count || 0);
+            };
+
+            const addResource = async () => {
+                if (!resInput.title || !resInput.link) return;
+                const newItems = [...resources, resInput];
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                    user_id: '00000000-0000-0000-0000-000000000000', // System record
+                    name: 'LB_RESOURCES',
+                    history: { items: newItems }
+                });
+                if (!error) {
+                    setResources(newItems);
+                    setResInput({ title: '', link: '', subject: 'Physics' });
+                }
+            };
+
+            const removeResource = async (idx) => {
+                const newItems = resources.filter((_, i) => i !== idx);
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                    user_id: '00000000-0000-0000-0000-000000000000',
+                    name: 'LB_RESOURCES',
+                    history: { items: newItems }
+                });
+                if (!error) setResources(newItems);
+            };
+
+            useEffect(() => { fetchResources(); fetchTotalUsers(); }, []);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1022,7 +1157,11 @@
                     const fetchMarked = async () => {
                         try {
                             const today = new Date().toISOString().split('T')[0];
-                            const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
+                            const { data, error } = await sb.from('study_tracker_v2')
+                                .select('name, district, history')
+                                .not(`history->${today}`, 'is', null)
+                                .order('history->last_updated', { ascending: false })
+                                .limit(100);
                             if (!error && data) {
                                 // Only count users who have actually marked at least one hour
                                 const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
@@ -1057,42 +1196,31 @@
                 }
             }, [user]);
 
-            useEffect(() => {
-                const fetchAnnouncement = async () => {
-                    const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'Bimsath Walpola').maybeSingle();
-                    if (data && data.history?.msg) {
-                        const msg = data.history.msg;
-                        setAnnouncement(msg);
-                        setAnnouncementInput(msg);
-                        const lastSeen = localStorage.getItem('lastSeenAnnounce');
-                        if (msg && msg !== lastSeen) {
-                            setShowAnnounceModal(true);
-                        }
-                    }
-                };
-                fetchAnnouncement();
-                const inv = setInterval(fetchAnnouncement, 60000);
-                return () => clearInterval(inv);
-            }, []);
-
             const updateAnnouncement = async () => {
                 if (!user) return;
                 const { error } = await sb.from('study_tracker_v2').upsert({ 
                     user_id: user.id, 
                     name: profile?.name || 'Bimsath Walpola', 
                     district: profile?.district || 'Colombo', 
-                    history: { ...history, msg: announcementInput },
+                    history: { ...history, msg: announcementInput, last_updated: new Date().toISOString() },
                     subjects: profile?.subjects || [],
-                    exam_year: profile?.examYear || 2026,
-                    exam_month: profile?.examMonth || 'August'
+                    exam_year: profile?.examYear || '2026',
+                    exam_month: profile?.examMonth || 'August',
+                    exam_level: profile?.examLevel || 'A/L',
+                    notes: profile?.notes || ''
                 });
-                if (!error) {
-                    setAnnouncement(announcementInput);
-                    alert('Broadcast updated successfully! ✅');
-                } else {
-                    alert('Error updating broadcast: ' + error.message);
+                if (!error) { setAnnouncement(announcementInput); setAdminView(null); }
+            };
+
+            const fetchAnnouncement = async () => {
+                const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'Bimsath Walpola').maybeSingle();
+                if (data && data.history?.msg) {
+                    const msg = data.history.msg;
+                    setAnnouncement(msg);
+                    if (localStorage.getItem('lastSeenAnnounce') !== msg) setShowAnnounceModal(true);
                 }
             };
+            useEffect(() => { fetchAnnouncement(); }, []);
 
             const fetchUserData = async (uid) => {
                 try {
@@ -1104,7 +1232,8 @@
                             subjects: data.subjects, 
                             examYear: data.exam_year, 
                             examMonth: data.exam_month,
-                            examLevel: data.exam_level || 'A/L'
+                            examLevel: data.exam_level || 'A/L',
+                            notes: data.notes || ''
                         });
                         setHistory(data.history || {});
                         setMarks(data.marks || []);
@@ -1126,6 +1255,7 @@
                     exam_year: p.examYear,
                     exam_month: p.examMonth,
                     exam_level: p.examLevel,
+                    notes: p.notes || '',
                     history: { ...history, last_updated: new Date().toISOString() },
                     marks: marks
                 };
@@ -1135,7 +1265,7 @@
                 setLoading(false);
             };
 
-            const pushData = async (h, m) => {
+            const pushData = async (h, m, notesText) => {
                 if (!user || !profile) return;
                 const historyWithTimestamp = { ...h, last_updated: new Date().toISOString() };
                 console.log("Pushing data to Supabase...", historyWithTimestamp);
@@ -1143,7 +1273,8 @@
                     user_id: user.id, 
                     name: profile.name, district: profile.district, subjects: profile.subjects,
                     exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel, 
-                    history: historyWithTimestamp, marks: m 
+                    history: historyWithTimestamp, marks: m,
+                    notes: notesText !== undefined ? notesText : (profile.notes || '')
                 });
                 if (error) console.error("Push Error:", error);
                 else console.log("Data pushed successfully! ✅");
@@ -1190,6 +1321,7 @@
                             </div>
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
+                                <div className={`nav-link ${currentPage === 'resources' ? 'active' : ''}`} onClick={() => setCurrentPage('resources')}>Resources</div>
                                 <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
                                 <div className={`nav-link ${currentPage === 'tutorial' ? 'active' : ''}`} onClick={() => setCurrentPage('tutorial')}>How to Use</div>
                                 <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
@@ -1234,13 +1366,10 @@
 
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
+                        <MobileItem active={currentPage === 'resources'} icon="📂" label="Resources" onClick={() => setCurrentPage('resources')} />
                         <MobileItem active={currentPage === 'subjects' || profile.subjects.includes(currentPage)} icon="📚" label="Subjects" onClick={() => setCurrentPage('subjects')} />
                         <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Guide" onClick={() => setCurrentPage('tutorial')} />
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
-                        <div className="mobile-item tg-item" onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
-                            <span className="m-icon">✈️</span>
-                            <span className="m-label">Join</span>
-                        </div>
                     </nav>
 
                     {adminView && (
@@ -1251,56 +1380,83 @@
                                     <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
                                 </div>
 
-                                <div className="glass" style={{ padding: '1.2rem', marginBottom: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid var(--primary-glow)', borderRadius: '18px' }}>
-                                    <div style={{ fontWeight: '800', fontSize: '0.8rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span>📢</span> BROADCAST MESSAGE
-                                    </div>
-                                    <textarea 
-                                        value={announcementInput}
-                                        onChange={e => setAnnouncementInput(e.target.value)}
-                                        placeholder="Type a message to all students..."
-                                        style={{ width: '100%', minHeight: '80px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', color: 'white', fontSize: '0.85rem', marginBottom: '10px', outline: 'none' }}
-                                    />
-                                    <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '40px', fontSize: '0.8rem' }}>Update Broadcast</button>
+                                <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '5px' }}>
+                                    <button className={`btn-primary ${adminView === 'live' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('live'); }}>Live Users</button>
+                                    <button className={`btn-primary ${adminView === 'marked' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('marked'); }}>Marked Today</button>
+                                    <button className={`btn-primary ${adminView === 'broadcast' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('broadcast'); }}>Broadcast</button>
+                                    <button className={`btn-primary ${adminView === 'resources' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('resources'); }}>Resources</button>
                                 </div>
-                                
-                                <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', opacity: 0.8 }}>{adminView === 'live' ? 'Online Students' : 'Today\'s Progress'}</h4>
-                                
-                                {adminView === 'live' ? (
-                                    <div>
-                                        {liveDetails.length === 0 ? <p>No one online</p> : 
-                                            liveDetails.map((u, i) => (
-                                                <div key={i} className="admin-list-item">
-                                                    <div>
-                                                        <div style={{ fontWeight: '700' }}>
-                                                            {u.name}
-                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
-                                                    </div>
-                                                    <div className="live-dot"></div>
-                                                </div>
-                                            ))
-                                        }
+
+                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <div className="glass" style={{ flex: 1, padding: '1rem', textAlign: 'center', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total Students</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary)' }}>{totalUsers}</div>
                                     </div>
-                                ) : (
-                                    <div>
-                                        {markedDetails.length === 0 ? <p>No one marked today</p> : 
-                                            markedDetails.map((u, i) => (
-                                                <div key={i} className="admin-list-item">
-                                                    <div>
-                                                        <div style={{ fontWeight: '700' }}>
-                                                            {u.name}
-                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
-                                                    </div>
-                                                    <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
-                                                </div>
-                                            ))
-                                        }
+                                    <div className="glass" style={{ flex: 1, padding: '1rem', textAlign: 'center', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Active Now</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#10B981' }}>{liveUsers}</div>
                                     </div>
-                                )}
+                                </div>
+
+                                <div className="admin-content-area" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '5px' }}>
+                                    {adminView === 'live' ? (
+                                        liveDetails.length === 0 ? <p style={{ textAlign: 'center', opacity: 0.5 }}>No one online</p> : 
+                                        liveDetails.map((u, i) => (
+                                            <div key={i} className="admin-list-item">
+                                                <div>
+                                                    <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
+                                                </div>
+                                                <div className="live-dot"></div>
+                                            </div>
+                                        ))
+                                    ) : adminView === 'marked' ? (
+                                        markedDetails.length === 0 ? <p style={{ textAlign: 'center', opacity: 0.5 }}>No one marked today</p> : 
+                                        markedDetails.map((u, i) => (
+                                            <div key={i} className="admin-list-item">
+                                                <div>
+                                                    <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
+                                                </div>
+                                                <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
+                                            </div>
+                                        ))
+                                    ) : adminView === 'broadcast' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type global announcement..." style={{ width: '100%', height: '100px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: 'white', outline: 'none' }} />
+                                            <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                            <div className="glass" style={{ padding: '1.2rem', borderRadius: '16px' }}>
+                                                <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>Add New Resource</h4>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                                    <input type="text" placeholder="Title (e.g. Physics Note)" value={resInput.title} onChange={e => setResInput({...resInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                                                    <input type="text" placeholder="Link (https://...)" value={resInput.link} onChange={e => setResInput({...resInput, link: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                                                    <select value={resInput.subject} onChange={e => setResInput({...resInput, subject: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }}>
+                                                        <option value="Physics">Physics</option>
+                                                        <option value="Chemistry">Chemistry</option>
+                                                        <option value="Biology">Biology</option>
+                                                        <option value="Maths">Combined Maths</option>
+                                                        <option value="General">General</option>
+                                                    </select>
+                                                    <button className="btn-primary" onClick={addResource} style={{ fontSize: '0.8rem' }}>Add Link</button>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {resources.map((r, i) => (
+                                                    <div key={i} className="admin-list-item" style={{ fontSize: '0.8rem' }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <div style={{ fontWeight: '700' }}>{r.title}</div>
+                                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{r.subject}</div>
+                                                        </div>
+                                                        <button onClick={() => removeResource(i)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', cursor: 'pointer' }}>Delete</button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
@@ -1309,6 +1465,8 @@
                         <div className="container">
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
+                            ) : currentPage === 'resources' ? (
+                                <ResourcesView resources={resources} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'feedback' ? (
@@ -1329,7 +1487,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
     </script>
 </body>
 </html>
