@@ -128,12 +128,52 @@
         .floating-settings:hover { transform: rotate(90deg) scale(1.1); }
         .settings-menu { position: fixed; bottom: 95px; right: 25px; width: 280px; padding: 1.5rem; z-index: 1501; }
 
-        .mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 85px; background: var(--navbar-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: var(--glass-border); display: none; align-items: center; justify-content: space-around; z-index: 2000; padding: 0 6px 6px; }
-        .mobile-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; color: var(--text-dim); font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; padding: 8px 6px; border-radius: 16px; flex: 1; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); min-width: 0; }
-        .mobile-item.active { color: var(--primary); background: var(--primary-glow); box-shadow: 0 0 14px var(--primary-glow); }
-        .mobile-item.active span:first-child { transform: scale(1.2) translateY(-2px); }
-        .mobile-item span:first-child { font-size: 1.6rem; display: block; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .mobile-item span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; }
+        /* ── Floating Pill Mobile Nav ── */
+        .mobile-nav {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: auto; max-width: calc(100vw - 32px);
+            height: 64px;
+            background: rgba(10,10,10,0.75);
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 100px;
+            display: none; align-items: center; justify-content: center;
+            gap: 4px;
+            z-index: 2000;
+            padding: 8px 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 0.5px rgba(255,255,255,0.06) inset;
+        }
+        body.light-mode .mobile-nav {
+            background: rgba(248,250,252,0.82);
+            border-color: rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        .mobile-item {
+            display: flex; align-items: center; justify-content: center;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4rem;
+            position: relative;
+            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), background 0.2s;
+            flex-shrink: 0;
+        }
+        .mobile-item::before {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: transparent;
+            transition: background 0.25s, box-shadow 0.25s;
+        }
+        .mobile-item.active::before {
+            background: var(--primary-glow);
+            box-shadow: 0 0 18px var(--primary-glow);
+        }
+        .mobile-item.active { transform: translateY(-3px) scale(1.12); }
+        .mobile-item:active { transform: scale(0.9); }
+        .mobile-item .nav-icon { position: relative; z-index: 1; }
+        /* Telegram blue for join item */
+        .mobile-item.tg-item::before { background: rgba(42,171,238,0.18); box-shadow: 0 0 16px rgba(42,171,238,0.35); }
+        /* Divider between subjects and extras */
+        .nav-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.1); margin: 0 2px; flex-shrink: 0; }
 
         .countdown-container { display: flex; gap: 8px; justify-content: center; margin-top: 0.8rem; }
         .countdown-box { background: var(--input-bg); padding: 8px; border-radius: 12px; border: var(--glass-border); min-width: 55px; text-align: center; }
@@ -174,14 +214,18 @@
             .stat-val { font-size: 1.8rem; } 
             .mobile-nav { display: flex; } 
             .marks-grid, .stats-grid-3 { grid-template-columns: 1fr; }
-            .main-content { padding-bottom: 110px; } 
+            .main-content { padding-bottom: 120px; } 
             .hour-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
             .hour-btn { font-size: 1.1rem; border-radius: 12px; }
             .card { padding: 1.5rem; }
-            .floating-settings { bottom: 90px; right: 20px; width: 50px; height: 50px; }
-            .settings-menu { bottom: 150px; right: 20px; }
+            .floating-settings { bottom: 100px; right: 20px; width: 50px; height: 50px; }
+            .settings-menu { bottom: 165px; right: 20px; }
         }
-        @media (max-width: 350px) { .stats-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 350px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .mobile-nav { gap: 2px; padding: 8px 8px; }
+            .mobile-item { width: 38px; height: 38px; font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
@@ -595,13 +639,14 @@
 
 
                     <nav className="mobile-nav">
-                        <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
-                        {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} label={s} onClick={() => setCurrentPage(s)} />)}
-                        <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Tutorial" onClick={() => setCurrentPage('tutorial')} />
-                        <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Feedback" onClick={() => setCurrentPage('feedback')} />
-                        <div className="mobile-item" style={{ color: '#2AABEE' }} onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
-                            <span>✈️</span>
-                            <span>Join us</span>
+                        <MobileItem active={currentPage === 'dashboard'} icon="🏠" onClick={() => setCurrentPage('dashboard')} />
+                        <div className="nav-divider" />
+                        {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} onClick={() => setCurrentPage(s)} />)}
+                        <div className="nav-divider" />
+                        <MobileItem active={currentPage === 'tutorial'} icon="📖" onClick={() => setCurrentPage('tutorial')} />
+                        <MobileItem active={currentPage === 'feedback'} icon="⭐" onClick={() => setCurrentPage('feedback')} />
+                        <div className={`mobile-item tg-item ${false ? 'active' : ''}`} onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
+                            <span className="nav-icon" style={{ fontSize: '1.3rem' }}>✈️</span>
                         </div>
                     </nav>
 
@@ -877,7 +922,11 @@
 
         const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
         const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
-        const MobileItem = ({ active, icon, label, onClick }) => ( <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}><span>{icon}</span><span>{label}</span></div> );
+        const MobileItem = ({ active, icon, onClick }) => (
+            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}>
+                <span className="nav-icon">{icon}</span>
+            </div>
+        );
         
         const SubjectBackground = ({ subject }) => { 
             const icon = SUBJECT_ICONS[subject] || '🎓'; 
