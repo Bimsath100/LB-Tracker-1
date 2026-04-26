@@ -491,6 +491,37 @@
             );
         };
 
+        const SubjectsGridView = ({ subjects, onSelect, marks }) => {
+            return (
+                <div>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Subjects</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාගෙ ප්‍රගතිය බලන්න විශයක් තෝරන්න.</p>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                        {subjects.map((s, i) => {
+                            const subMarks = marks.filter(m => m.subject === s);
+                            const avgMastery = subMarks.length > 0 ? Math.round(subMarks.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/subMarks.length / 450 * 100) : 0;
+                            return (
+                                <Reveal key={s} delay={i * 0.05}>
+                                    <div className="glass card" onClick={() => onSelect(s)} style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                        <div style={{ fontSize: '2.5rem' }}>{SUBJECT_ICONS[s] || '📚'}</div>
+                                        <div>
+                                            <div style={{ fontFamily: 'Outfit', fontSize: '1.3rem', fontWeight: '800' }}>{s}</div>
+                                            {SINHALA_NAMES[s] && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '-4px' }}>{SINHALA_NAMES[s]}</div>}
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>{avgMastery}% MASTERY</div>
+                                        </div>
+                                        <div style={{ marginLeft: 'auto', fontSize: '1.2rem', color: 'var(--text-dim)' }}>➡️</div>
+                                    </div>
+                                </Reveal>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             const [user, setUser] = useState(null);
             const [profile, setProfile] = useState(null);
