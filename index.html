@@ -970,27 +970,29 @@
             }, [user]);
 
             useEffect(() => {
-                if (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                if (user) {
                     const fetchMarked = async () => {
                         try {
                             const today = new Date().toISOString().split('T')[0];
                             const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
                             if (!error && data) {
                                 setMarkedToday(data.length);
-                                const details = data.map(d => ({ 
-                                    name: d.name || 'Unknown', 
-                                    district: d.district || 'N/A', 
-                                    hours: (d.history && Array.isArray(d.history[today])) ? d.history[today].filter(Boolean).length : 0 
-                                })).sort((a, b) => b.hours - a.hours);
-                                setMarkedDetails(details);
+                                if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                                    const details = data.map(d => ({ 
+                                        name: d.name || 'Unknown', 
+                                        district: d.district || 'N/A', 
+                                        hours: (d.history && Array.isArray(d.history[today])) ? d.history[today].filter(Boolean).length : 0 
+                                    })).sort((a, b) => b.hours - a.hours);
+                                    setMarkedDetails(details);
+                                }
                             }
                         } catch (e) {
-                            console.error("Admin Fetch Error:", e);
+                            console.error("Fetch Marked Error:", e);
                         }
                     };
                     fetchMarked();
 
-                    const channel = sb.channel('admin-realtime')
+                    const channel = sb.channel('global-realtime')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
                             fetchMarked();
                         })
