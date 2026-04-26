@@ -289,6 +289,9 @@
             display: flex; white-space: nowrap; gap: 50px;
             animation: tickerMove 40s linear infinite;
         }
+        @media (max-width: 768px) {
+            .ticker { animation-duration: 15s; }
+        }
         @keyframes tickerMove {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-150%); }
