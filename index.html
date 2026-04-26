@@ -969,6 +969,103 @@
             );
         };
 
+        const AdminSideItem = ({ active, icon, label, onClick }) => (
+            <div onClick={onClick} style={{ 
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 15px', borderRadius: '12px',
+                cursor: 'pointer', background: active ? 'var(--primary-glow)' : 'transparent',
+                color: active ? 'var(--primary)' : 'var(--text-dim)', transition: 'all 0.2s',
+                fontWeight: active ? '800' : '500', fontSize: '0.9rem'
+            }}>
+                <span>{icon}</span> <span>{label}</span>
+            </div>
+        );
+
+        const AdminStatCard = ({ icon, val, lbl, color }) => (
+            <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px', borderLeft: `4px solid ${color}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+                    <span style={{ fontSize: '1.8rem', fontWeight: '800', color }}>{val}</span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>{lbl}</div>
+            </div>
+        );
+
+        const AdminStudentsView = ({ onSelectUser }) => {
+            const [users, setUsers] = useState([]);
+            const [search, setSearch] = useState('');
+            useEffect(() => {
+                const fetchAll = async () => {
+                    const { data } = await sb.from('study_tracker_v2').select('*').not('name', 'eq', 'LB_RESOURCES').not('name', 'eq', 'LB_COMMUNITY_GOAL').order('name');
+                    if (data) setUsers(data);
+                };
+                fetchAll();
+            }, []);
+            const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
+            return (
+                <div>
+                    <input type="text" placeholder="🔍 Search students by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', marginBottom: '1.5rem', background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '12px', borderRadius: '12px', color: 'white' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {filtered.map(u => (
+                            <div key={u.id} className="admin-list-item" onClick={() => onSelectUser(u)} style={{ cursor: 'pointer' }}>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px' }}>OWNER</span>}</div>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>DETAILS →</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const AdminResourcesView = ({ resources, resInput, setResInput, addResource, removeResource }) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="glass" style={{ padding: '1.2rem', borderRadius: '16px' }}>
+                    <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>Add New Resource</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                        <input type="text" placeholder="Title" value={resInput.title} onChange={e => setResInput({...resInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                        <input type="text" placeholder="URL" value={resInput.link} onChange={e => setResInput({...resInput, link: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                        <select value={resInput.subject} onChange={e => setResInput({...resInput, subject: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }}>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Maths">Combined Maths</option>
+                            <option value="General">General</option>
+                        </select>
+                        <button className="btn-primary" onClick={addResource}>Add Link</button>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {resources.map((r, i) => (
+                        <div key={i} className="admin-list-item">
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '700' }}>{r.title}</div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{r.subject}</div>
+                            </div>
+                            <button onClick={() => removeResource(i)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem' }}>Delete</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const AdminCommunityView = ({ commGoal, goalInput, setGoalInput, updateGoal, announcementInput, setAnnouncementInput, updateAnnouncement }) => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
+                    <h4 style={{ margin: '0 0 1rem 0' }}>📢 Broadcast Message</h4>
+                    <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type message..." style={{ width: '100%', height: '80px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'white', borderRadius: '12px', padding: '10px', marginBottom: '10px', outline: 'none' }} />
+                    <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
+                </div>
+                <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
+                    <h4 style={{ margin: '0 0 1rem 0' }}>🎯 Community Goal</h4>
+                    <input type="text" placeholder="Title" value={goalInput.title} onChange={e => setGoalInput({...goalInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white', width: '100%', marginBottom: '10px' }} />
+                    <input type="number" placeholder="Target" value={goalInput.target} onChange={e => setGoalInput({...goalInput, target: parseInt(e.target.value)})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white', width: '100%', marginBottom: '10px' }} />
+                    <button className="btn-primary" onClick={updateGoal}>Update Goal</button>
+                </div>
+            </div>
+        );
+
         const TutorialView = () => (
             <div style={{ paddingBottom: '2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📖</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>How to Use</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>LB Tracker එක පාවිච්චි කරන විදිය මෙතනින් දැනගන්න.</p></div>
@@ -1030,7 +1127,6 @@
             );
         };
 
-
         const App = () => {
             const [user, setUser] = useState(null);
             const [profile, setProfile] = useState(null);
@@ -1049,7 +1145,7 @@
             const [announcement, setAnnouncement] = useState('');
             const [announcementInput, setAnnouncementInput] = useState('');
             const [showAnnounceModal, setShowAnnounceModal] = useState(false);
-            const [adminView, setAdminView] = useState(null); // 'live', 'marked', 'broadcast', 'resources'
+            const [adminView, setAdminView] = useState(null);
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
             
@@ -1058,6 +1154,8 @@
             const [resInput, setResInput] = useState({ title: '', link: '', subject: 'Physics' });
             const [commGoal, setCommGoal] = useState(null);
             const [goalInput, setGoalInput] = useState({ title: '', target: 100 });
+            const [adminTab, setAdminTab] = useState('overview');
+            const [selectedUser, setSelectedUser] = useState(null);
 
             const fetchResources = async () => {
                 const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_RESOURCES').maybeSingle();
@@ -1083,127 +1181,29 @@
                     name: 'LB_COMMUNITY_GOAL',
                     history: goalInput
                 });
-                if (!error) { setCommGoal(goalInput); setAdminView(null); }
             };
 
             const addResource = async () => {
                 if (!resInput.title || !resInput.link) return;
                 const newItems = [...resources, resInput];
-                const { error } = await sb.from('study_tracker_v2').upsert({ 
-                    user_id: '00000000-0000-0000-0000-000000000000', // System record
-                    name: 'LB_RESOURCES',
-                    history: { items: newItems }
-                });
-                if (!error) {
-                    setResources(newItems);
-                    setResInput({ title: '', link: '', subject: 'Physics' });
-                }
-            };
-
-            const removeResource = async (idx) => {
-                const newItems = resources.filter((_, i) => i !== idx);
-                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                await sb.from('study_tracker_v2').upsert({ 
                     user_id: '00000000-0000-0000-0000-000000000000',
                     name: 'LB_RESOURCES',
                     history: { items: newItems }
                 });
-                if (!error) setResources(newItems);
+                setResources(newItems);
+                setResInput({ title: '', link: '', subject: 'Physics' });
             };
 
-            const [adminTab, setAdminTab] = useState('overview');
-            const [selectedUser, setSelectedUser] = useState(null);
-
-            const AdminSideItem = ({ active, icon, label, onClick }) => (
-                <div onClick={onClick} style={{ 
-                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 15px', borderRadius: '12px',
-                    cursor: 'pointer', background: active ? 'var(--primary-glow)' : 'transparent',
-                    color: active ? 'var(--primary)' : 'var(--text-dim)', transition: 'all 0.2s',
-                    fontWeight: active ? '800' : '500', fontSize: '0.9rem'
-                }}>
-                    <span>{icon}</span> <span>{label}</span>
-                </div>
-            );
-
-            const AdminStatCard = ({ icon, val, lbl, color }) => (
-                <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px', borderLeft: `4px solid ${color}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '1.5rem' }}>{icon}</span>
-                        <span style={{ fontSize: '1.8rem', fontWeight: '800', color }}>{val}</span>
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>{lbl}</div>
-                </div>
-            );
-
-            const AdminStudentsView = ({ sb, onSelectUser }) => {
-                const [users, setUsers] = useState([]);
-                const [search, setSearch] = useState('');
-                useEffect(() => {
-                    const fetchAll = async () => {
-                        const { data } = await sb.from('study_tracker_v2').select('*').not('name', 'eq', 'LB_RESOURCES').not('name', 'eq', 'LB_COMMUNITY_GOAL').order('name');
-                        if (data) setUsers(data);
-                    };
-                    fetchAll();
-                }, []);
-                const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
-                return (
-                    <div>
-                        <input type="text" placeholder="🔍 Search students by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', marginBottom: '1.5rem', background: 'var(--input-bg)' }} />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {filtered.map(u => (
-                                <div key={u.id} className="admin-list-item" onClick={() => onSelectUser(u)} style={{ cursor: 'pointer' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span className="owner-badge-small">OWNER</span>}</div>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
-                                    </div>
-                                    <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>DETAILS →</div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
+            const removeResource = async (idx) => {
+                const newItems = resources.filter((_, i) => i !== idx);
+                await sb.from('study_tracker_v2').upsert({ 
+                    user_id: '00000000-0000-0000-0000-000000000000',
+                    name: 'LB_RESOURCES',
+                    history: { items: newItems }
+                });
+                setResources(newItems);
             };
-
-            const AdminResourcesView = ({ resources, resInput, setResInput, addResource, removeResource }) => (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <div className="glass" style={{ padding: '1.2rem', borderRadius: '16px' }}>
-                        <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>Add New Resource</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                            <input type="text" placeholder="Title" value={resInput.title} onChange={e => setResInput({...resInput, title: e.target.value})} />
-                            <input type="text" placeholder="URL" value={resInput.link} onChange={e => setResInput({...resInput, link: e.target.value})} />
-                            <select value={resInput.subject} onChange={e => setResInput({...resInput, subject: e.target.value})}>
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Biology">Biology</option>
-                                <option value="Maths">Combined Maths</option>
-                                <option value="General">General</option>
-                            </select>
-                            <button className="btn-primary" onClick={addResource}>Add Link</button>
-                        </div>
-                    </div>
-                    {resources.map((r, i) => (
-                        <div key={i} className="admin-list-item">
-                            <div style={{ flex: 1 }}>{r.title} ({r.subject})</div>
-                            <button onClick={() => removeResource(i)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px' }}>Delete</button>
-                        </div>
-                    ))}
-                </div>
-            );
-
-            const AdminCommunityView = ({ commGoal, goalInput, setGoalInput, updateGoal, announcementInput, setAnnouncementInput, updateAnnouncement }) => (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
-                        <h4 style={{ margin: '0 0 1rem 0' }}>📢 Broadcast Message</h4>
-                        <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type message..." style={{ width: '100%', height: '80px', background: 'var(--input-bg)', color: 'white', borderRadius: '12px', padding: '10px', marginBottom: '10px' }} />
-                        <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
-                    </div>
-                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
-                        <h4 style={{ margin: '0 0 1rem 0' }}>🎯 Community Goal</h4>
-                        <input type="text" placeholder="Title" value={goalInput.title} onChange={e => setGoalInput({...goalInput, title: e.target.value})} style={{ marginBottom: '10px' }} />
-                        <input type="number" placeholder="Target" value={goalInput.target} onChange={e => setGoalInput({...goalInput, target: parseInt(e.target.value)})} style={{ marginBottom: '10px' }} />
-                        <button className="btn-primary" onClick={updateGoal}>Update Goal</button>
-                    </div>
-                </div>
-            );
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1570,7 +1570,7 @@
                                                 </div>
                                             </div>
                                         ) : adminTab === 'students' ? (
-                                            <AdminStudentsView sb={sb} onSelectUser={u => setSelectedUser(u)} />
+                                            <AdminStudentsView onSelectUser={u => setSelectedUser(u)} />
                                         ) : adminTab === 'resources' ? (
                                             <AdminResourcesView resources={resources} resInput={resInput} setResInput={setResInput} addResource={addResource} removeResource={removeResource} />
                                         ) : (
