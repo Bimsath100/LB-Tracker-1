@@ -936,6 +936,7 @@
             const [adminView, setAdminView] = useState(null); // 'live' or 'marked'
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
+            const [totalRegistered, setTotalRegistered] = useState(0);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1073,13 +1074,22 @@
                     };
                     fetchMarked();
 
+                    const fetchTotalUsers = async () => {
+                        try {
+                            const { count, error } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
+                            if (!error && count !== null) setTotalRegistered(count);
+                        } catch (e) { console.error("Fetch Total Error:", e); }
+                    };
+                    fetchTotalUsers();
+
                     const channel = sb.channel('global-realtime')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
                             fetchMarked();
+                            fetchTotalUsers();
                         })
                         .subscribe();
 
-                    const inv = setInterval(fetchMarked, 10000);
+                    const inv = setInterval(() => { fetchMarked(); fetchTotalUsers(); }, 10000);
                     return () => {
                         clearInterval(inv);
                         sb.removeChannel(channel);
@@ -1205,6 +1215,10 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
+                                <div className="live-indicator" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', marginLeft: '10px' }}>
+                                    <div className="live-dot" style={{ background: '#F59E0B', boxShadow: '0 0 8px #F59E0B' }}></div>
+                                    <span>{totalRegistered} REGISTERED</span>
+                                </div>
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
