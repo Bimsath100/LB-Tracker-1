@@ -242,6 +242,31 @@
             padding: 12px; border-bottom: 1px solid var(--border);
         }
 
+        /* Community Hub Styles */
+        .community-hub {
+            display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-top: 2rem;
+        }
+        .feed-container {
+            height: 200px; overflow-y: hidden; position: relative;
+        }
+        .feed-item {
+            padding: 12px; background: var(--input-bg); border-radius: 12px;
+            margin-bottom: 10px; font-size: 0.85rem; border-left: 3px solid var(--primary);
+            animation: slideInLeft 0.5s ease-out;
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .district-rank-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .rank-num {
+            width: 24px; height: 24px; background: var(--primary); border-radius: 6px;
+            display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;
+        }
+
         .live-indicator {
             display: flex;
             align-items: center;
@@ -1038,6 +1063,83 @@
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
                     </div>
+
+                    <div className="community-hub">
+                        <Reveal delay={0.4}>
+                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3>
+                                    <div className="live-indicator">
+                                        <div className="live-dot"></div>
+                                        <span>LIVE UPDATES</span>
+                                    </div>
+                                </div>
+                                <ActivityFeed />
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.5}>
+                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                                <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3>
+                                <DistrictLeaderboard />
+                            </div>
+                        </Reveal>
+                    </div>
+                </div>
+            );
+        };
+
+        const ActivityFeed = () => {
+            const [feeds, setFeeds] = useState([
+                { id: 1, text: "Someone from Colombo just reached 12 hours! 🔥", type: 'goal' },
+                { id: 2, text: "A student from Kandy is on a 5-day streak! 🚀", type: 'streak' },
+                { id: 3, text: "New student joined from Galle! Welcome! ✨", type: 'new' },
+                { id: 4, text: "Gampaha district just hit 500 total hours! 📈", type: 'stat' }
+            ]);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Jaffna"];
+                    const loc = locations[Math.floor(Math.random() * locations.length)];
+                    const hrs = Math.floor(Math.random() * 15) + 1;
+                    const newFeed = {
+                        id: Date.now(),
+                        text: `Someone from ${loc} marked ${hrs} hours today! ${hrs > 10 ? '🔥' : '💪'}`,
+                        type: 'live'
+                    };
+                    setFeeds(prev => [newFeed, ...prev.slice(0, 4)]);
+                }, 8000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="feed-container">
+                    {feeds.map(f => (
+                        <div key={f.id} className="feed-item">
+                            {f.text}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const DistrictLeaderboard = () => {
+            const ranks = [
+                { name: 'Colombo', hours: '1,240', rank: 1 },
+                { name: 'Gampaha', hours: '980', rank: 2 },
+                { name: 'Kandy', hours: '850', rank: 3 },
+                { name: 'Galle', hours: '720', rank: 4 },
+                { name: 'Kurunegala', hours: '640', rank: 5 }
+            ];
+
+            return (
+                <div>
+                    {ranks.map(r => (
+                        <div key={r.name} className="district-rank-item">
+                            <div className="rank-num" style={{ background: r.rank <= 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{r.rank}</div>
+                            <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div>
+                            <div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div>
+                        </div>
+                    ))}
                 </div>
             );
         };
