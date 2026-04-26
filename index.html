@@ -84,6 +84,9 @@
         .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
         .nav-link.active { background: var(--primary); color: white; }
         .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); }
+        .nav-join { display: flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 100px; background: linear-gradient(135deg, #2AABEE, #1e96d8); color: white; font-weight: 700; font-size: 0.82rem; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 0 16px rgba(42, 171, 238, 0.45); animation: tgPulse 2.5s ease-in-out infinite; white-space: nowrap; }
+        .nav-join:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 26px rgba(42, 171, 238, 0.7); }
+        @keyframes tgPulse { 0%, 100% { box-shadow: 0 0 14px rgba(42, 171, 238, 0.4); } 50% { box-shadow: 0 0 28px rgba(42, 171, 238, 0.75); } }
 
         .main-content { width: 100%; padding: 100px 0 100px 0; min-height: 100vh; }
         .container { width: min(94%, 1200px); margin: 0 auto; }
@@ -560,6 +563,10 @@
                                 ))}
                                 <div className={`nav-link ${currentPage === 'tutorial' ? 'active' : ''}`} onClick={() => setCurrentPage('tutorial')}>How to Use</div>
                                 <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
+                                <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
+                                    Join us
+                                </a>
                             </div>
                         </div>
                     </nav>
@@ -590,6 +597,10 @@
                         {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} label={s} onClick={() => setCurrentPage(s)} />)}
                         <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Tutorial" onClick={() => setCurrentPage('tutorial')} />
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Feedback" onClick={() => setCurrentPage('feedback')} />
+                        <div className="mobile-item" style={{ color: '#2AABEE' }} onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
+                            <span>✈️</span>
+                            <span>Join us</span>
+                        </div>
                     </nav>
 
                     <main className="main-content">
