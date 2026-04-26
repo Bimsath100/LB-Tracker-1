@@ -662,6 +662,8 @@
             const [deferredPrompt, setDeferredPrompt] = useState(null);
             const [liveUsers, setLiveUsers] = useState(1);
             const [markedToday, setMarkedToday] = useState(0);
+            const [announcement, setAnnouncement] = useState('');
+            const [announcementInput, setAnnouncementInput] = useState('');
             const [adminView, setAdminView] = useState(null); // 'live' or 'marked'
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
@@ -749,6 +751,37 @@
                     return () => clearInterval(inv);
                 }
             }, [user]);
+
+            useEffect(() => {
+                const fetchAnnouncement = async () => {
+                    const { data } = await sb.from('study_tracker_v2').select('history').eq('user_id', 'SYSTEM_ANNOUNCEMENT').maybeSingle();
+                    if (data && data.history?.msg) {
+                        setAnnouncement(data.history.msg);
+                        setAnnouncementInput(data.history.msg);
+                    }
+                };
+                fetchAnnouncement();
+                const inv = setInterval(fetchAnnouncement, 60000);
+                return () => clearInterval(inv);
+            }, []);
+
+            const updateAnnouncement = async () => {
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                    user_id: 'SYSTEM_ANNOUNCEMENT', 
+                    name: 'SYSTEM', 
+                    district: 'SYSTEM', 
+                    history: { msg: announcementInput },
+                    subjects: [],
+                    exam_year: 2026,
+                    exam_month: 'August'
+                });
+                if (!error) {
+                    setAnnouncement(announcementInput);
+                    alert('Broadcast updated successfully! ✅');
+                } else {
+                    alert('Error updating broadcast: ' + error.message);
+                }
+            };
 
             const fetchUserData = async (uid) => {
                 try {
@@ -899,9 +932,24 @@
                         <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
                             <div className="admin-modal glass" onClick={e => e.stopPropagation()}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                    <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>{adminView === 'live' ? 'Online Students' : 'Today\'s Progress'}</h2>
+                                    <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>Admin Controls</h2>
                                     <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
                                 </div>
+
+                                <div className="glass" style={{ padding: '1.2rem', marginBottom: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid var(--primary-glow)', borderRadius: '18px' }}>
+                                    <div style={{ fontWeight: '800', fontSize: '0.8rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span>📢</span> BROADCAST MESSAGE
+                                    </div>
+                                    <textarea 
+                                        value={announcementInput}
+                                        onChange={e => setAnnouncementInput(e.target.value)}
+                                        placeholder="Type a message to all students..."
+                                        style={{ width: '100%', minHeight: '80px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', color: 'white', fontSize: '0.85rem', marginBottom: '10px', outline: 'none' }}
+                                    />
+                                    <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '40px', fontSize: '0.8rem' }}>Update Broadcast</button>
+                                </div>
+                                
+                                <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', opacity: 0.8 }}>{adminView === 'live' ? 'Online Students' : 'Today\'s Progress'}</h4>
                                 
                                 {adminView === 'live' ? (
                                     <div>
