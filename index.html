@@ -1024,12 +1024,15 @@
                             const today = new Date().toISOString().split('T')[0];
                             const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
                             if (!error && data) {
-                                setMarkedToday(data.length);
+                                // Only count users who have actually marked at least one hour
+                                const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
+                                setMarkedToday(actualMarked.length);
+                                
                                 if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                                    const details = data.map(d => ({ 
+                                    const details = actualMarked.map(d => ({ 
                                         name: d.name || 'Unknown', 
                                         district: d.district || 'N/A', 
-                                        hours: (d.history && Array.isArray(d.history[today])) ? d.history[today].filter(Boolean).length : 0 
+                                        hours: d.history[today].filter(Boolean).length 
                                     })).sort((a, b) => b.hours - a.hours);
                                     setMarkedDetails(details);
                                 }
@@ -1135,12 +1138,15 @@
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
                 const historyWithTimestamp = { ...h, last_updated: new Date().toISOString() };
-                await sb.from('study_tracker_v2').upsert({ 
+                console.log("Pushing data to Supabase...", historyWithTimestamp);
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
                     user_id: user.id, 
                     name: profile.name, district: profile.district, subjects: profile.subjects,
                     exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel, 
                     history: historyWithTimestamp, marks: m 
                 });
+                if (error) console.error("Push Error:", error);
+                else console.log("Data pushed successfully! ✅");
             };
 
             useEffect(() => {
