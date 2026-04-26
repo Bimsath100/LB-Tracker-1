@@ -1134,12 +1134,14 @@
             
             useEffect(() => {
                 const hour = new Date().getHours();
-                // Realistic online users based on 161 total (10 to 45 online)
-                const baseOnline = hour < 6 ? 5 : hour < 12 ? 18 : hour < 18 ? 28 : hour < 22 ? 42 : 12;
-                // Realistic marked today (starts low in morning, reaches ~130 by night)
-                const baseMarked = (hour * 5) + (markedToday * 2) + 20;
+                // Peaks during SL 'Golden Hours' (4-6am and 9pm-1am)
+                const isPeak = (hour >= 4 && hour <= 6) || (hour >= 21 || hour <= 1);
+                const baseOnline = isPeak ? Math.floor(Math.random() * 15) + 30 : Math.floor(Math.random() * 15) + 15;
                 
-                setDynamicStats({ online: baseOnline + liveUsers, marked: Math.min(160, baseMarked) });
+                // Realistic marked today scaling to ~135 max
+                const baseMarked = (hour * 4) + (markedToday * 1.5) + 30;
+                
+                setDynamicStats({ online: Math.min(60, baseOnline + liveUsers), marked: Math.min(155, Math.floor(baseMarked)) });
 
                 const interval = setInterval(() => {
                     setDynamicStats(prev => ({
@@ -1225,10 +1227,12 @@
                         return acc;
                     }, {});
 
-                    // Add Simulated consistent stats to match Feed and Ticker
-                    const simDistricts = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala"];
-                    simDistricts.forEach((d, i) => {
-                        const simHrs = Math.floor((hour * 1.5) + (i * 2));
+                    // Add Simulated consistent stats to match SL Exam Performance trends
+                    const slTopDistricts = ["Colombo", "Kandy", "Galle", "Gampaha", "Matara", "Kurunegala"];
+                    slTopDistricts.forEach((d, i) => {
+                        // Weighting: Colombo gets more hours, Kurunegala slightly less
+                        const weight = (slTopDistricts.length - i) * 1.2;
+                        const simHrs = Math.floor((hour * weight) + 10);
                         stats[d] = (stats[d] || 0) + simHrs;
                     });
                     
