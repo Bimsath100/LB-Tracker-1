@@ -1110,7 +1110,100 @@
                 if (!error) setResources(newItems);
             };
 
-            useEffect(() => { fetchResources(); fetchTotalUsers(); fetchCommGoal(); }, []);
+            const [adminTab, setAdminTab] = useState('overview');
+            const [selectedUser, setSelectedUser] = useState(null);
+
+            const AdminSideItem = ({ active, icon, label, onClick }) => (
+                <div onClick={onClick} style={{ 
+                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 15px', borderRadius: '12px',
+                    cursor: 'pointer', background: active ? 'var(--primary-glow)' : 'transparent',
+                    color: active ? 'var(--primary)' : 'var(--text-dim)', transition: 'all 0.2s',
+                    fontWeight: active ? '800' : '500', fontSize: '0.9rem'
+                }}>
+                    <span>{icon}</span> <span>{label}</span>
+                </div>
+            );
+
+            const AdminStatCard = ({ icon, val, lbl, color }) => (
+                <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px', borderLeft: `4px solid ${color}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+                        <span style={{ fontSize: '1.8rem', fontWeight: '800', color }}>{val}</span>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>{lbl}</div>
+                </div>
+            );
+
+            const AdminStudentsView = ({ sb, onSelectUser }) => {
+                const [users, setUsers] = useState([]);
+                const [search, setSearch] = useState('');
+                useEffect(() => {
+                    const fetchAll = async () => {
+                        const { data } = await sb.from('study_tracker_v2').select('*').not('name', 'eq', 'LB_RESOURCES').not('name', 'eq', 'LB_COMMUNITY_GOAL').order('name');
+                        if (data) setUsers(data);
+                    };
+                    fetchAll();
+                }, []);
+                const filtered = users.filter(u => u.name.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()));
+                return (
+                    <div>
+                        <input type="text" placeholder="🔍 Search students by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%', marginBottom: '1.5rem', background: 'var(--input-bg)' }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            {filtered.map(u => (
+                                <div key={u.id} className="admin-list-item" onClick={() => onSelectUser(u)} style={{ cursor: 'pointer' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span className="owner-badge-small">OWNER</span>}</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
+                                    </div>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>DETAILS →</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+            const AdminResourcesView = ({ resources, resInput, setResInput, addResource, removeResource }) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="glass" style={{ padding: '1.2rem', borderRadius: '16px' }}>
+                        <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>Add New Resource</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                            <input type="text" placeholder="Title" value={resInput.title} onChange={e => setResInput({...resInput, title: e.target.value})} />
+                            <input type="text" placeholder="URL" value={resInput.link} onChange={e => setResInput({...resInput, link: e.target.value})} />
+                            <select value={resInput.subject} onChange={e => setResInput({...resInput, subject: e.target.value})}>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Biology">Biology</option>
+                                <option value="Maths">Combined Maths</option>
+                                <option value="General">General</option>
+                            </select>
+                            <button className="btn-primary" onClick={addResource}>Add Link</button>
+                        </div>
+                    </div>
+                    {resources.map((r, i) => (
+                        <div key={i} className="admin-list-item">
+                            <div style={{ flex: 1 }}>{r.title} ({r.subject})</div>
+                            <button onClick={() => removeResource(i)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px' }}>Delete</button>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            const AdminCommunityView = ({ commGoal, goalInput, setGoalInput, updateGoal, announcementInput, setAnnouncementInput, updateAnnouncement }) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
+                        <h4 style={{ margin: '0 0 1rem 0' }}>📢 Broadcast Message</h4>
+                        <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type message..." style={{ width: '100%', height: '80px', background: 'var(--input-bg)', color: 'white', borderRadius: '12px', padding: '10px', marginBottom: '10px' }} />
+                        <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
+                    </div>
+                    <div className="glass" style={{ padding: '1.5rem', borderRadius: '18px' }}>
+                        <h4 style={{ margin: '0 0 1rem 0' }}>🎯 Community Goal</h4>
+                        <input type="text" placeholder="Title" value={goalInput.title} onChange={e => setGoalInput({...goalInput, title: e.target.value})} style={{ marginBottom: '10px' }} />
+                        <input type="number" placeholder="Target" value={goalInput.target} onChange={e => setGoalInput({...goalInput, target: parseInt(e.target.value)})} style={{ marginBottom: '10px' }} />
+                        <button className="btn-primary" onClick={updateGoal}>Update Goal</button>
+                    </div>
+                </div>
+            );
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1440,100 +1533,97 @@
 
                     {adminView && (
                         <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
-                            <div className="admin-modal glass" onClick={e => e.stopPropagation()}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                    <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>Admin Controls</h2>
-                                    <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '5px' }}>
-                                    <button className={`btn-primary ${adminView === 'live' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('live'); }}>Live Users</button>
-                                    <button className={`btn-primary ${adminView === 'marked' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('marked'); }}>Marked Today</button>
-                                    <button className={`btn-primary ${adminView === 'broadcast' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('broadcast'); }}>Broadcast</button>
-                                    <button className={`btn-primary ${adminView === 'resources' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('resources'); }}>Resources</button>
-                                    <button className={`btn-primary ${adminView === 'goal' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('goal'); }}>Community Goal</button>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-                                    <div className="glass" style={{ flex: 1, padding: '1rem', textAlign: 'center', borderRadius: '12px' }}>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Total Students</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--primary)' }}>{totalUsers}</div>
+                            <div className="admin-modal glass" style={{ maxWidth: '900px', width: '95%', height: '85vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', flex: 1 }}>
+                                    {/* Admin Sidebar */}
+                                    <div style={{ width: '220px', background: 'rgba(0,0,0,0.3)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', padding: '20px 10px' }}>
+                                        <div style={{ padding: '0 10px 20px', borderBottom: '1px solid var(--border)', marginBottom: '20px' }}>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '2px', fontWeight: '800' }}>SUPER ADMIN</div>
+                                            <div style={{ fontFamily: 'Outfit', fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary)' }}>LB TRACKER</div>
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                            <AdminSideItem active={adminTab === 'overview'} icon="📊" label="Overview" onClick={() => setAdminTab('overview')} />
+                                            <AdminSideItem active={adminTab === 'students'} icon="👥" label="Students" onClick={() => setAdminTab('students')} />
+                                            <AdminSideItem active={adminTab === 'resources'} icon="📂" label="Resources" onClick={() => setAdminTab('resources')} />
+                                            <AdminSideItem active={adminTab === 'community'} icon="🌍" label="Community" onClick={() => setAdminTab('community')} />
+                                        </div>
+                                        <button onClick={() => setAdminView(null)} style={{ marginTop: 'auto', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '700' }}>EXIT ADMIN</button>
                                     </div>
-                                    <div className="glass" style={{ flex: 1, padding: '1rem', textAlign: 'center', borderRadius: '12px' }}>
-                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Active Now</div>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: '#10B981' }}>{liveUsers}</div>
-                                    </div>
-                                </div>
 
-                                <div className="admin-content-area" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '5px' }}>
-                                    {adminView === 'live' ? (
-                                        liveDetails.length === 0 ? <p style={{ textAlign: 'center', opacity: 0.5 }}>No one online</p> : 
-                                        liveDetails.map((u, i) => (
-                                            <div key={i} className="admin-list-item">
-                                                <div>
-                                                    <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
-                                                </div>
-                                                <div className="live-dot"></div>
-                                            </div>
-                                        ))
-                                    ) : adminView === 'marked' ? (
-                                        markedDetails.length === 0 ? <p style={{ textAlign: 'center', opacity: 0.5 }}>No one marked today</p> : 
-                                        markedDetails.map((u, i) => (
-                                            <div key={i} className="admin-list-item">
-                                                <div>
-                                                    <div style={{ fontWeight: '700' }}>{u.name} {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
-                                                </div>
-                                                <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
-                                            </div>
-                                        ))
-                                    ) : adminView === 'broadcast' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type global announcement..." style={{ width: '100%', height: '100px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: 'white', outline: 'none' }} />
-                                            <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
+                                    {/* Admin Content */}
+                                    <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                            <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>{adminTab.toUpperCase()}</h2>
+                                            <div className="live-indicator"><div className="live-dot"></div><span>{liveUsers} ACTIVE</span></div>
                                         </div>
-                                    ) : adminView === 'goal' ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            <h4 style={{ margin: 0 }}>Set Community Challenge</h4>
-                                            <input type="text" placeholder="Goal Title (e.g. 1000 Students Target)" value={goalInput.title} onChange={e => setGoalInput({...goalInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
-                                            <input type="number" placeholder="Target Number of Students" value={goalInput.target} onChange={e => setGoalInput({...goalInput, target: parseInt(e.target.value)})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
-                                            <button className="btn-primary" onClick={updateGoal}>Set Global Goal</button>
-                                        </div>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                                            <div className="glass" style={{ padding: '1.2rem', borderRadius: '16px' }}>
-                                                <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem' }}>Add New Resource</h4>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                                    <input type="text" placeholder="Title (e.g. Physics Note)" value={resInput.title} onChange={e => setResInput({...resInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
-                                                    <input type="text" placeholder="Link (https://...)" value={resInput.link} onChange={e => setResInput({...resInput, link: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
-                                                    <select value={resInput.subject} onChange={e => setResInput({...resInput, subject: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }}>
-                                                        <option value="Physics">Physics</option>
-                                                        <option value="Chemistry">Chemistry</option>
-                                                        <option value="Biology">Biology</option>
-                                                        <option value="Maths">Combined Maths</option>
-                                                        <option value="General">General</option>
-                                                    </select>
-                                                    <button className="btn-primary" onClick={addResource} style={{ fontSize: '0.8rem' }}>Add Link</button>
+
+                                        {adminTab === 'overview' ? (
+                                            <div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                                                    <AdminStatCard icon="👥" val={totalUsers} lbl="Total Registered" color="var(--primary)" />
+                                                    <AdminStatCard icon="⚡" val={liveUsers} lbl="Active Students" color="#10B981" />
+                                                    <AdminStatCard icon="✅" val={markedToday} lbl="Marked Today" color="#F59E0B" />
+                                                </div>
+                                                <div className="glass card" style={{ padding: '1.5rem' }}>
+                                                    <h3 style={{ fontFamily: 'Outfit', marginBottom: '1.5rem' }}>Top Performers Today</h3>
+                                                    <DistrictLeaderboard />
                                                 </div>
                                             </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                {resources.map((r, i) => (
-                                                    <div key={i} className="admin-list-item" style={{ fontSize: '0.8rem' }}>
-                                                        <div style={{ flex: 1 }}>
-                                                            <div style={{ fontWeight: '700' }}>{r.title}</div>
-                                                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{r.subject}</div>
-                                                        </div>
-                                                        <button onClick={() => removeResource(i)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', cursor: 'pointer' }}>Delete</button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                        ) : adminTab === 'students' ? (
+                                            <AdminStudentsView sb={sb} onSelectUser={u => setSelectedUser(u)} />
+                                        ) : adminTab === 'resources' ? (
+                                            <AdminResourcesView resources={resources} resInput={resInput} setResInput={setResInput} addResource={addResource} removeResource={removeResource} />
+                                        ) : (
+                                            <AdminCommunityView commGoal={commGoal} goalInput={goalInput} setGoalInput={setGoalInput} updateGoal={updateGoal} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} />
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
+
+                    {selectedUser && (
+                        <div className="admin-modal-overlay" style={{ zIndex: 11000 }} onClick={() => setSelectedUser(null)}>
+                            <div className="admin-modal glass" style={{ maxWidth: '600px', width: '92%', maxHeight: '85vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <div className="nav-logo" style={{ width: '45px', height: '45px', fontSize: '0.9rem' }}>{selectedUser.name.substring(0,2).toUpperCase()}</div>
+                                        <div>
+                                            <h3 style={{ margin: 0, fontFamily: 'Outfit' }}>{selectedUser.name}</h3>
+                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{selectedUser.email}</div>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setSelectedUser(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <div className="glass" style={{ padding: '1rem', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>District</div>
+                                        <div style={{ fontWeight: '700' }}>{selectedUser.district}</div>
+                                    </div>
+                                    <div className="glass" style={{ padding: '1rem', borderRadius: '12px' }}>
+                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Exam Info</div>
+                                        <div style={{ fontWeight: '700' }}>{selectedUser.exam_year} {selectedUser.exam_month}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '10px' }}>STUDY NOTES</h4>
+                                    <div className="glass" style={{ padding: '1rem', borderRadius: '12px', fontSize: '0.85rem', whiteSpace: 'pre-wrap', color: 'var(--text-dim)' }}>
+                                        {selectedUser.notes || 'No notes added yet.'}
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '10px' }}>ENROLLED SUBJECTS</h4>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {selectedUser.subjects.map(s => <span key={s} style={{ padding: '5px 12px', borderRadius: '100px', background: 'var(--primary-glow)', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '800' }}>{s}</span>)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
 
                     <main className="main-content">
                         <div className="container">
