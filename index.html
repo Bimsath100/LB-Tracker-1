@@ -804,6 +804,174 @@
             );
         };
 
+        const LoadingScreen = () => (
+            <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+                <div className="nav-logo" style={{ width: '80px', height: '80px', fontSize: '2rem', marginBottom: '2rem', animation: 'livePulse 2s infinite' }}>LB</div>
+                <div style={{ color: 'var(--primary)', fontWeight: '800', letterSpacing: '2px' }}>LOADING EXPERIENCE...</div>
+            </div>
+        );
+
+        const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
+                <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
+                <Reveal>
+                    <div className="nav-logo" style={{ width: '100px', height: '100px', fontSize: '2.5rem', margin: '0 auto 2rem auto' }}>LB</div>
+                    <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4.5rem)', lineHeight: '1.1', marginBottom: '1.5rem' }}>The Elite<br/><span style={{ color: 'var(--primary)' }}>Study Tracker</span></h1>
+                    <p style={{ color: 'var(--text-dim)', maxWidth: '500px', margin: '0 auto 2.5rem auto', fontSize: '1.1rem', lineHeight: '1.6' }}>Join the most advanced study community in Sri Lanka. Track your hours, analyze your marks, and dominate your exams.</p>
+                    <button className="btn-google" onClick={onLogin}>
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" alt="G" />
+                        Continue with Google
+                    </button>
+                    {deferredPrompt && (
+                        <button className="btn-primary" onClick={onInstall} style={{ maxWidth: '300px', margin: '1rem auto', background: 'var(--success)' }}>📱 Install Desktop App</button>
+                    )}
+                </Reveal>
+            </div>
+        );
+
+        const SubjectsGridView = ({ subjects, onSelect, marks }) => (
+            <div style={{ padding: '2rem 0' }}>
+                <h2 style={{ fontFamily: 'Outfit', fontSize: '2rem', marginBottom: '2rem' }}>Your Subjects 📚</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    {subjects.map(s => {
+                        const sMarks = marks.filter(m => m.subject === s);
+                        const avg = sMarks.length ? Math.round(sMarks.reduce((a, b) => a + b.mark, 0) / sMarks.length) : 0;
+                        return (
+                            <Reveal key={s}>
+                                <div className="glass card" onClick={() => onSelect(s)} style={{ cursor: 'pointer', padding: '2rem' }}>
+                                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{SUBJECT_ICONS[s] || '📖'}</div>
+                                    <h3 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '0.5rem' }}>{s}</h3>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>{sMarks.length} Papers Done</div>
+                                        <div style={{ color: 'var(--primary)', fontWeight: '800' }}>Avg: {avg}%</div>
+                                    </div>
+                                    <div style={{ height: '4px', background: 'var(--input-bg)', borderRadius: '2px', marginTop: '10px' }}>
+                                        <div style={{ width: `${avg}%`, height: '100%', background: 'var(--primary)', borderRadius: '2px', transition: '0.5s' }}></div>
+                                    </div>
+                                </div>
+                            </Reveal>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+
+        const SubjectView = ({ subject, marks, setMarks }) => {
+            const [val, setVal] = useState('');
+            const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+            const sMarks = marks.filter(m => m.subject === subject);
+            const avg = sMarks.length ? Math.round(sMarks.reduce((a, b) => a + b.mark, 0) / sMarks.length) : 0;
+            const max = sMarks.length ? Math.max(...sMarks.map(m => m.mark)) : 0;
+
+            const addMark = () => {
+                if (!val || val < 0 || val > 100) return alert('Enter a valid mark (0-100)');
+                const newMark = { id: Date.now(), subject, mark: parseInt(val), date };
+                setMarks([...marks, newMark]);
+                setVal('');
+            };
+
+            const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
+
+            return (
+                <div style={{ padding: '2rem 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                        <div style={{ fontSize: '3rem' }}>{SUBJECT_ICONS[subject]}</div>
+                        <h2 style={{ fontFamily: 'Outfit', fontSize: '2.5rem' }}>{subject}</h2>
+                    </div>
+                    
+                    <div className="stats-grid">
+                        <StatCardCircle label="Average" value={avg} max={100} color="var(--primary)" />
+                        <StatCardCircle label="Highest" value={max} max={100} color="#10B981" />
+                        <StatCardCircle label="Papers" value={sMarks.length} max={20} color="#D946EF" />
+                    </div>
+
+                    <div className="dash-grid">
+                        <Reveal>
+                            <div className="glass card">
+                                <h3 className="card-title">Add Paper Mark</h3>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                                    <input type="number" placeholder="Mark (%)" value={val} onChange={e => setVal(e.target.value)} />
+                                    <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+                                </div>
+                                <button className="btn-primary" onClick={addMark}>Add to Progress 🚀</button>
+                            </div>
+                            <div className="glass card" style={{ marginTop: '1.5rem' }}>
+                                <h3 className="card-title" style={{ marginBottom: '1.5rem' }}>Mark History</h3>
+                                {sMarks.length === 0 ? <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>No marks added yet.</p> : 
+                                    sMarks.sort((a,b) => new Date(b.date) - new Date(a.date)).map(m => (
+                                        <div key={m.id} className="admin-list-item">
+                                            <span>{new Date(m.date).toLocaleDateString()}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                <span style={{ fontWeight: '800', color: m.mark >= 75 ? '#10B981' : m.mark >= 40 ? '#F59E0B' : '#EF4444' }}>{m.mark}%</span>
+                                                <span className="delete-btn" onClick={() => delMark(m.id)}>✕</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.1}>
+                            <MarkChart title="Progress Trend" data={sMarks} field="mark" color="var(--primary)" />
+                        </Reveal>
+                    </div>
+                </div>
+            );
+        };
+
+        const FeedbackView = ({ profile }) => {
+            const [rating, setRating] = useState(0);
+            const [hover, setHover] = useState(0);
+            const [msg, setMsg] = useState('');
+            const [submitted, setSubmitted] = useState(false);
+
+            const submit = async () => {
+                if (rating === 0) return alert('Please select a rating!');
+                const { error } = await sb.from('feedbacks').insert({
+                    name: profile.name,
+                    rating,
+                    message: msg,
+                    exam_level: profile.examLevel
+                });
+                if (!error) setSubmitted(true);
+                else alert(error.message);
+            };
+
+            if (submitted) return (
+                <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+                    <div style={{ fontSize: '5rem', marginBottom: '1rem' }}>🎉</div>
+                    <h2 style={{ fontFamily: 'Outfit' }}>Thank you for your feedback!</h2>
+                    <p style={{ color: 'var(--text-dim)' }}>Your input helps us make LB Tracker even better for everyone.</p>
+                </div>
+            );
+
+            return (
+                <div style={{ maxWidth: '600px', margin: '4rem auto', textAlign: 'center' }}>
+                    <Reveal>
+                        <h2 style={{ fontFamily: 'Outfit', fontSize: '2.5rem', marginBottom: '1rem' }}>Rate Your Experience ⭐</h2>
+                        <p style={{ color: 'var(--text-dim)', marginBottom: '3rem' }}>How are you enjoying LB Tracker? Let us know your thoughts!</p>
+                        <div className="star-rating">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <span key={i} className={`star ${i <= (hover || rating) ? 'active' : ''}`} onClick={() => setRating(i)} onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}>★</span>
+                            ))}
+                        </div>
+                        <textarea className="glass" placeholder="Tell us more... (Optional)" value={msg} onChange={e => setMsg(e.target.value)} style={{ minHeight: '120px', padding: '1.5rem', marginBottom: '2rem' }} />
+                        <button className="btn-primary" onClick={submit}>Submit Feedback 🚀</button>
+                    </Reveal>
+                </div>
+            );
+        };
+
+        const TutorialView = () => (
+            <div style={{ padding: '2rem 0' }}>
+                <h2 style={{ fontFamily: 'Outfit', fontSize: '2.5rem', marginBottom: '2rem', textAlign: 'center' }}>How to Use LB Tracker 📖</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                    <Reveal><div className="glass card"><h3>1. Mark Your Hours ⏰</h3><p style={{ color: 'var(--text-dim)', marginTop: '1rem' }}>Use the Study Grid on your dashboard to click the hours you've completed each day. Your progress is synced instantly across all your devices.</p></div></Reveal>
+                    <Reveal delay={0.1}><div className="glass card"><h3>2. Track Paper Marks 📈</h3><p style={{ color: 'var(--text-dim)', marginTop: '1rem' }}>Go to 'Subjects', select a subject, and add your paper marks. We'll show you beautiful charts and averages to help you improve.</p></div></Reveal>
+                    <Reveal delay={0.2}><div className="glass card"><h3>3. Join the Community 🌍</h3><p style={{ color: 'var(--text-dim)', marginTop: '1rem' }}>See what other students are doing in real-time on the Activity Hub. Compete with other districts and aim for the top of the leaderboard!</p></div></Reveal>
+                </div>
+            </div>
+        );
+
         const App = () => {
             const [user, setUser] = useState(null);
             const [profile, setProfile] = useState(null);
