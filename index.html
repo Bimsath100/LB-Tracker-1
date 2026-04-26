@@ -1215,23 +1215,30 @@
             useEffect(() => {
                 const fetchStats = async () => {
                     const today = new Date().toISOString().split('T')[0];
-                    const { data, error } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    const hour = new Date().getHours();
                     
-                    if (data) {
-                        const stats = data.reduce((acc, row) => {
-                            const hrs = (row.history[today] || []).filter(Boolean).length;
-                            if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
-                            return acc;
-                        }, {});
-                        
-                        const sorted = Object.entries(stats)
-                            .map(([name, hours]) => ({ name, hours }))
-                            .sort((a, b) => b.hours - a.hours)
-                            .slice(0, 5);
-                        
-                        setRanks(sorted);
-                        setLoading(false);
-                    }
+                    const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    
+                    const stats = (data || []).reduce((acc, row) => {
+                        const hrs = (row.history[today] || []).filter(Boolean).length;
+                        if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
+                        return acc;
+                    }, {});
+
+                    // Add Simulated consistent stats to match Feed and Ticker
+                    const simDistricts = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala"];
+                    simDistricts.forEach((d, i) => {
+                        const simHrs = Math.floor((hour * 1.5) + (i * 2));
+                        stats[d] = (stats[d] || 0) + simHrs;
+                    });
+                    
+                    const sorted = Object.entries(stats)
+                        .map(([name, hours]) => ({ name, hours }))
+                        .sort((a, b) => b.hours - a.hours)
+                        .slice(0, 5);
+                    
+                    setRanks(sorted);
+                    setLoading(false);
                 };
                 fetchStats();
                 const inv = setInterval(fetchStats, 60000);
@@ -1249,7 +1256,7 @@
                             <div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div>
                         </div>
                     ))}
-                    {ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No study logs today yet.</div>}
+                    {ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}
                 </div>
             );
         };
