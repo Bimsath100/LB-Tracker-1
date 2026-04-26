@@ -266,6 +266,7 @@
         const SB_URL = "https://gemcglmmjbicgbvdhdee.supabase.co"; 
         const SB_KEY = "sb_publishable_XhYi9wPvuOOLjRdpjaqUWg_xKXL2Dg6";
         const sb = supabase.createClient(SB_URL, SB_KEY);
+        const ADMIN_EMAIL = "lomithabimsath51@gmail.com";
 
         const SUBJECT_ICONS = {
             'ICT': '💻', 'Physics': '⚛️', 'Chemistry': '🧪', 'Biology': '🧬', 'Combined Maths': '📐',
@@ -683,7 +684,7 @@
             }, [profile]);
 
             if (loading) return <LoadingScreen />;
-            if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} liveUsers={liveUsers} />;
+            if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} />;
             if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
 
             return (
@@ -696,10 +697,12 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
-                                <div className="live-indicator">
-                                    <div className="live-dot"></div>
-                                    <span>{liveUsers} LIVE</span>
-                                </div>
+                                {user?.email === ADMIN_EMAIL && (
+                                    <div className="live-indicator">
+                                        <div className="live-dot"></div>
+                                        <span>{liveUsers} LIVE</span>
+                                    </div>
+                                )}
                             </div>
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
@@ -774,16 +777,12 @@
             </div>
         );
 
-        const LandingPage = ({ onLogin, deferredPrompt, onInstall, liveUsers }) => (
+        const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
             <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
                 <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                 <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
                 <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '1.5rem' }}>The elite cloud-synced tracker for serious students.</p>
-                <div style={{ marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-                    <div className="live-dot"></div>
-                    <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#10B981' }}>{liveUsers} students online now</span>
-                </div>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
                 {deferredPrompt && (
                     <button className="btn-primary" style={{ background: '#10B981', color: 'white', maxWidth: '300px', margin: '0 auto', marginBottom: '1.5rem', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)' }} onClick={onInstall}>
                         📱 Install LB Tracker
