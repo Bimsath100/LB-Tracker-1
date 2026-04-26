@@ -547,14 +547,18 @@
                         <div className="ticker-content">
                             {items.map((item, i) => ( 
                                 <div key={i} className="ticker-item">
-                                    {item.icon} <span>{item.val}</span> {item.lbl}
+                                    {item.icon} <span>{item.val}</span>
+                                    {item.val === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '2px', marginRight: '2px', verticalAlign: 'middle', fontWeight: '800' }}>OWNER</span>}
+                                    {item.lbl}
                                 </div> 
                             ))}
                         </div>
                         <div className="ticker-content">
                             {items.map((item, i) => ( 
                                 <div key={'dup-' + i} className="ticker-item">
-                                    {item.icon} <span>{item.val}</span> {item.lbl}
+                                    {item.icon} <span>{item.val}</span>
+                                    {item.val === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '2px', marginRight: '2px', verticalAlign: 'middle', fontWeight: '800' }}>OWNER</span>}
+                                    {item.lbl}
                                 </div> 
                             ))}
                         </div>
