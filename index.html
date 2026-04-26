@@ -431,14 +431,12 @@
         const getNavLabel = (s) => NAV_LABELS[s] || s.slice(0,4).toUpperCase();
         
         const timeAgo = (date) => {
-            if (!date) return 'Just now';
+            if (!date) return '0 min ago';
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-            if (seconds < 10) return 'Just now';
-            if (seconds < 60) return `${seconds}s ago`;
             const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `${minutes}m ago`;
+            if (minutes < 60) return `${minutes} min ago`;
             const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours}h ago`;
+            if (hours < 24) return `${hours} hours ago`;
             return new Date(date).toLocaleDateString();
         };
 
