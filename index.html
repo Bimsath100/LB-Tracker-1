@@ -754,7 +754,7 @@
 
             useEffect(() => {
                 const fetchAnnouncement = async () => {
-                    const { data } = await sb.from('study_tracker_v2').select('history').eq('user_id', 'SYSTEM_ANNOUNCEMENT').maybeSingle();
+                    const { data } = await sb.from('study_tracker_v2').select('history').eq('user_id', '00000000-0000-0000-0000-000000000000').maybeSingle();
                     if (data && data.history?.msg) {
                         setAnnouncement(data.history.msg);
                         setAnnouncementInput(data.history.msg);
@@ -767,7 +767,7 @@
 
             const updateAnnouncement = async () => {
                 const { error } = await sb.from('study_tracker_v2').upsert({ 
-                    user_id: 'SYSTEM_ANNOUNCEMENT', 
+                    user_id: '00000000-0000-0000-0000-000000000000', 
                     name: 'SYSTEM', 
                     district: 'SYSTEM', 
                     history: { msg: announcementInput },
