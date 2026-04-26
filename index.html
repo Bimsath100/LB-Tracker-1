@@ -267,6 +267,26 @@
             display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;
         }
 
+        /* Ticker Styles */
+        .ticker-wrap {
+            width: 100%; overflow: hidden; background: rgba(99, 102, 241, 0.03);
+            border-radius: 12px; padding: 10px 0; margin-bottom: 2rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .ticker {
+            display: flex; white-space: nowrap; gap: 50px;
+            animation: tickerMove 40s linear infinite;
+        }
+        @keyframes tickerMove {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-150%); }
+        }
+        .ticker-item {
+            display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
+            font-weight: 700; color: var(--text-dim);
+        }
+        .ticker-item span { color: var(--primary); }
+
         .live-indicator {
             display: flex;
             align-items: center;
@@ -682,7 +702,16 @@
                 channel
                     .on('presence', { event: 'sync' }, () => {
                         const newState = channel.presenceState();
-                        const details = Object.values(newState).flat().map(p => ({ name: p.name || 'Anonymous', email: p.email }));
+                        const allProfiles = Object.values(newState).flat();
+                        // Unique-ify by email or name
+                        const uniqueMap = new Map();
+                        allProfiles.forEach(p => {
+                            const key = p.email || p.name;
+                            if (!uniqueMap.has(key) || (p.name !== 'Guest' && uniqueMap.get(key).name === 'Guest')) {
+                                uniqueMap.set(key, { name: p.name || 'Anonymous', email: p.email });
+                            }
+                        });
+                        const details = Array.from(uniqueMap.values());
                         setLiveDetails(details);
                         setLiveUsers(details.length > 0 ? details.length : 1);
                     })
@@ -697,7 +726,7 @@
                     });
 
                 return () => { channel.unsubscribe(); };
-            }, [user]);
+            }, [user, profile?.name]);
 
             useEffect(() => {
                 if (user?.email === ADMIN_EMAIL) {
@@ -1041,6 +1070,7 @@
 
             return (
                 <div>
+                    <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
                     {showReminder && (
                         <div className="reminder-banner">
                             <div style={{ fontSize: '1.5rem' }}>⏰</div>
@@ -1099,26 +1129,53 @@
             );
         };
 
+        const ActivityTicker = ({ liveUsers, markedToday }) => {
+            const items = [
+                `🚀 <span>${liveUsers + 12}</span> Students Online Now`,
+                `🔥 <span>Someone</span> from Kandy reached 10h!`,
+                `⚔️ <span>Colombo</span> is Leading District Battle`,
+                `✨ <span>${markedToday + 5}</span> Students Marked Today`,
+                `🏆 <span>Peak Performance:</span> 15.5h Today`,
+                `📊 <span>Growth:</span> +12% Study Hours this week`
+            ];
+            return (
+                <div className="ticker-wrap">
+                    <div className="ticker">
+                        {items.concat(items).map((text, i) => (
+                            <div key={i} className="ticker-item" dangerouslySetInnerHTML={{ __html: text }}></div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
         const ActivityFeed = () => {
-            const [feeds, setFeeds] = useState([
-                { id: 1, text: "Someone from Colombo just reached 12 hours! 🔥", type: 'goal' },
-                { id: 2, text: "A student from Kandy is on a 5-day streak! 🚀", type: 'streak' },
-                { id: 3, text: "New student joined from Galle! Welcome! ✨", type: 'new' },
-                { id: 4, text: "Gampaha district just hit 500 total hours! 📈", type: 'stat' }
-            ]);
+            const [feeds, setFeeds] = useState([]);
 
             useEffect(() => {
+                const generateInitialFeeds = () => {
+                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa"];
+                    const hourFactor = Math.max(1, Math.floor(new Date().getHours() / 3)); // More hours in evening
+                    return Array.from({ length: 4 }).map((_, i) => ({
+                        id: i,
+                        text: `Someone from ${locations[Math.floor(Math.random() * locations.length)]} marked ${Math.floor(Math.random() * 5) + hourFactor} hours today! 🔥`,
+                        type: 'live'
+                    }));
+                };
+                setFeeds(generateInitialFeeds());
+
                 const interval = setInterval(() => {
-                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Jaffna"];
+                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Badulla"];
                     const loc = locations[Math.floor(Math.random() * locations.length)];
-                    const hrs = Math.floor(Math.random() * 15) + 1;
+                    const hourFactor = Math.max(1, Math.floor(new Date().getHours() / 4));
+                    const hrs = Math.floor(Math.random() * 6) + hourFactor;
                     const newFeed = {
                         id: Date.now(),
-                        text: `Someone from ${loc} marked ${hrs} hours today! ${hrs > 10 ? '🔥' : '💪'}`,
+                        text: `Someone from ${loc} reached ${hrs} hours! ${hrs > 10 ? '🏆' : '💪'}`,
                         type: 'live'
                     };
-                    setFeeds(prev => [newFeed, ...prev.slice(0, 4)]);
-                }, 8000);
+                    setFeeds(prev => [newFeed, ...prev.slice(0, 3)]);
+                }, 10000);
                 return () => clearInterval(interval);
             }, []);
 
@@ -1129,28 +1186,53 @@
                             {f.text}
                         </div>
                     ))}
+                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Waiting for updates...</div>}
                 </div>
             );
         };
 
         const DistrictLeaderboard = () => {
-            const ranks = [
-                { name: 'Colombo', hours: '1,240', rank: 1 },
-                { name: 'Gampaha', hours: '980', rank: 2 },
-                { name: 'Kandy', hours: '850', rank: 3 },
-                { name: 'Galle', hours: '720', rank: 4 },
-                { name: 'Kurunegala', hours: '640', rank: 5 }
-            ];
+            const [ranks, setRanks] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const fetchStats = async () => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const { data, error } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    
+                    if (data) {
+                        const stats = data.reduce((acc, row) => {
+                            const hrs = (row.history[today] || []).filter(Boolean).length;
+                            if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
+                            return acc;
+                        }, {});
+                        
+                        const sorted = Object.entries(stats)
+                            .map(([name, hours]) => ({ name, hours }))
+                            .sort((a, b) => b.hours - a.hours)
+                            .slice(0, 5);
+                        
+                        setRanks(sorted);
+                        setLoading(false);
+                    }
+                };
+                fetchStats();
+                const inv = setInterval(fetchStats, 60000);
+                return () => clearInterval(inv);
+            }, []);
+
+            if (loading) return <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranks...</div>;
 
             return (
                 <div>
-                    {ranks.map(r => (
+                    {ranks.map((r, i) => (
                         <div key={r.name} className="district-rank-item">
-                            <div className="rank-num" style={{ background: r.rank <= 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{r.rank}</div>
+                            <div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div>
                             <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div>
                             <div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div>
                         </div>
                     ))}
+                    {ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No study logs today yet.</div>}
                 </div>
             );
         };
