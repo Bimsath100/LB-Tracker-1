@@ -611,7 +611,12 @@
                 <div className="feed-container">
                     {feeds.map(f => ( 
                         <div key={f.id} className="feed-item" style={{ borderLeftColor: '#10B981', background: 'rgba(16, 185, 129, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ flex: 1 }}>{f.text}</span>
+                            <span style={{ flex: 1 }}>
+                                <span style={{ fontWeight: '700' }}>{f.name}</span>
+                                {f.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
+                                <span style={{ color: 'var(--text-dim)' }}> from {f.district} marked </span>
+                                <span style={{ fontWeight: '700', color: '#10B981' }}>{f.hrs} hours! 🎯</span>
+                            </span>
                             <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', fontWeight: '700' }}>{timeAgo(f.time)}</span>
                         </div> 
                     ))}
@@ -713,7 +718,7 @@
                     )}
                     {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}! ✨</h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
@@ -782,7 +787,7 @@
             }, [feedbacks.length]);
             if (feedbacks.length === 0) return null;
             const fb = feedbacks[idx];
-            return ( <div className="fb-slider-wrapper"><div className={`fb-slide-card glass ${visible ? 'visible' : 'hidden'}`}><div style={{ color: '#F59E0B', fontSize: '1.6rem', letterSpacing: '4px', marginBottom: '0.8rem' }}>{'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}</div><p style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.5' }}>"{fb.text}"</p><p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>— {fb.name}</p></div><div className="fb-dots">{feedbacks.map((_, i) => ( <div key={i} className={`fb-dot ${i === idx ? 'active' : ''}`} onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 400); }} /> ))}</div></div> );
+            return ( <div className="fb-slider-wrapper"><div className={`fb-slide-card glass ${visible ? 'visible' : 'hidden'}`}><div style={{ color: '#F59E0B', fontSize: '1.6rem', letterSpacing: '4px', marginBottom: '0.8rem' }}>{'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}</div><p style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.5' }}>"{fb.text}"</p><p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>— {fb.name} {fb.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', textTransform: 'uppercase' }}>OWNER</span>}</p></div><div className="fb-dots">{feedbacks.map((_, i) => ( <div key={i} className={`fb-dot ${i === idx ? 'active' : ''}`} onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 400); }} /> ))}</div></div> );
         };
 
         const FeedbackView = ({ profile }) => {
@@ -1051,7 +1056,7 @@
 
             useEffect(() => {
                 const fetchAnnouncement = async () => {
-                    const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_ADMIN_OFFICIAL').maybeSingle();
+                    const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'Bimsath Walpola').maybeSingle();
                     if (data && data.history?.msg) {
                         const msg = data.history.msg;
                         setAnnouncement(msg);
@@ -1071,7 +1076,7 @@
                 if (!user) return;
                 const { error } = await sb.from('study_tracker_v2').upsert({ 
                     user_id: user.id, 
-                    name: 'LB_ADMIN_OFFICIAL', 
+                    name: profile?.name || 'Bimsath Walpola', 
                     district: profile?.district || 'Colombo', 
                     history: { ...history, msg: announcementInput },
                     subjects: profile?.subjects || [],
@@ -1261,7 +1266,10 @@
                                             liveDetails.map((u, i) => (
                                                 <div key={i} className="admin-list-item">
                                                     <div>
-                                                        <div style={{ fontWeight: '700' }}>{u.name}</div>
+                                                        <div style={{ fontWeight: '700' }}>
+                                                            {u.name}
+                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
+                                                        </div>
                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
                                                     </div>
                                                     <div className="live-dot"></div>
@@ -1275,7 +1283,10 @@
                                             markedDetails.map((u, i) => (
                                                 <div key={i} className="admin-list-item">
                                                     <div>
-                                                        <div style={{ fontWeight: '700' }}>{u.name}</div>
+                                                        <div style={{ fontWeight: '700' }}>
+                                                            {u.name}
+                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
+                                                        </div>
                                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
                                                     </div>
                                                     <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
