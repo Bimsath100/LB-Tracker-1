@@ -850,13 +850,21 @@
             }, [user, profile?.name]);
 
             useEffect(() => {
-                if (user?.email === ADMIN_EMAIL) {
+                if (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                     const fetchMarked = async () => {
-                        const today = new Date().toISOString().split('T')[0];
-                        const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
-                        if (!error) {
-                            setMarkedToday(data.length);
-                            setMarkedDetails(data.map(d => ({ name: d.name, district: d.district, hours: d.history[today].filter(Boolean).length })));
+                        try {
+                            const today = new Date().toISOString().split('T')[0];
+                            const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
+                            if (!error && data) {
+                                setMarkedToday(data.length);
+                                setMarkedDetails(data.map(d => ({ 
+                                    name: d.name || 'Unknown', 
+                                    district: d.district || 'N/A', 
+                                    hours: (d.history && Array.isArray(d.history[today])) ? d.history[today].filter(Boolean).length : 0 
+                                })));
+                            }
+                        } catch (e) {
+                            console.error("Admin Fetch Error:", e);
                         }
                     };
                     fetchMarked();
@@ -979,7 +987,7 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
-                                {user?.email === ADMIN_EMAIL && (
+                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
                                             <div className="live-dot"></div>
