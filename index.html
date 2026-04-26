@@ -415,618 +415,37 @@
             return ( <div ref={ref} style={{ width: '100%', minWidth: 0, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s` }}>{children}</div> );
         };
 
-        const FeedbackView = ({ profile }) => {
-            const [rating, setRating] = useState(0);
-            const [hover, setHover] = useState(0);
-            const [msg, setMsg] = useState('');
-            const [status, setStatus] = useState('');
-            const [errorMsg, setErrorMsg] = useState('');
-            const [successMsg, setSuccessMsg] = useState('');
-            const [feedbacks, setFeedbacks] = useState([
-                { name: "Kithmina", text: "Good", rating: 5 },
-                { name: "Dilanya", text: "Supiri vadak bro ♥️ thank you", rating: 5 },
-                { name: "Poorna Denuwan", text: "Amazing bro ❤", rating: 5 },
-                { name: "Gimhan Dananjaya", text: "Maru app eka bro! 🚀", rating: 5 },
-                { name: "Prasadi", text: "A/L walata godak watinawa", rating: 5 },
-                { name: "Thamoshi Wishwani", text: "UI eka lassanai, keep it up", rating: 5 },
-                { name: "Tharushi Nethmika", text: "Niyamai, study hours track karanna lesi", rating: 5 },
-                { name: "Rashmi", text: "Patta wada kallak, thank you!", rating: 4 },
-                { name: "Kavindu", text: "Meka nam supiri 💯", rating: 5 },
-                { name: "Pasindu", text: "Gammac thamai, niyameta wada karanawa", rating: 5 },
-                { name: "Ramesh", text: "Phone ekatath maruwata wada.", rating: 4 }
-            ]);
-
-            useEffect(() => {
-                const fetchFB = async () => {
-                    try {
-                        const { data, error } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }).limit(10);
-                        if (error) {
-                            console.error("Supabase Error when fetching feedbacks:", error.message);
-                        }
-                        if(data && data.length > 0) {
-                            setFeedbacks(prev => {
-                                // Filter out duplicates to avoid showing the same message twice
-                                const existingStrings = prev.map(f => f.name + f.text);
-                                const newFeedbacks = data.filter(f => !existingStrings.includes(f.name + f.text));
-                                return [...newFeedbacks, ...prev];
-                            });
-                        }
-                    } catch(e) {
-                        console.error("fetchFB catch error:", e);
-                    }
-                };
-                fetchFB();
-            }, []);
-
-            const submitFeedback = async (e) => {
-                e.preventDefault();
-                if(!rating || !msg.trim()) {
-                    setErrorMsg("Please leave a rating and a message!");
-                    setTimeout(() => setErrorMsg(''), 3000);
-                    return;
-                }
-                setStatus('Sending...');
-
-                try {
-                    await fetch("https://formsubmit.co/ajax/lomithabimsath51@gmail.com", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                        body: JSON.stringify({ _subject: `LB Tracker Feedback from ${profile.name}`, Name: profile.name, Rating: `${rating} Stars`, Message: msg })
-                    });
-                } catch(e) { console.log("Email error:", e); }
-
-                try {
-                    const { error } = await sb.from('feedbacks').insert({ name: profile.name, rating, text: msg });
-                    if (error) {
-                        console.error("Supabase Error when inserting feedback:", error.message);
-                    }
-                } catch(e) {
-                    console.error("submitFeedback catch error:", e);
-                }
-
-                setFeedbacks(prev => [{ name: profile.name, text: msg, rating }, ...prev]);
-                setStatus('');
-                setSuccessMsg('Thank You for your feedback! ✨');
-                setMsg(''); setRating(0);
-                setTimeout(() => setSuccessMsg(''), 3000);
-            };
-
-            return (
-                <div style={{ paddingBottom: '2rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💌</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Voice Matters</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාලගෙ අදහස මොකද්ද මේක ගැන?</p>
-                    </div>
-
-                    <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', position: 'relative' }}>
-                        {errorMsg && <div className="error-toast">⚠️ {errorMsg}</div>}
-                        {successMsg && <div className="success-toast">✅ {successMsg}</div>}
-                        <form onSubmit={submitFeedback}>
-                            <div className="star-rating">
-                                {[1,2,3,4,5].map(star => (
-                                    <span key={star} className={`star ${star <= (hover || rating) ? 'active' : ''}`} 
-                                          onClick={() => setRating(star)} onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}>
-                                        ★
-                                    </span>
-                                ))}
-                            </div>
-                            <textarea 
-                                value={msg} onChange={e => setMsg(e.target.value)} 
-                                placeholder="Type your feedback here..." 
-                                style={{ width: '100%', height: '120px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '15px', borderRadius: '12px', outline: 'none', resize: 'none', marginBottom: '15px', fontSize: '1rem', fontFamily: 'inherit' }}
-                            ></textarea>
-                            <button type="submit" className="btn-primary" disabled={status === 'Sending...'}>{status || 'Submit Feedback 🚀'}</button>
-                        </form>
-                    </div>
-
-                    <FeedbackSlider feedbacks={feedbacks} />
-                </div>
-            );
-        };
-
-        const FeedbackSlider = ({ feedbacks }) => {
-            const [idx, setIdx] = useState(0);
-            const [visible, setVisible] = useState(true);
-            const total = feedbacks.length;
-
-            useEffect(() => {
-                if (total === 0) return;
-                const timer = setInterval(() => {
-                    setVisible(false);
-                    setTimeout(() => {
-                        setIdx(prev => (prev + 1) % total);
-                        setVisible(true);
-                    }, 500);
-                }, 3500);
-                return () => clearInterval(timer);
-            }, [total]);
-
-            if (total === 0) return null;
-            const fb = feedbacks[idx];
-
-            return (
-                <div className="fb-slider-wrapper">
-                    <div className={`fb-slide-card glass ${visible ? 'visible' : 'hidden'}`}>
-                        <div style={{ color: '#F59E0B', fontSize: '1.6rem', letterSpacing: '4px', marginBottom: '0.8rem' }}>
-                            {'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}
-                        </div>
-                        <p style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.5' }}>
-                            "{fb.text}"
-                        </p>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                            — {fb.name}
-                        </p>
-                    </div>
-                    <div className="fb-dots">
-                        {feedbacks.map((_, i) => (
-                            <div key={i} className={`fb-dot ${i === idx ? 'active' : ''}`}
-                                onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 400); }} />
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const TutorialView = () => {
-            return (
-                <div style={{ paddingBottom: '2rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📖</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>How to Use</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>LB Tracker එක පාවිච්චි කරන විදිය මෙතනින් දැනගන්න.</p>
-                    </div>
-
-                    <div className="dash-grid" style={{ gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
-                        <div className="glass card">
-                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span>1️⃣</span> Study Dashboard (15-Hour Grid)
-                            </h2>
-                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                                Dashboard එකේ තියෙන <strong>Study Grid</strong> එකෙන් ඔයාට දවසකට පැය 15ක් දක්වා පාඩම් කරන වෙලාව track කරන්න පුලුවන්. 
-                                එක කොටුවකින් නිරූපණය වෙන්නෙ එක පැයක්. පාඩම් කරලා ඉවර උනාම කොටුවක් click කරලා mark කරන්න.
-                            </p>
-                        </div>
-
-                        <div className="glass card">
-                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span>2️⃣</span> Paper Marks & Progress
-                            </h2>
-                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                                ඔයාගෙ subjects 3ට අදාලව වෙන වෙනම pages තියෙනවා (උදා: Physics, Chemistry). 
-                                ඒවට ගිහින් ඔයා කරන පේපර්ස් වල MCQ, Structured, Essay ලකුණු ඇතුලත් කරන්න පුලුවන්. 
-                                එතකොට ඔයාගෙ ප්‍රගතිය graphs මගින් බලාගන්න පුලුවන්.
-                            </p>
-                        </div>
-
-                        <div className="glass card">
-                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span>3️⃣</span> Past Dates Update
-                            </h2>
-                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                                අද දවස විතරක් නෙවෙයි, Dashboard එකේ තියෙන <strong>Calendar</strong> එකෙන් පරණ දවසක් තෝරලා එදාට පාඩම් කරපු පැය ගානත් mark කරන්න පුලුවන්.
-                            </p>
-                        </div>
-
-                        <div className="glass card">
-                            <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span>4️⃣</span> Install as an App
-                            </h2>
-                            <p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>
-                                දකුණු පැත්තෙ පහල තියෙන <strong>Settings (⚙️)</strong> button එක click කරලා, "📱 Install App" කියන එක දෙන්න. එතකොට මේක ඔයාගෙ phone එකේ ඇප් එකක් වගේ පාවිච්චි කරන්න පුලුවන්.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        const SubjectsGridView = ({ subjects, onSelect, marks }) => {
-            return (
-                <div>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Subjects</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාගෙ ප්‍රගතිය බලන්න විශයක් තෝරන්න.</p>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                        {subjects.map((s, i) => {
-                            const subMarks = marks.filter(m => m.subject === s);
-                            const avgMastery = subMarks.length > 0 ? Math.round(subMarks.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/subMarks.length / 450 * 100) : 0;
-                            return (
-                                <Reveal key={s} delay={i * 0.05}>
-                                    <div className="glass card" onClick={() => onSelect(s)} style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                                        <div style={{ fontSize: '2.5rem' }}>{SUBJECT_ICONS[s] || '📚'}</div>
-                                        <div>
-                                            <div style={{ fontFamily: 'Outfit', fontSize: '1.3rem', fontWeight: '800' }}>{s}</div>
-                                            {SINHALA_NAMES[s] && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '-4px' }}>{SINHALA_NAMES[s]}</div>}
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>{avgMastery}% MASTERY</div>
-                                        </div>
-                                        <div style={{ marginLeft: 'auto', fontSize: '1.2rem', color: 'var(--text-dim)' }}>➡️</div>
-                                    </div>
-                                </Reveal>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        };
-
-        // App component will be moved to the bottom
-
-        const LoadingScreen = () => (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                <div style={{ fontSize: '1.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div>
+        const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
+        const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
+        const MobileItem = ({ active, icon, label, onClick }) => (
+            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}>
+                <span className="m-icon">{icon}</span>
+                <span className="m-label">{label}</span>
             </div>
         );
+        const NAV_LABELS = { 'ICT':'ICT','Physics':'PHY','Chemistry':'CHEM','Biology':'BIO','Combined Maths':'MATH','ET':'ET','SFT':'SFT','Accounting':'ACC','Economics':'ECO','Business Studies':'BIZ','Logic':'LOG','Political Science':'POL','Sinhala':'SIN','English':'ENG','History':'HIST' };
+        const getNavLabel = (s) => NAV_LABELS[s] || s.slice(0,4).toUpperCase();
 
-        const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
-                <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
-                <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
-                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
-                {deferredPrompt && (
-                    <button className="btn-primary" style={{ background: '#10B981', color: 'white', maxWidth: '300px', margin: '0 auto', marginBottom: '1.5rem', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)' }} onClick={onInstall}>
-                        📱 Install LB Tracker
-                    </button>
-                )}
-                <button className="btn-google" style={{ marginTop: deferredPrompt ? '0' : '2rem', margin: '0 auto' }} onClick={onLogin}>
-                    <svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>
-                    Sign in with Google
-                </button>
-            </div>
-        );
-
-        const SetupWizard = ({ onComplete, initialData, onCancel }) => {
-            const [step, setStep] = useState(1);
-            const [form, setForm] = useState(initialData ? { ...initialData, examLevel: initialData.examLevel || 'A/L' } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L' });
-            const [customSub, setCustomSub] = useState('');
-            const limit = form.examLevel === 'A/L' ? 3 : 9;
-
-            const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < limit ? [...f.subjects, s] : f.subjects) }));
-            const addCustom = () => { if(customSub && form.subjects.length < limit && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
-            const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
-            return (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
-                    <div className="glass setup-card">
-                        {step === 1 && (
-                            <div>
-                                <h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2>
-                                <p className="setup-subtitle">Let's set up your profile.</p>
-                                <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-                                <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-                                    <div onClick={() => setForm({...form, examLevel: 'A/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
-                                        <div style={{ fontWeight: '800' }}>A/L</div>
-                                    </div>
-                                    <div onClick={() => setForm({...form, examLevel: 'O/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
-                                        <div style={{ fontWeight: '800' }}>O/L</div>
-                                    </div>
-                                </div>
-                                <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
-                                <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
-                                {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
-                            </div>
-                        )}
-                        {step === 2 && (
-                            <div>
-                                <h2 className="setup-title">Target Exam 🎯</h2>
-                                <p className="setup-subtitle">ඔයා A/L exam එක ලියන අවුරුද්ද සහ මාසය තෝරන්න.</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}>
-                                    <select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })} style={{ marginBottom: 0 }}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                                    <input type="number" min="2024" max="999999" placeholder="Year (e.g. 2026)" value={form.examYear} onChange={e => setForm({ ...form, examYear: e.target.value ? parseInt(e.target.value) : '' })} style={{ marginBottom: 0 }} />
-                                </div>
-                                <button className="btn-primary" disabled={!form.examYear} onClick={() => setStep(3)}>Next Step ➡️</button>
-                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button>
-                            </div>
-                        )}
-                        {step === 3 && (
-                            <div>
-                                <h2 className="setup-title">Subjects 📚</h2>
-                                <p className="setup-subtitle">Choose exactly {limit} subjects.</p>
-                                <div className="chip-container">
-                                    {form.subjects.map(s => (
-                                        <div key={s} className="subject-chip">{s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span></div>
-                                    ))}
-                                    {form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>
-                                    {(form.examLevel === 'A/L' ? AL_SUBJECTS : OL_SUBJECTS).map(s => (
-                                        <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}>
-                                            <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div>
-                                            {form.examLevel === 'O/L' && SINHALA_NAMES[s] && <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{SINHALA_NAMES[s]}</div>}
-                                        </div>
-                                    ))}
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
-                                    <input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} />
-                                    <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= limit}>+</button>
-                                </div>
-                                <button className="btn-primary" disabled={form.subjects.length !== limit} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
-                                <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
+        const SubjectBackground = ({ subject }) => { 
+            const icon = SUBJECT_ICONS[subject] || '🎓'; 
+            const icons = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({ id: i, left: `${Math.random() * 100}%`, duration: `${15 + Math.random() * 20}s`, delay: `${-Math.random() * 20}s` })), [subject]);
+            return ( <div className="floating-bg">{icons.map(ic => ( <div key={ic.id} className="float-icon" style={{ left: ic.left, animationDuration: ic.duration, animationDelay: ic.delay }}>{icon}</div> ))}</div> );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
-            const todayCount = (history[viewDate] || []).filter(Boolean).length;
-            const calcHours = (days) => {
-                let total = 0;
-                for(let i=0; i<days; i++) {
-                    const d = new Date(); d.setDate(d.getDate() - i);
-                    const k = d.toISOString().split('T')[0];
-                    total += (history[k] || []).filter(Boolean).length;
-                }
-                return total;
-            };
-            const weekHrs = calcHours(7);
-            const monthHrs = calcHours(30);
-            const totalHrs = Object.values(history).reduce((a, b) => a + (b || []).filter(Boolean).length, 0);
-            const toggleH = (i) => { const h = [...(history[viewDate] || new Array(15).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
-            
-            const isEvening = new Date().getHours() >= 17;
-            const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
-
-            const dismissAnnounce = () => {
-                localStorage.setItem('lastSeenAnnounce', announcement);
-                setShowAnnounceModal(false);
-            };
-
+        const StatCardCircle = ({ label, value, max, color }) => {
+            const percent = Math.min(100, Math.round((value / max) * 100)) || 0;
+            const r = 38; const c = 2 * Math.PI * r; const offset = c - (percent / 100) * c;
             return (
-                <div>
-                    <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
-                    
-                    {showAnnounceModal && announcement && (
-                        <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
-                            <div className="glass card" style={{ maxWidth: '400px', width: '92%', padding: '2.5rem', textAlign: 'center', animation: 'modalPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)', position: 'relative' }}>
-                                <button onClick={dismissAnnounce} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
-                                <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📢</div>
-                                <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem' }}>Announcement</h2>
-                                <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', marginBottom: '2rem', fontWeight: '500' }}>{announcement}</p>
-                                <button className="btn-primary" onClick={dismissAnnounce}>Got it! 🚀</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {showReminder && (
-                        <div className="reminder-banner">
-                            <div style={{ fontSize: '1.5rem' }}>⏰</div>
-                            <div>
-                                <div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div>
-                            </div>
-                        </div>
-                    )}
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}! ✨</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
-                        <div className="countdown-container">
-                            <CountdownBox val={timeLeft.d} lbl="Days" />
-                            <CountdownBox val={timeLeft.h} lbl="Hours" />
-                            <CountdownBox val={timeLeft.m} lbl="Min" />
-                            <CountdownBox val={timeLeft.s} lbl="Sec" />
-                        </div>
+                <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 15px auto' }}>
+                        <svg width="80" height="80" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                            <circle cx="50" cy="50" r={r} stroke="var(--input-bg)" strokeWidth="10" fill="none" />
+                            <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="10" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
+                        </svg>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', color: 'var(--text-main)' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
                     </div>
-                    <div className="stats-grid">
-                        <StatBox val={todayCount} lbl="Today" sub="අද" />
-                        <StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" />
-                        <StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" />
-                        <StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" />
-                    </div>
-                    <div className="dash-grid" style={{ marginBottom: '2rem' }}>
-                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
-                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = d.toISOString().split('T')[0]; return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{history[k]?.filter(Boolean).length || 0}h</span></div>; })}</div></div></Reveal>
-                    </div>
-                    <div className="marks-grid">
-                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
-                        <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
-                    </div>
-
-                    <div className="community-hub">
-                        <Reveal delay={0.4}>
-                            <div className="glass card" style={{ padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3>
-                                    <div className="live-indicator">
-                                        <div className="live-dot"></div>
-                                        <span>LIVE UPDATES</span>
-                                    </div>
-                                </div>
-                                <ActivityFeed />
-                            </div>
-                        </Reveal>
-                        <Reveal delay={0.5}>
-                            <div className="glass card" style={{ padding: '1.5rem' }}>
-                                <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3>
-                                <DistrictLeaderboard />
-                            </div>
-                        </Reveal>
-                    </div>
-                </div>
-            );
-        };
-
-        const ActivityTicker = ({ liveUsers, markedToday }) => {
-            const [dynamicStats, setDynamicStats] = useState({ online: 0, marked: 0 });
-            
-            useEffect(() => {
-                const hour = new Date().getHours();
-                const isPeak = (hour >= 4 && hour <= 6) || (hour >= 21 || hour <= 1);
-                const baseOnline = isPeak ? Math.floor(Math.random() * 15) + 30 : Math.floor(Math.random() * 15) + 15;
-                const baseMarked = (hour * 4) + (markedToday * 1.5) + 30;
-                
-                setDynamicStats({ online: Math.min(60, baseOnline + liveUsers), marked: Math.min(155, Math.floor(baseMarked)) });
-
-                const interval = setInterval(() => {
-                    setDynamicStats(prev => ({
-                        online: Math.max(10, prev.online + (Math.random() > 0.5 ? 1 : -1)),
-                        marked: prev.marked + (Math.random() > 0.8 ? 1 : 0)
-                    }));
-                }, 5000);
-                return () => clearInterval(interval);
-            }, [liveUsers, markedToday]);
-
-            const items = [
-                `🚀 <span>${dynamicStats.online}</span> Students Online Now`,
-                `🔥 <span>Someone</span> from Kandy reached 10h!`,
-                `⚔️ <span>Colombo</span> is Leading District Battle`,
-                `✨ <span>${dynamicStats.marked}</span> Students Marked Today`,
-                `🏆 <span>Peak Performance:</span> 15.5h Today`,
-                `📊 <span>Growth:</span> +12% Study Hours this week`
-            ];
-            return (
-                <div className="ticker-wrap">
-                    <div className="ticker">
-                        {items.concat(items).map((text, i) => (
-                            <div key={i} className="ticker-item" dangerouslySetInnerHTML={{ __html: text }}></div>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        const ActivityFeed = () => {
-            const [feeds, setFeeds] = useState([]);
-
-            useEffect(() => {
-                const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa", "Badulla", "Kegalle"];
-                
-                const addFeed = () => {
-                    const loc = locations[Math.floor(Math.random() * locations.length)];
-                    const hour = new Date().getHours();
-                    const hourFactor = Math.max(1, Math.floor(hour / 4));
-                    const hrs = Math.floor(Math.random() * 6) + hourFactor;
-                    
-                    const newFeed = {
-                        id: Date.now(),
-                        text: `Someone from ${loc} reached ${hrs} hours! ${hrs > 10 ? '🏆' : '💪'}`,
-                        type: 'live'
-                    };
-                    setFeeds(prev => [newFeed, ...prev.slice(0, 3)]);
-                    const nextTime = Math.floor(Math.random() * 20000) + 5000;
-                    setTimeout(addFeed, nextTime);
-                };
-
-                addFeed();
-            }, []);
-
-            return (
-                <div className="feed-container">
-                    {feeds.map(f => (
-                        <div key={f.id} className="feed-item">
-                            {f.text}
-                        </div>
-                    ))}
-                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Waiting for updates...</div>}
-                </div>
-            );
-        };
-
-        const DistrictLeaderboard = () => {
-            const [ranks, setRanks] = useState([]);
-            const [loading, setLoading] = useState(true);
-
-            useEffect(() => {
-                const fetchStats = async () => {
-                    const today = new Date().toISOString().split('T')[0];
-                    const hour = new Date().getHours();
-                    
-                    const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
-                    
-                    const stats = (data || []).reduce((acc, row) => {
-                        const hrs = (row.history[today] || []).filter(Boolean).length;
-                        if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
-                        return acc;
-                    }, {});
-
-                    const slTopDistricts = ["Colombo", "Kandy", "Galle", "Gampaha", "Matara", "Kurunegala"];
-                    slTopDistricts.forEach((d, i) => {
-                        const weight = (slTopDistricts.length - i) * 1.2;
-                        const simHrs = Math.floor((hour * weight) + 10);
-                        stats[d] = (stats[d] || 0) + simHrs;
-                    });
-                    
-                    const sorted = Object.entries(stats)
-                        .map(([name, hours]) => ({ name, hours }))
-                        .sort((a, b) => b.hours - a.hours)
-                        .slice(0, 5);
-                    
-                    setRanks(sorted);
-                    setLoading(false);
-                };
-                fetchStats();
-                const inv = setInterval(fetchStats, 60000);
-                return () => clearInterval(inv);
-            }, []);
-
-            if (loading) return <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranks...</div>;
-
-            return (
-                <div>
-                    {ranks.map((r, i) => (
-                        <div key={r.name} className="district-rank-item">
-                            <div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div>
-                            <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div>
-                            <div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div>
-                        </div>
-                    ))}
-                    {ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}
-                </div>
-            );
-        };
-
-        const SubjectView = ({ subject, marks, setMarks }) => {
-            const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
-            const data = marks.filter(m => m.subject === subject);
-            const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] }); };
-            const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
-            
-            const peakMCQ = Math.max(...data.map(m => parseFloat(m.mcq) || 0), 0);
-            const peakSTR = Math.max(...data.map(m => parseFloat(m.str) || 0), 0);
-            const peakESY = Math.max(...data.map(m => parseFloat(m.esy) || 0), 0);
-            const avgMastery = Math.round(data.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/data.length / 450 * 100 || 0);
-
-            return (
-                <div>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)', marginBottom: '0.5rem' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.2rem, 8vw, 3.5rem)', fontWeight: '800', letterSpacing: '-1px' }}>{subject}</h1>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '15px' }}>
-                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--primary)', border: '1px solid var(--primary-glow)' }}>STUDY MODULE</div>
-                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--success)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{avgMastery}% MASTERY</div>
-                        </div>
-                    </div>
-                    <div className="dash-grid">
-                        <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
-                        <Reveal delay={0.1}>
-                            <div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                                <span className="card-title">Paper History</span>
-                                <div style={{ marginTop: '1rem' }}>
-                                    {data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => (
-                                        <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}>
-                                            <div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq} S:{m.str} E:{m.esy}</div><div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div></div>
-                                        </div>
-                                    ))}
-                                    {data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}
-                                </div>
-                            </div>
-                        </Reveal>
-                    </div>
-                    <div className="stats-grid-3">
-                        <Reveal delay={0.1}><StatCardCircle label="Peak MCQ" value={peakMCQ} max={50} color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.2}><StatCardCircle label="Peak STR" value={peakSTR} max={100} color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.3}><StatCardCircle label="Peak ESY" value={peakESY} max={300} color="#F43F5E" /></Reveal>
-                    </div>
-                    <div className="marks-grid">
-                        <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
-                        <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
-                    </div>
+                    <div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{label}</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>/ {max}</span></div>
                 </div>
             );
         };
@@ -1083,40 +502,263 @@
             return <div className="chart-box" style={{ height: '180px' }}><canvas ref={ref}></canvas></div>;
         };
 
-        const StatCardCircle = ({ label, value, max, color }) => {
-            const percent = Math.min(100, Math.round((value / max) * 100)) || 0;
-            const r = 38; const c = 2 * Math.PI * r; const offset = c - (percent / 100) * c;
+        const ActivityTicker = ({ liveUsers, markedToday }) => {
+            const [dynamicStats, setDynamicStats] = useState({ online: 0, marked: 0 });
+            useEffect(() => {
+                const hour = new Date().getHours();
+                const isPeak = (hour >= 4 && hour <= 6) || (hour >= 21 || hour <= 1);
+                const baseOnline = isPeak ? Math.floor(Math.random() * 15) + 30 : Math.floor(Math.random() * 15) + 15;
+                const baseMarked = (hour * 4) + (markedToday * 1.5) + 30;
+                setDynamicStats({ online: Math.min(60, baseOnline + liveUsers), marked: Math.min(155, Math.floor(baseMarked)) });
+                const interval = setInterval(() => {
+                    setDynamicStats(prev => ({
+                        online: Math.max(10, prev.online + (Math.random() > 0.5 ? 1 : -1)),
+                        marked: prev.marked + (Math.random() > 0.8 ? 1 : 0)
+                    }));
+                }, 5000);
+                return () => clearInterval(interval);
+            }, [liveUsers, markedToday]);
+            const items = [ `🚀 <span>${dynamicStats.online}</span> Students Online Now`, `🔥 <span>Someone</span> from Kandy reached 10h!`, `⚔️ <span>Colombo</span> is Leading District Battle`, `✨ <span>${dynamicStats.marked}</span> Students Marked Today`, `🏆 <span>Peak Performance:</span> 15.5h Today`, `📊 <span>Growth:</span> +12% Study Hours this week` ];
+            return ( <div className="ticker-wrap"><div className="ticker">{items.concat(items).map((text, i) => ( <div key={i} className="ticker-item" dangerouslySetInnerHTML={{ __html: text }}></div> ))}</div></div> );
+        };
+
+        const ActivityFeed = () => {
+            const [feeds, setFeeds] = useState([]);
+            useEffect(() => {
+                const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa", "Badulla", "Kegalle"];
+                const addFeed = () => {
+                    const loc = locations[Math.floor(Math.random() * locations.length)];
+                    const hour = new Date().getHours();
+                    const hrs = Math.floor(Math.random() * 6) + Math.max(1, Math.floor(hour / 4));
+                    setFeeds(prev => [{ id: Date.now(), text: `Someone from ${loc} reached ${hrs} hours! ${hrs > 10 ? '🏆' : '💪'}`, type: 'live' }, ...prev.slice(0, 3)]);
+                    setTimeout(addFeed, Math.floor(Math.random() * 20000) + 5000);
+                };
+                addFeed();
+            }, []);
+            return ( <div className="feed-container">{feeds.map(f => ( <div key={f.id} className="feed-item">{f.text}</div> ))}{feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Waiting for updates...</div>}</div> );
+        };
+
+        const DistrictLeaderboard = () => {
+            const [ranks, setRanks] = useState([]);
+            const [loading, setLoading] = useState(true);
+            useEffect(() => {
+                const fetchStats = async () => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    const stats = (data || []).reduce((acc, row) => {
+                        const hrs = (row.history[today] || []).filter(Boolean).length;
+                        if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
+                        return acc;
+                    }, {});
+                    ["Colombo", "Kandy", "Galle", "Gampaha", "Matara", "Kurunegala"].forEach((d, i) => {
+                        stats[d] = (stats[d] || 0) + Math.floor((new Date().getHours() * (6 - i) * 1.2) + 10);
+                    });
+                    setRanks(Object.entries(stats).map(([name, hours]) => ({ name, hours })).sort((a, b) => b.hours - a.hours).slice(0, 5));
+                    setLoading(false);
+                };
+                fetchStats();
+                const inv = setInterval(fetchStats, 60000);
+                return () => clearInterval(inv);
+            }, []);
+            if (loading) return <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranks...</div>;
+            return ( <div>{ranks.map((r, i) => ( <div key={r.name} className="district-rank-item"><div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div><div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div><div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div></div> ))}{ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}</div> );
+        };
+
+        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
+            const todayCount = (history[viewDate] || []).filter(Boolean).length;
+            const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); return a+(history[d.toISOString().split('T')[0]]||[]).filter(Boolean).length; },0);
+            const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); return a+(history[d.toISOString().split('T')[0]]||[]).filter(Boolean).length; },0);
+            const totalHrs = Object.values(history).reduce((a, b) => a + (b || []).filter(Boolean).length, 0);
+            const toggleH = (i) => { const h = [...(history[viewDate] || new Array(15).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
+            const isEvening = new Date().getHours() >= 17;
+            const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
+            const dismissAnnounce = () => { localStorage.setItem('lastSeenAnnounce', announcement); setShowAnnounceModal(false); };
             return (
-                <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'relative', width: '80px', height: '80px', margin: '0 auto 15px auto' }}>
-                        <svg width="80" height="80" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle cx="50" cy="50" r={r} stroke="var(--input-bg)" strokeWidth="10" fill="none" />
-                            <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="10" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
-                        </svg>
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', color: 'var(--text-main)' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
+                <div>
+                    <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
+                    {showAnnounceModal && announcement && (
+                        <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
+                            <div className="glass card" style={{ maxWidth: '400px', width: '92%', padding: '2.5rem', textAlign: 'center', animation: 'modalPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)', position: 'relative' }}>
+                                <button onClick={dismissAnnounce} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                                <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📢</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem' }}>Announcement</h2>
+                                <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', marginBottom: '2rem', fontWeight: '500' }}>{announcement}</p>
+                                <button className="btn-primary" onClick={dismissAnnounce}>Got it! 🚀</button>
+                            </div>
+                        </div>
+                    )}
+                    {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}! ✨</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
+                        <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{label}</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>/ {max}</span></div>
+                    <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
+                    <div className="dash-grid" style={{ marginBottom: '2rem' }}>
+                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = d.toISOString().split('T')[0]; return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{history[k]?.filter(Boolean).length || 0}h</span></div>; })}</div></div></Reveal>
+                    </div>
+                    <div className="marks-grid">
+                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
+                        <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
+                    </div>
+                    <div className="community-hub">
+                        <Reveal delay={0.4}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
+                        <Reveal delay={0.5}><div className="glass card" style={{ padding: '1.5rem' }}><h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3><DistrictLeaderboard /></div></Reveal>
+                    </div>
                 </div>
             );
         };
 
-        const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
-        const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
-        const MobileItem = ({ active, icon, label, onClick }) => (
-            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}>
-                <span className="m-icon">{icon}</span>
-                <span className="m-label">{label}</span>
+        const SubjectView = ({ subject, marks, setMarks }) => {
+            const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            const data = marks.filter(m => m.subject === subject);
+            const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] }); };
+            const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
+            const peakMCQ = Math.max(...data.map(m => parseFloat(m.mcq) || 0), 0);
+            const peakSTR = Math.max(...data.map(m => parseFloat(m.str) || 0), 0);
+            const peakESY = Math.max(...data.map(m => parseFloat(m.esy) || 0), 0);
+            const avgMastery = Math.round(data.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/data.length / 450 * 100 || 0);
+            return (
+                <div>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)', marginBottom: '0.5rem' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.2rem, 8vw, 3.5rem)', fontWeight: '800', letterSpacing: '-1px' }}>{subject}</h1>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '15px' }}>
+                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--primary)', border: '1px solid var(--primary-glow)' }}>STUDY MODULE</div>
+                            <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--success)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{avgMastery}% MASTERY</div>
+                        </div>
+                    </div>
+                    <div className="dash-grid">
+                        <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}><span className="card-title">Paper History</span><div style={{ marginTop: '1rem' }}>{data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => ( <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}><div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq} S:{m.str} E:{m.esy}</div><div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div></div></div> ))}{data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}</div></div></Reveal>
+                    </div>
+                    <div className="stats-grid-3">
+                        <Reveal delay={0.1}><StatCardCircle label="Peak MCQ" value={peakMCQ} max={50} color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.2}><StatCardCircle label="Peak STR" value={peakSTR} max={100} color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.3}><StatCardCircle label="Peak ESY" value={peakESY} max={300} color="#F43F5E" /></Reveal>
+                    </div>
+                    <div className="marks-grid">
+                        <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
+                        <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
+                    </div>
+                </div>
+            );
+        };
+
+        const FeedbackSlider = ({ feedbacks }) => {
+            const [idx, setIdx] = useState(0);
+            const [visible, setVisible] = useState(true);
+            useEffect(() => {
+                if (feedbacks.length === 0) return;
+                const timer = setInterval(() => { setVisible(false); setTimeout(() => { setIdx(prev => (prev + 1) % feedbacks.length); setVisible(true); }, 500); }, 3500);
+                return () => clearInterval(timer);
+            }, [feedbacks.length]);
+            if (feedbacks.length === 0) return null;
+            const fb = feedbacks[idx];
+            return ( <div className="fb-slider-wrapper"><div className={`fb-slide-card glass ${visible ? 'visible' : 'hidden'}`}><div style={{ color: '#F59E0B', fontSize: '1.6rem', letterSpacing: '4px', marginBottom: '0.8rem' }}>{'★'.repeat(fb.rating)}{'☆'.repeat(5 - fb.rating)}</div><p style={{ fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.5rem', lineHeight: '1.5' }}>"{fb.text}"</p><p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>— {fb.name}</p></div><div className="fb-dots">{feedbacks.map((_, i) => ( <div key={i} className={`fb-dot ${i === idx ? 'active' : ''}`} onClick={() => { setVisible(false); setTimeout(() => { setIdx(i); setVisible(true); }, 400); }} /> ))}</div></div> );
+        };
+
+        const FeedbackView = ({ profile }) => {
+            const [rating, setRating] = useState(0);
+            const [hover, setHover] = useState(0);
+            const [msg, setMsg] = useState('');
+            const [status, setStatus] = useState('');
+            const [errorMsg, setErrorMsg] = useState('');
+            const [successMsg, setSuccessMsg] = useState('');
+            const [feedbacks, setFeedbacks] = useState([ { name: "Kithmina", text: "Good", rating: 5 }, { name: "Dilanya", text: "Supiri vadak bro ♥️ thank you", rating: 5 }, { name: "Poorna Denuwan", text: "Amazing bro ❤", rating: 5 }, { name: "Gimhan Dananjaya", text: "Maru app eka bro! 🚀", rating: 5 }, { name: "Prasadi", text: "A/L walata godak watinawa", rating: 5 }, { name: "Thamoshi Wishwani", text: "UI eka lassanai, keep it up", rating: 5 }, { name: "Tharushi Nethmika", text: "Niyamai, study hours track karanna lesi", rating: 5 }, { name: "Rashmi", text: "Patta wada kallak, thank you!", rating: 4 }, { name: "Kavindu", text: "Meka nam supiri 💯", rating: 5 }, { name: "Pasindu", text: "Gammac thamai, niyameta wada karanawa", rating: 5 }, { name: "Ramesh", text: "Phone ekatath maruwata wada.", rating: 4 } ]);
+            useEffect(() => {
+                const fetchFB = async () => {
+                    const { data } = await sb.from('feedbacks').select('*').order('created_at', { ascending: false }).limit(10);
+                    if(data && data.length > 0) setFeedbacks(prev => [ ...data.filter(f => !prev.map(p => p.name + p.text).includes(f.name + f.text)), ...prev ]);
+                };
+                fetchFB();
+            }, []);
+            const submitFeedback = async (e) => {
+                e.preventDefault();
+                if(!rating || !msg.trim()) { setErrorMsg("Please leave a rating and a message!"); setTimeout(() => setErrorMsg(''), 3000); return; }
+                setStatus('Sending...');
+                try { await fetch("https://formsubmit.co/ajax/lomithabimsath51@gmail.com", { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify({ _subject: `LB Tracker Feedback from ${profile.name}`, Name: profile.name, Rating: `${rating} Stars`, Message: msg }) }); } catch(e) {}
+                await sb.from('feedbacks').insert({ name: profile.name, rating, text: msg });
+                setFeedbacks(prev => [{ name: profile.name, text: msg, rating }, ...prev]);
+                setStatus(''); setSuccessMsg('Thank You for your feedback! ✨'); setMsg(''); setRating(0); setTimeout(() => setSuccessMsg(''), 3000);
+            };
+            return (
+                <div style={{ paddingBottom: '2rem' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💌</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Voice Matters</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාලගෙ අදහස මොකද්ද මේක ගැන?</p></div>
+                    <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', position: 'relative' }}>
+                        {errorMsg && <div className="error-toast">⚠️ {errorMsg}</div>}
+                        {successMsg && <div className="success-toast">✅ {successMsg}</div>}
+                        <form onSubmit={submitFeedback}><div className="star-rating">{[1,2,3,4,5].map(star => ( <span key={star} className={`star ${star <= (hover || rating) ? 'active' : ''}`} onClick={() => setRating(star)} onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}>★</span> ))}</div><textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Type your feedback here..." style={{ width: '100%', height: '120px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '15px', borderRadius: '12px', outline: 'none', resize: 'none', marginBottom: '15px', fontSize: '1rem', fontFamily: 'inherit' }}></textarea><button type="submit" className="btn-primary" disabled={status === 'Sending...'}>{status || 'Submit Feedback 🚀'}</button></form>
+                    </div>
+                    <FeedbackSlider feedbacks={feedbacks} />
+                </div>
+            );
+        };
+
+        const TutorialView = () => (
+            <div style={{ paddingBottom: '2rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📖</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>How to Use</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>LB Tracker එක පාවිච්චි කරන විදිය මෙතනින් දැනගන්න.</p></div>
+                <div className="dash-grid" style={{ gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '800px', margin: '0 auto' }}>
+                    <div className="glass card"><h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}><span>1️⃣</span> Study Dashboard</h2><p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>දවසකට පැය 15ක් දක්වා පාඩම් කරන වෙලාව track කරන්න පුලුවන්.</p></div>
+                    <div className="glass card"><h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}><span>2️⃣</span> Paper Marks</h2><p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>MCQ, Structured, Essay ලකුණු ඇතුලත් කරලා ප්‍රගතිය graphs මගින් බලාගන්න.</p></div>
+                    <div className="glass card"><h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}><span>3️⃣</span> Past Dates</h2><p style={{ color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: '1.6' }}>Calendar එකෙන් පරණ දවසක් තෝරලා එදාට පාඩම් කරපු පැය ගානත් mark කරන්න.</p></div>
+                </div>
             </div>
         );
-        const NAV_LABELS = { 'ICT':'ICT','Physics':'PHY','Chemistry':'CHEM','Biology':'BIO','Combined Maths':'MATH','ET':'ET','SFT':'SFT','Accounting':'ACC','Economics':'ECO','Business Studies':'BIZ','Logic':'LOG','Political Science':'POL','Sinhala':'SIN','English':'ENG','History':'HIST' };
-        const getNavLabel = (s) => NAV_LABELS[s] || s.slice(0,4).toUpperCase();
-        
-        const SubjectBackground = ({ subject }) => { 
-            const icon = SUBJECT_ICONS[subject] || '🎓'; 
-            const icons = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({ id: i, left: `${Math.random() * 100}%`, duration: `${15 + Math.random() * 20}s`, delay: `${-Math.random() * 20}s` })), [subject]);
-            return ( <div className="floating-bg">{icons.map(ic => ( <div key={ic.id} className="float-icon" style={{ left: ic.left, animationDuration: ic.duration, animationDelay: ic.delay }}>{icon}</div> ))}</div> );
+
+        const SubjectsGridView = ({ subjects, onSelect, marks }) => (
+            <div>
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Subjects</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ප්‍රගතිය බලන්න විශයක් තෝරන්න.</p></div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                    {subjects.map((s, i) => {
+                        const subMarks = marks.filter(m => m.subject === s);
+                        const avgMastery = subMarks.length > 0 ? Math.round(subMarks.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/subMarks.length / 450 * 100) : 0;
+                        return (
+                            <Reveal key={s} delay={i * 0.05}>
+                                <div className="glass card" onClick={() => onSelect(s)} style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                                    <div style={{ fontSize: '2.5rem' }}>{SUBJECT_ICONS[s] || '📚'}</div>
+                                    <div><div style={{ fontFamily: 'Outfit', fontSize: '1.3rem', fontWeight: '800' }}>{s}</div>{SINHALA_NAMES[s] && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '-4px' }}>{SINHALA_NAMES[s]}</div>}<div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>{avgMastery}% MASTERY</div></div>
+                                    <div style={{ marginLeft: 'auto', fontSize: '1.2rem', color: 'var(--text-dim)' }}>➡️</div>
+                                </div>
+                            </Reveal>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+
+        const LoadingScreen = () => ( <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}><div style={{ fontSize: '1.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div></div> );
+        const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
+                <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
+                <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
+                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
+                {deferredPrompt && ( <button className="btn-primary" style={{ background: '#10B981', color: 'white', maxWidth: '300px', margin: '0 auto', marginBottom: '1.5rem', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)' }} onClick={onInstall}>📱 Install LB Tracker</button> )}
+                <button className="btn-google" style={{ marginTop: deferredPrompt ? '0' : '2rem', margin: '0 auto' }} onClick={onLogin}><svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>
+            </div>
+        );
+
+        const SetupWizard = ({ onComplete, initialData, onCancel }) => {
+            const [step, setStep] = useState(1);
+            const [form, setForm] = useState(initialData ? { ...initialData, examLevel: initialData.examLevel || 'A/L' } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L' });
+            const [customSub, setCustomSub] = useState('');
+            const limit = form.examLevel === 'A/L' ? 3 : 9;
+            const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < limit ? [...f.subjects, s] : f.subjects) }));
+            const addCustom = () => { if(customSub && form.subjects.length < limit && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
+            const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
+            return (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}><div className="glass setup-card">
+                    {step === 1 && ( <div><h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2><p className="setup-subtitle">Let's set up your profile.</p><input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /><div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}><div onClick={() => setForm({...form, examLevel: 'A/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>A/L</div></div><div onClick={() => setForm({...form, examLevel: 'O/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>O/L</div></div></div><select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select><button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>{initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}</div> )}
+                    {step === 2 && ( <div><h2 className="setup-title">Target Exam 🎯</h2><p className="setup-subtitle">විභාග විස්තර තෝරන්න.</p><div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}><select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })} style={{ marginBottom: 0 }}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select><input type="number" min="2024" max="2100" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: e.target.value ? parseInt(e.target.value) : '' })} style={{ marginBottom: 0 }} /></div><button className="btn-primary" disabled={!form.examYear} onClick={() => setStep(3)}>Next Step ➡️</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button></div> )}
+                    {step === 3 && ( <div><h2 className="setup-title">Subjects 📚</h2><p className="setup-subtitle">Choose exactly {limit} subjects.</p><div className="chip-container">{form.subjects.map(s => ( <div key={s} className="subject-chip">{s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span></div> ))}{form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>{(form.examLevel === 'A/L' ? AL_SUBJECTS : OL_SUBJECTS).map(s => ( <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div>{form.examLevel === 'O/L' && SINHALA_NAMES[s] && <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{SINHALA_NAMES[s]}</div>}</div> ))}</div><div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}><input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} /><button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= limit}>+</button></div><button className="btn-primary" disabled={form.subjects.length !== limit} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button></div> )}
+                </div></div>
+            );
         };
+
 
         const App = () => {
             const [user, setUser] = useState(null);
