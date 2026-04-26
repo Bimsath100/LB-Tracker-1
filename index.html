@@ -519,8 +519,25 @@
                 }, 5000);
                 return () => clearInterval(interval);
             }, [liveUsers, markedToday]);
-            const items = [ `🚀 <span>${dynamicStats.online}</span> Students Online Now`, `🔥 <span>Someone</span> from Kandy reached 10h!`, `⚔️ <span>Colombo</span> is Leading District Battle`, `✨ <span>${dynamicStats.marked}</span> Students Marked Today`, `🏆 <span>Peak Performance:</span> 15h Today`, `📊 <span>Growth:</span> +12% Study Hours this week` ];
-            return ( <div className="ticker-wrap"><div className="ticker">{items.concat(items).map((text, i) => ( <div key={i} className="ticker-item" dangerouslySetInnerHTML={{ __html: text }}></div> ))}</div></div> );
+            const items = [
+                { icon: '🚀', val: dynamicStats.online, lbl: 'Students Online Now' },
+                { icon: '🔥', val: 'Someone', lbl: 'from Kandy reached 10h!' },
+                { icon: '⚔️', val: 'Colombo', lbl: 'is Leading District Battle' },
+                { icon: '✨', val: dynamicStats.marked, lbl: 'Students Marked Today' },
+                { icon: '🏆', val: '15h', lbl: 'Today Peak Performance' },
+                { icon: '📊', val: '+12%', lbl: 'Study Hours growth this week' }
+            ];
+            return ( 
+                <div className="ticker-wrap">
+                    <div className="ticker">
+                        {items.concat(items).map((item, i) => ( 
+                            <div key={i} className="ticker-item">
+                                {item.icon} <span>{item.val}</span> {item.lbl}
+                            </div> 
+                        ))}
+                    </div>
+                </div> 
+            );
         };
 
         const ActivityFeed = () => {
