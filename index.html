@@ -248,6 +248,13 @@
         };
 
         const DISTRICTS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle"];
+        const AL_SUBJECTS = ['Combined Maths', 'Physics', 'Chemistry', 'Biology', 'ICT', 'ET', 'SFT', 'Accounting', 'Economics', 'Business Studies', 'Logic', 'Political Science', 'Sinhala', 'English', 'History'];
+        const OL_SUBJECTS = ['Mathematics', 'Science', 'Religion', 'History', 'Sinhala', 'English', 'Geography', 'Civics', 'Commerce', 'ICT', 'Home Science', 'Art', 'Music', 'Drama', 'Health', 'Tamil'];
+        const SINHALA_NAMES = {
+            'Mathematics': 'ගණිතය', 'Science': 'විද්‍යාව', 'Religion': 'ආගම', 'History': 'ඉතිහාසය', 'Sinhala': 'සිංහල', 'English': 'ඉංග්‍රීසි',
+            'Geography': 'භූගෝල විද්‍යාව', 'Civics': 'පුරවැසි අධ්‍යාපනය', 'Commerce': 'ව්‍යාපාර හා ගිණුම්කරණය', 'ICT': 'තොරතුරු තාක්ෂණය',
+            'Home Science': 'ගෘහ ආර්ථික විද්‍යාව', 'Art': 'චිත්‍ර', 'Music': 'සංගීතය', 'Drama': 'නාට්‍ය හා රංග කලාව', 'Health': 'සෞඛ්‍යය', 'Tamil': 'දෙමළ'
+        };
         const SUBJECT_LIST = [...Object.keys(SUBJECT_ICONS)];
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -754,7 +761,12 @@
                                     {form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>
-                                    {SUBJECT_LIST.map(s => <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div></div>)}
+                                    {(form.examLevel === 'A/L' ? AL_SUBJECTS : OL_SUBJECTS).map(s => (
+                                        <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}>
+                                            <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div>
+                                            {form.examLevel === 'O/L' && SINHALA_NAMES[s] && <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{SINHALA_NAMES[s]}</div>}
+                                        </div>
+                                    ))}
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
                                     <input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} />
