@@ -429,6 +429,18 @@
         );
         const NAV_LABELS = { 'ICT':'ICT','Physics':'PHY','Chemistry':'CHEM','Biology':'BIO','Combined Maths':'MATH','ET':'ET','SFT':'SFT','Accounting':'ACC','Economics':'ECO','Business Studies':'BIZ','Logic':'LOG','Political Science':'POL','Sinhala':'SIN','English':'ENG','History':'HIST' };
         const getNavLabel = (s) => NAV_LABELS[s] || s.slice(0,4).toUpperCase();
+        
+        const timeAgo = (date) => {
+            if (!date) return 'Just now';
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            if (seconds < 10) return 'Just now';
+            if (seconds < 60) return `${seconds}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            return new Date(date).toLocaleDateString();
+        };
 
         const SubjectBackground = ({ subject }) => { 
             const icon = SUBJECT_ICONS[subject] || '🎓'; 
@@ -535,15 +547,28 @@
             
             const fetchReal = async () => {
                 const today = new Date().toISOString().split('T')[0];
-                const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(20);
+                const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(40);
                 if (data && data.length > 0) {
-                    const mapped = data.map(u => ({
-                        id: u.name + Math.random(),
-                        text: `${u.name} from ${u.district} marked ${u.history[today].filter(Boolean).length} hours! 🎯`,
-                        hrs: u.history[today].filter(Boolean).length,
-                        type: 'real'
-                    }));
-                    return mapped.sort((a, b) => b.hrs - a.hrs);
+                    const mapped = data
+                        .map(u => {
+                            const hrsToday = (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0;
+                            return {
+                                id: u.name + (u.history?.last_updated || Math.random()),
+                                name: u.name,
+                                district: u.district,
+                                hrs: hrsToday,
+                                time: u.history?.last_updated,
+                                text: `${u.name} from ${u.district} marked ${hrsToday} hours! 🎯`
+                            };
+                        })
+                        .filter(u => u.hrs > 0)
+                        .sort((a, b) => {
+                            // Prioritize recency, then hours
+                            const timeA = a.time ? new Date(a.time).getTime() : 0;
+                            const timeB = b.time ? new Date(b.time).getTime() : 0;
+                            return timeB - timeA || b.hrs - a.hrs;
+                        });
+                    return mapped.slice(0, 5);
                 }
                 return [];
             };
@@ -551,7 +576,7 @@
             useEffect(() => {
                 const updateFeed = async () => {
                     const realOnes = await fetchReal();
-                    setFeeds(realOnes.slice(0, 5));
+                    setFeeds(realOnes);
                 };
                 updateFeed();
 
@@ -561,7 +586,7 @@
                     })
                     .subscribe();
 
-                const interval = setInterval(updateFeed, 60000);
+                const interval = setInterval(updateFeed, 5000);
                 return () => {
                     clearInterval(interval);
                     sb.removeChannel(channel);
@@ -571,11 +596,12 @@
             return ( 
                 <div className="feed-container">
                     {feeds.map(f => ( 
-                        <div key={f.id} className="feed-item" style={{ borderLeftColor: '#10B981', background: 'rgba(16, 185, 129, 0.05)' }}>
-                            {f.text}
+                        <div key={f.id} className="feed-item" style={{ borderLeftColor: '#10B981', background: 'rgba(16, 185, 129, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ flex: 1 }}>{f.text}</span>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', fontWeight: '700' }}>{timeAgo(f.time)}</span>
                         </div> 
                     ))}
-                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No student activity recorded yet today. ⏳</div>}
+                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem', textAlign: 'center' }}>No student activity recorded yet today. ⏳</div>}
                 </div> 
             );
         };
@@ -603,7 +629,7 @@
                     })
                     .subscribe();
 
-                const inv = setInterval(fetchStats, 60000);
+                const inv = setInterval(fetchStats, 10000);
                 return () => {
                     clearInterval(inv);
                     sb.removeChannel(channel);
@@ -642,7 +668,7 @@
                     })
                     .subscribe();
 
-                const inv = setInterval(fetchLeaders, 60000);
+                const inv = setInterval(fetchLeaders, 10000);
                 return () => {
                     clearInterval(inv);
                     sb.removeChannel(channel);
@@ -1001,7 +1027,7 @@
                         })
                         .subscribe();
 
-                    const inv = setInterval(fetchMarked, 30000);
+                    const inv = setInterval(fetchMarked, 10000);
                     return () => {
                         clearInterval(inv);
                         sb.removeChannel(channel);
@@ -1078,7 +1104,7 @@
                     exam_year: p.examYear,
                     exam_month: p.examMonth,
                     exam_level: p.examLevel,
-                    history: history,
+                    history: { ...history, last_updated: new Date().toISOString() },
                     marks: marks
                 };
                 const { error } = await sb.from('study_tracker_v2').upsert(payload);
@@ -1089,11 +1115,12 @@
 
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
+                const historyWithTimestamp = { ...h, last_updated: new Date().toISOString() };
                 await sb.from('study_tracker_v2').upsert({ 
                     user_id: user.id, 
                     name: profile.name, district: profile.district, subjects: profile.subjects,
                     exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel, 
-                    history: h, marks: m 
+                    history: historyWithTimestamp, marks: m 
                 });
             };
 
