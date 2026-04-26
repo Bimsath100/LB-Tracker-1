@@ -850,17 +850,13 @@
             }, [user, profile?.name]);
 
             useEffect(() => {
-                if (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                if (user?.email === ADMIN_EMAIL) {
                     const fetchMarked = async () => {
                         const today = new Date().toISOString().split('T')[0];
                         const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
                         if (!error) {
                             setMarkedToday(data.length);
-                            setMarkedDetails(data.map(d => ({ 
-                                name: d.name, 
-                                district: d.district, 
-                                hours: (d.history?.[today] || []).filter(Boolean).length 
-                            })));
+                            setMarkedDetails(data.map(d => ({ name: d.name, district: d.district, hours: d.history[today].filter(Boolean).length })));
                         }
                     };
                     fetchMarked();
@@ -888,24 +884,21 @@
             }, []);
 
             const updateAnnouncement = async () => {
-                if (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                    const { error } = await sb.from('study_tracker_v2').upsert({ 
-                        user_id: user.id, 
-                        name: 'LB_ADMIN_OFFICIAL', 
-                        district: profile?.district || 'Colombo', 
-                        history: { ...history, msg: announcementInput },
-                        subjects: profile?.subjects || [],
-                        exam_year: profile?.examYear || 2026,
-                        exam_month: profile?.examMonth || 'August'
-                    });
-                    if (!error) {
-                        setAnnouncement(announcementInput);
-                        alert('Broadcast updated successfully! ✅');
-                    } else {
-                        alert('Error updating broadcast: ' + error.message);
-                    }
+                if (!user) return;
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                    user_id: user.id, 
+                    name: 'LB_ADMIN_OFFICIAL', 
+                    district: profile?.district || 'Colombo', 
+                    history: { ...history, msg: announcementInput },
+                    subjects: profile?.subjects || [],
+                    exam_year: profile?.examYear || 2026,
+                    exam_month: profile?.examMonth || 'August'
+                });
+                if (!error) {
+                    setAnnouncement(announcementInput);
+                    alert('Broadcast updated successfully! ✅');
                 } else {
-                    alert('Unauthorized: Only admin can broadcast messages.');
+                    alert('Error updating broadcast: ' + error.message);
                 }
             };
 
@@ -986,7 +979,7 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
-                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                                {user?.email === ADMIN_EMAIL && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
                                         <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
                                             <div className="live-dot"></div>
