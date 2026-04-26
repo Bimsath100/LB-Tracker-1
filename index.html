@@ -28,13 +28,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            alert("JS Error: " + msg + "\nLine: " + line + "\nColumn: " + col + "\nError object: " + JSON.stringify(error));
-            return false;
-        };
-        console.log("Error handler initialized");
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -525,7 +519,7 @@
                 }, 5000);
                 return () => clearInterval(interval);
             }, [liveUsers, markedToday]);
-            const items = [ `🚀 <span>${dynamicStats.online}</span> Students Online Now`, `🔥 <span>Someone</span> from Kandy reached 10h!`, `⚔️ <span>Colombo</span> is Leading District Battle`, `✨ <span>${dynamicStats.marked}</span> Students Marked Today`, `🏆 <span>Peak Performance:</span> 15.5h Today`, `📊 <span>Growth:</span> +12% Study Hours this week` ];
+            const items = [ `🚀 <span>${dynamicStats.online}</span> Students Online Now`, `🔥 <span>Someone</span> from Kandy reached 10h!`, `⚔️ <span>Colombo</span> is Leading District Battle`, `✨ <span>${dynamicStats.marked}</span> Students Marked Today`, `🏆 <span>Peak Performance:</span> 15h Today`, `📊 <span>Growth:</span> +12% Study Hours this week` ];
             return ( <div className="ticker-wrap"><div className="ticker">{items.concat(items).map((text, i) => ( <div key={i} className="ticker-item" dangerouslySetInnerHTML={{ __html: text }}></div> ))}</div></div> );
         };
 
@@ -871,6 +865,29 @@
 
                 return () => { channel.unsubscribe(); };
             }, [user, profile?.name]);
+
+            useEffect(() => {
+                const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                if (!isAdmin) {
+                    const handleContextMenu = (e) => e.preventDefault();
+                    const handleKeyDown = (e) => {
+                        if (
+                            e.keyCode === 123 || // F12
+                            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // Ctrl+Shift+I/J/C
+                            (e.ctrlKey && e.keyCode === 85) // Ctrl+U
+                        ) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    };
+                    document.addEventListener('contextmenu', handleContextMenu);
+                    document.addEventListener('keydown', handleKeyDown);
+                    return () => {
+                        document.removeEventListener('contextmenu', handleContextMenu);
+                        document.removeEventListener('keydown', handleKeyDown);
+                    };
+                }
+            }, [user]);
 
             useEffect(() => {
                 if (user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
