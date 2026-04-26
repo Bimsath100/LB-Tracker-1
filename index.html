@@ -576,9 +576,6 @@
                         if (hrs > 0) acc[row.district] = (acc[row.district] || 0) + hrs;
                         return acc;
                     }, {});
-                    ["Colombo", "Kandy", "Galle", "Gampaha", "Matara", "Kurunegala"].forEach((d, i) => {
-                        stats[d] = (stats[d] || 0) + Math.floor((new Date().getHours() * (6 - i) * 1.2) + 10);
-                    });
                     setRanks(Object.entries(stats).map(([name, hours]) => ({ name, hours })).sort((a, b) => b.hours - a.hours).slice(0, 5));
                     setLoading(false);
                 };
@@ -933,8 +930,18 @@
                         }
                     };
                     fetchMarked();
+
+                    const channel = sb.channel('admin-realtime')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
+                            fetchMarked();
+                        })
+                        .subscribe();
+
                     const inv = setInterval(fetchMarked, 30000);
-                    return () => clearInterval(inv);
+                    return () => {
+                        clearInterval(inv);
+                        sb.removeChannel(channel);
+                    };
                 }
             }, [user]);
 
