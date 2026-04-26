@@ -445,6 +445,29 @@
         ];
         const getRank = (hrs) => [...RANKS].reverse().find(r => hrs >= r.min) || RANKS[0];
         
+        const getStreak = (history) => {
+            let streak = 0;
+            let d = new Date();
+            for (let i = 0; i < 365; i++) {
+                const k = d.toISOString().split('T')[0];
+                if (history[k] && history[k].some(h => h === true)) {
+                    streak++;
+                    d.setDate(d.getDate() - 1);
+                } else {
+                    if (i === 0) { // Check yesterday if today is 0
+                        d.setDate(d.getDate() - 1);
+                        const yesterdayK = d.toISOString().split('T')[0];
+                        if (history[yesterdayK] && history[yesterdayK].some(h => h === true)) {
+                            streak = 0; // Streak continues from yesterday but today is 0
+                            continue;
+                        }
+                    }
+                    break;
+                }
+            }
+            return streak;
+        };
+        
         const timeAgo = (date) => {
             if (!date) return '0 min ago';
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -743,15 +766,33 @@
                     )}
                     {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '10px' }}>
-                            <div className="glass" style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800', background: rank.color + '20', border: `1px solid ${rank.color}40`, color: rank.color }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '15px' }}>
+                            <div className="glass" style={{ padding: '6px 15px', borderRadius: '100px', fontSize: '0.8rem', fontWeight: '800', color: '#F59E0B', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span>🔥</span> {getStreak(history)} DAY STREAK
+                            </div>
+                            <div className="glass" style={{ padding: '6px 15px', borderRadius: '100px', fontSize: '0.8rem', fontWeight: '800', background: rank.color + '20', border: `1px solid ${rank.color}40`, color: rank.color }}>
                                 {rank.icon} {rank.name.toUpperCase()}
                             </div>
                         </div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
+
+                    {commGoal && (
+                        <Reveal>
+                            <div className="glass card" style={{ marginBottom: '2rem', padding: '1.5rem', background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(217, 70, 239, 0.1))' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <h4 style={{ margin: 0, fontFamily: 'Outfit', fontSize: '0.9rem' }}>🎯 Community Goal: {commGoal.title}</h4>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{Math.round((markedToday / commGoal.target) * 100)}%</span>
+                                </div>
+                                <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${Math.min(100, (markedToday / commGoal.target) * 100)}%`, background: 'linear-gradient(90deg, var(--primary), #D946EF)', boxShadow: '0 0 10px var(--primary)', transition: 'width 1s ease' }}></div>
+                                </div>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '8px', textAlign: 'center' }}>{markedToday} students out of {commGoal.target} target joined the challenge!</p>
+                            </div>
+                        </Reveal>
+                    )}
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
@@ -760,6 +801,12 @@
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
+                    </div>
+
+                    <div style={{ textAlign: 'center', marginTop: '1rem', marginBottom: '2rem' }}>
+                        <button className="btn-outline" onClick={() => window.print()} style={{ fontSize: '0.8rem', padding: '10px 20px', borderRadius: '100px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                            <span>📄</span> Download Study Report (PDF)
+                        </button>
                     </div>
                     <div className="community-hub">
                         <Reveal delay={0.4}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
@@ -1009,6 +1056,8 @@
             const [resources, setResources] = useState([]);
             const [totalUsers, setTotalUsers] = useState(0);
             const [resInput, setResInput] = useState({ title: '', link: '', subject: 'Physics' });
+            const [commGoal, setCommGoal] = useState(null);
+            const [goalInput, setGoalInput] = useState({ title: '', target: 100 });
 
             const fetchResources = async () => {
                 const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_RESOURCES').maybeSingle();
@@ -1018,6 +1067,23 @@
             const fetchTotalUsers = async () => {
                 const { count } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
                 setTotalUsers(count || 0);
+            };
+
+            const fetchCommGoal = async () => {
+                const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_COMMUNITY_GOAL').maybeSingle();
+                if (data && data.history) {
+                    setCommGoal(data.history);
+                    setGoalInput(data.history);
+                }
+            };
+
+            const updateGoal = async () => {
+                const { error } = await sb.from('study_tracker_v2').upsert({ 
+                    user_id: '11111111-1111-1111-1111-111111111111', 
+                    name: 'LB_COMMUNITY_GOAL',
+                    history: goalInput
+                });
+                if (!error) { setCommGoal(goalInput); setAdminView(null); }
             };
 
             const addResource = async () => {
@@ -1044,7 +1110,7 @@
                 if (!error) setResources(newItems);
             };
 
-            useEffect(() => { fetchResources(); fetchTotalUsers(); }, []);
+            useEffect(() => { fetchResources(); fetchTotalUsers(); fetchCommGoal(); }, []);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1385,6 +1451,7 @@
                                     <button className={`btn-primary ${adminView === 'marked' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('marked'); }}>Marked Today</button>
                                     <button className={`btn-primary ${adminView === 'broadcast' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('broadcast'); }}>Broadcast</button>
                                     <button className={`btn-primary ${adminView === 'resources' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('resources'); }}>Resources</button>
+                                    <button className={`btn-primary ${adminView === 'goal' ? '' : 'btn-outline'}`} onClick={(e) => { e.stopPropagation(); setAdminView('goal'); }}>Community Goal</button>
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -1425,6 +1492,13 @@
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                             <textarea value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type global announcement..." style={{ width: '100%', height: '100px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', color: 'white', outline: 'none' }} />
                                             <button className="btn-primary" onClick={updateAnnouncement}>Update Broadcast</button>
+                                        </div>
+                                    ) : adminView === 'goal' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <h4 style={{ margin: 0 }}>Set Community Challenge</h4>
+                                            <input type="text" placeholder="Goal Title (e.g. 1000 Students Target)" value={goalInput.title} onChange={e => setGoalInput({...goalInput, title: e.target.value})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                                            <input type="number" placeholder="Target Number of Students" value={goalInput.target} onChange={e => setGoalInput({...goalInput, target: parseInt(e.target.value)})} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', padding: '10px', borderRadius: '10px', color: 'white' }} />
+                                            <button className="btn-primary" onClick={updateGoal}>Set Global Goal</button>
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
