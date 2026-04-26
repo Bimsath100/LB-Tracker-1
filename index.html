@@ -28,7 +28,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -876,26 +875,7 @@
                 return () => subscription.unsubscribe();
             }, []);
 
-            const fetchUserData = async (uid) => {
-                try {
-                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).maybeSingle();
-                    if (data) {
-                        setProfile({ 
-                            name: data.name, 
-                            district: data.district, 
-                            subjects: data.subjects, 
-                            examYear: data.exam_year, 
-                            examMonth: data.exam_month,
-                            examLevel: data.exam_level || 'AL'
-                        });
-                        setHistory(data.history || {});
-                        setSetupDone(true);
-                    } else {
-                        setSetupDone(false);
-                    }
-                } catch (e) { console.error(e); }
-                setLoading(false);
-            };
+
 
             useEffect(() => {
                 const channel = sb.channel('online-users', {
@@ -1033,7 +1013,7 @@
 
             const fetchUserData = async (uid) => {
                 try {
-                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
+                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).maybeSingle();
                     if (data) {
                         setProfile({ 
                             name: data.name, 
@@ -1041,7 +1021,7 @@
                             subjects: data.subjects, 
                             examYear: data.exam_year, 
                             examMonth: data.exam_month,
-                            examLevel: data.exam_level || 'A/L'
+                            examLevel: data.exam_level || 'AL'
                         });
                         setHistory(data.history || {});
                         setMarks(data.marks || []);
@@ -1096,7 +1076,7 @@
 
             if (loading) return <LoadingScreen />;
             if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} />;
-            if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
+            if (!profile || isEditMode) return <SetupWizard user={user} onComplete={(p) => { setProfile(p); setIsEditMode(false); }} />;
 
             return (
                 <div>
@@ -1256,7 +1236,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
     </script>
 </body>
 </html>
