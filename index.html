@@ -808,10 +808,26 @@
 
             useEffect(() => {
                 sb.auth.getSession().then(({ data: { session } }) => {
-                    if (session) { setUser(session.user); fetchUserData(session.user.id); } else { setLoading(false); }
+                    if (session) { 
+                        setUser(session.user); 
+                        fetchUserData(session.user.id); 
+                    } else { 
+                        setLoading(false); 
+                    }
+                }).catch(err => {
+                    console.error("Auth Error:", err);
+                    setLoading(false);
                 });
+
                 const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
-                    if (session) { setUser(session.user); fetchUserData(session.user.id); } else { setUser(null); setProfile(null); setLoading(false); }
+                    if (session) { 
+                        setUser(session.user); 
+                        fetchUserData(session.user.id); 
+                    } else { 
+                        setUser(null); 
+                        setProfile(null); 
+                        setLoading(false); 
+                    }
                 });
                 return () => subscription.unsubscribe();
             }, []);
