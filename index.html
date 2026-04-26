@@ -664,6 +664,7 @@
             const [markedToday, setMarkedToday] = useState(0);
             const [announcement, setAnnouncement] = useState('');
             const [announcementInput, setAnnouncementInput] = useState('');
+            const [showAnnounceModal, setShowAnnounceModal] = useState(false);
             const [adminView, setAdminView] = useState(null); // 'live' or 'marked'
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
@@ -756,8 +757,15 @@
                 const fetchAnnouncement = async () => {
                     const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_ADMIN_OFFICIAL').maybeSingle();
                     if (data && data.history?.msg) {
-                        setAnnouncement(data.history.msg);
-                        setAnnouncementInput(data.history.msg);
+                        const msg = data.history.msg;
+                        setAnnouncement(msg);
+                        setAnnouncementInput(msg);
+                        
+                        // Smart Popup Logic
+                        const lastSeen = localStorage.getItem('lastSeenAnnounce');
+                        if (msg && msg !== lastSeen) {
+                            setShowAnnounceModal(true);
+                        }
                     }
                 };
                 fetchAnnouncement();
@@ -988,7 +996,7 @@
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} />
+                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'feedback' ? (
@@ -1104,7 +1112,7 @@
             );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement }) => {
+        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const todayCount = (history[viewDate] || []).filter(Boolean).length;
             const calcHours = (days) => {
                 let total = 0;
@@ -1123,15 +1131,27 @@
             const isEvening = new Date().getHours() >= 17;
             const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
 
+            const dismissAnnounce = () => {
+                localStorage.setItem('lastSeenAnnounce', announcement);
+                setShowAnnounceModal(false);
+            };
+
             return (
                 <div>
                     <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
-                    {announcement && (
-                        <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid var(--primary)', padding: '12px 20px', borderRadius: '15px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px', animation: 'pulseBorder 2s infinite' }}>
-                            <span style={{ fontSize: '1.2rem' }}>📢</span>
-                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'white', lineHeight: '1.4' }}>{announcement}</div>
+                    
+                    {showAnnounceModal && announcement && (
+                        <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
+                            <div className="glass card" style={{ maxWidth: '400px', width: '90%', padding: '2.5rem', textAlign: 'center', animation: 'popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                                <button onClick={dismissAnnounce} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-dim)', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                                <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>📢</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', marginBottom: '1rem' }}>Announcement</h2>
+                                <p style={{ fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: '1.6', marginBottom: '2rem', fontWeight: '500' }}>{announcement}</p>
+                                <button className="btn-primary" onClick={dismissAnnounce}>Got it! 🚀</button>
+                            </div>
                         </div>
                     )}
+
                     {showReminder && (
                         <div className="reminder-banner">
                             <div style={{ fontSize: '1.5rem' }}>⏰</div>
