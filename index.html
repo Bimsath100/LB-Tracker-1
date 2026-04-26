@@ -1130,11 +1130,29 @@
         };
 
         const ActivityTicker = ({ liveUsers, markedToday }) => {
+            const [dynamicStats, setDynamicStats] = useState({ online: 0, marked: 0 });
+            
+            useEffect(() => {
+                const hour = new Date().getHours();
+                const baseOnline = hour < 6 ? 10 : hour < 12 ? 35 : hour < 18 ? 55 : hour < 22 ? 85 : 40;
+                const baseMarked = (hour * 45) + (markedToday * 5) + 120;
+                
+                setDynamicStats({ online: baseOnline + liveUsers, marked: baseMarked });
+
+                const interval = setInterval(() => {
+                    setDynamicStats(prev => ({
+                        online: Math.max(10, prev.online + (Math.random() > 0.5 ? 1 : -1)),
+                        marked: prev.marked + (Math.random() > 0.8 ? 1 : 0)
+                    }));
+                }, 5000);
+                return () => clearInterval(interval);
+            }, [liveUsers, markedToday]);
+
             const items = [
-                `🚀 <span>${liveUsers + 12}</span> Students Online Now`,
+                `🚀 <span>${dynamicStats.online}</span> Students Online Now`,
                 `🔥 <span>Someone</span> from Kandy reached 10h!`,
                 `⚔️ <span>Colombo</span> is Leading District Battle`,
-                `✨ <span>${markedToday + 5}</span> Students Marked Today`,
+                `✨ <span>${dynamicStats.marked}</span> Students Marked Today`,
                 `🏆 <span>Peak Performance:</span> 15.5h Today`,
                 `📊 <span>Growth:</span> +12% Study Hours this week`
             ];
@@ -1153,30 +1171,27 @@
             const [feeds, setFeeds] = useState([]);
 
             useEffect(() => {
-                const generateInitialFeeds = () => {
-                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa"];
-                    const hourFactor = Math.max(1, Math.floor(new Date().getHours() / 3)); // More hours in evening
-                    return Array.from({ length: 4 }).map((_, i) => ({
-                        id: i,
-                        text: `Someone from ${locations[Math.floor(Math.random() * locations.length)]} marked ${Math.floor(Math.random() * 5) + hourFactor} hours today! 🔥`,
-                        type: 'live'
-                    }));
-                };
-                setFeeds(generateInitialFeeds());
-
-                const interval = setInterval(() => {
-                    const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Badulla"];
+                const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa", "Badulla", "Kegalle"];
+                
+                const addFeed = () => {
                     const loc = locations[Math.floor(Math.random() * locations.length)];
-                    const hourFactor = Math.max(1, Math.floor(new Date().getHours() / 4));
+                    const hour = new Date().getHours();
+                    const hourFactor = Math.max(1, Math.floor(hour / 4));
                     const hrs = Math.floor(Math.random() * 6) + hourFactor;
+                    
                     const newFeed = {
                         id: Date.now(),
                         text: `Someone from ${loc} reached ${hrs} hours! ${hrs > 10 ? '🏆' : '💪'}`,
                         type: 'live'
                     };
                     setFeeds(prev => [newFeed, ...prev.slice(0, 3)]);
-                }, 10000);
-                return () => clearInterval(interval);
+                    
+                    // Randomize next update time (bursty behavior: 5s to 25s)
+                    const nextTime = Math.floor(Math.random() * 20000) + 5000;
+                    setTimeout(addFeed, nextTime);
+                };
+
+                addFeed();
             }, []);
 
             return (
