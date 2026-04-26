@@ -754,7 +754,7 @@
 
             useEffect(() => {
                 const fetchAnnouncement = async () => {
-                    const { data } = await sb.from('study_tracker_v2').select('history').eq('user_id', '00000000-0000-0000-0000-000000000000').maybeSingle();
+                    const { data } = await sb.from('study_tracker_v2').select('history').eq('name', 'LB_ADMIN_OFFICIAL').maybeSingle();
                     if (data && data.history?.msg) {
                         setAnnouncement(data.history.msg);
                         setAnnouncementInput(data.history.msg);
@@ -766,14 +766,15 @@
             }, []);
 
             const updateAnnouncement = async () => {
+                if (!user) return;
                 const { error } = await sb.from('study_tracker_v2').upsert({ 
-                    user_id: '00000000-0000-0000-0000-000000000000', 
-                    name: 'SYSTEM', 
-                    district: 'SYSTEM', 
-                    history: { msg: announcementInput },
-                    subjects: [],
-                    exam_year: 2026,
-                    exam_month: 'August'
+                    user_id: user.id, 
+                    name: 'LB_ADMIN_OFFICIAL', 
+                    district: profile?.district || 'Colombo', 
+                    history: { ...history, msg: announcementInput },
+                    subjects: profile?.subjects || [],
+                    exam_year: profile?.examYear || 2026,
+                    exam_month: profile?.examMonth || 'August'
                 });
                 if (!error) {
                     setAnnouncement(announcementInput);
