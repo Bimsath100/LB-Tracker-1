@@ -503,15 +503,16 @@
             return <div className="chart-box" style={{ height: '180px' }}><canvas ref={ref}></canvas></div>;
         };
 
-        const ActivityTicker = ({ liveUsers, markedToday }) => {
+        const ActivityTicker = ({ liveUsers, markedToday, topDistrict, topPerformer }) => {
             const [dynamicStats, setDynamicStats] = useState({ online: 0, marked: 0 });
             useEffect(() => {
                 setDynamicStats({ online: liveUsers, marked: markedToday });
             }, [liveUsers, markedToday]);
             const items = [
                 { icon: '🚀', val: dynamicStats.online, lbl: 'Students Online Now' },
+                { icon: '⚔️', val: topDistrict || '...', lbl: 'is Leading District Battle' },
                 { icon: '✨', val: dynamicStats.marked, lbl: 'Students Marked Today' },
-                { icon: '🏆', val: 'Elite Student Dashboard', lbl: '' }
+                { icon: '👑', val: topPerformer || '...', lbl: "is Today's Peak Performer" }
             ];
             return ( 
                 <div className="ticker-wrap">
@@ -588,6 +589,31 @@
         };
 
         const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
+            const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
+
+            useEffect(() => {
+                const fetchLeaders = async () => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
+                    if (data && data.length > 0) {
+                        const distMap = {};
+                        let bestP = { name: '', hrs: 0 };
+                        data.forEach(u => {
+                            const hrs = (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0;
+                            if (hrs > 0) {
+                                distMap[u.district] = (distMap[u.district] || 0) + hrs;
+                                if (hrs > bestP.hrs) bestP = { name: u.name, hrs };
+                            }
+                        });
+                        const topD = Object.entries(distMap).sort((a,b) => b[1] - a[1])[0];
+                        setLeaderStats({ district: topD ? topD[0] : 'None', performer: bestP.name || 'None' });
+                    }
+                };
+                fetchLeaders();
+                const inv = setInterval(fetchLeaders, 30000);
+                return () => clearInterval(inv);
+            }, []);
+
             const todayCount = (Array.isArray(history[viewDate]) ? history[viewDate].filter(Boolean).length : 0);
             const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
@@ -597,8 +623,8 @@
             const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
             const dismissAnnounce = () => { localStorage.setItem('lastSeenAnnounce', announcement); setShowAnnounceModal(false); };
             return (
-                <div>
-                    <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
+                <div className="dashboard-container">
+                    <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} topDistrict={leaderStats.district} topPerformer={leaderStats.performer} />
                     {showAnnounceModal && announcement && (
                         <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
                             <div className="glass card" style={{ maxWidth: '400px', width: '92%', padding: '2.5rem', textAlign: 'center', animation: 'modalPopIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)', position: 'relative' }}>
