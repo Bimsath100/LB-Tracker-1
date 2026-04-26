@@ -977,11 +977,12 @@
                             const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
                             if (!error && data) {
                                 setMarkedToday(data.length);
-                                setMarkedDetails(data.map(d => ({ 
+                                const details = data.map(d => ({ 
                                     name: d.name || 'Unknown', 
                                     district: d.district || 'N/A', 
                                     hours: (d.history && Array.isArray(d.history[today])) ? d.history[today].filter(Boolean).length : 0 
-                                })));
+                                })).sort((a, b) => b.hours - a.hours);
+                                setMarkedDetails(details);
                             }
                         } catch (e) {
                             console.error("Admin Fetch Error:", e);
