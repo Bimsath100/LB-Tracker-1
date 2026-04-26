@@ -758,11 +758,11 @@
                                 <span className="nav-tracker">Tracker</span>
                                 {user?.email === ADMIN_EMAIL && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
-                                        <div className="live-indicator">
+                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
                                             <div className="live-dot"></div>
                                             <span>{liveUsers} LIVE</span>
                                         </div>
-                                        <div className="live-indicator" style={{ background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
+                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
                                             <span>{markedToday} MARKED</span>
                                         </div>
@@ -823,6 +823,47 @@
                             <span className="m-label">Join</span>
                         </div>
                     </nav>
+
+                    {adminView && (
+                        <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
+                            <div className="admin-modal glass" onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                                    <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>{adminView === 'live' ? 'Online Students' : 'Today\'s Progress'}</h2>
+                                    <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+                                </div>
+                                
+                                {adminView === 'live' ? (
+                                    <div>
+                                        {liveDetails.length === 0 ? <p>No one online</p> : 
+                                            liveDetails.map((u, i) => (
+                                                <div key={i} className="admin-list-item">
+                                                    <div>
+                                                        <div style={{ fontWeight: '700' }}>{u.name}</div>
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
+                                                    </div>
+                                                    <div className="live-dot"></div>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {markedDetails.length === 0 ? <p>No one marked today</p> : 
+                                            markedDetails.map((u, i) => (
+                                                <div key={i} className="admin-list-item">
+                                                    <div>
+                                                        <div style={{ fontWeight: '700' }}>{u.name}</div>
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
+                                                    </div>
+                                                    <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <main className="main-content">
                         <div className="container">
