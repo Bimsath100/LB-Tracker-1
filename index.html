@@ -225,6 +225,23 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .admin-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .admin-modal {
+            width: 100%; max-width: 500px; max-height: 80vh;
+            overflow-y: auto; background: var(--card-bg);
+            border: var(--glass-border); border-radius: 24px;
+            padding: 2rem; position: relative;
+        }
+        .admin-list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; border-bottom: 1px solid var(--border);
+        }
+
         .live-indicator {
             display: flex;
             align-items: center;
@@ -583,6 +600,9 @@
             const [deferredPrompt, setDeferredPrompt] = useState(null);
             const [liveUsers, setLiveUsers] = useState(1);
             const [markedToday, setMarkedToday] = useState(0);
+            const [adminView, setAdminView] = useState(null); // 'live' or 'marked'
+            const [liveDetails, setLiveDetails] = useState([]);
+            const [markedDetails, setMarkedDetails] = useState([]);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -626,12 +646,17 @@
                 channel
                     .on('presence', { event: 'sync' }, () => {
                         const newState = channel.presenceState();
-                        const count = Object.keys(newState).length;
-                        setLiveUsers(count > 0 ? count : 1);
+                        const details = Object.values(newState).flat().map(p => ({ name: p.name || 'Anonymous', email: p.email }));
+                        setLiveDetails(details);
+                        setLiveUsers(details.length > 0 ? details.length : 1);
                     })
                     .subscribe(async (status) => {
                         if (status === 'SUBSCRIBED') {
-                            await channel.track({ online_at: new Date().toISOString() });
+                            await channel.track({ 
+                                name: profile?.name || 'Guest', 
+                                email: user?.email,
+                                online_at: new Date().toISOString() 
+                            });
                         }
                     });
 
@@ -642,8 +667,11 @@
                 if (user?.email === ADMIN_EMAIL) {
                     const fetchMarked = async () => {
                         const today = new Date().toISOString().split('T')[0];
-                        const { count, error } = await sb.from('study_tracker_v2').select('user_id', { count: 'exact', head: true }).not(`history->${today}`, 'is', null);
-                        if (!error) setMarkedToday(count);
+                        const { data, error } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null);
+                        if (!error) {
+                            setMarkedToday(data.length);
+                            setMarkedDetails(data.map(d => ({ name: d.name, district: d.district, hours: d.history[today].filter(Boolean).length })));
+                        }
                     };
                     fetchMarked();
                     const inv = setInterval(fetchMarked, 30000);
