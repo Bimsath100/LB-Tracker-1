@@ -286,15 +286,22 @@
             border: 1px solid rgba(99, 102, 241, 0.1);
         }
         .ticker {
-            display: flex; white-space: nowrap; gap: 50px;
-            animation: tickerMove 40s linear infinite;
+            display: flex;
+            width: max-content;
+            animation: tickerMove 30s linear infinite;
+        }
+        .ticker-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            padding-right: 50px;
         }
         @media (max-width: 768px) {
             .ticker { animation-duration: 15s; }
         }
         @keyframes tickerMove {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-150%); }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
         .ticker-item {
             display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
@@ -530,11 +537,20 @@
             return ( 
                 <div className="ticker-wrap">
                     <div className="ticker">
-                        {items.concat(items).map((item, i) => ( 
-                            <div key={i} className="ticker-item">
-                                {item.icon} <span>{item.val}</span> {item.lbl}
-                            </div> 
-                        ))}
+                        <div className="ticker-content">
+                            {items.map((item, i) => ( 
+                                <div key={i} className="ticker-item">
+                                    {item.icon} <span>{item.val}</span> {item.lbl}
+                                </div> 
+                            ))}
+                        </div>
+                        <div className="ticker-content">
+                            {items.map((item, i) => ( 
+                                <div key={'dup-' + i} className="ticker-item">
+                                    {item.icon} <span>{item.val}</span> {item.lbl}
+                                </div> 
+                            ))}
+                        </div>
                     </div>
                 </div> 
             );
