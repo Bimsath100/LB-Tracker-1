@@ -242,7 +242,9 @@
         const SUBJECT_ICONS = {
             'ICT': '💻', 'Physics': '⚛️', 'Chemistry': '🧪', 'Biology': '🧬', 'Combined Maths': '📐',
             'ET': '⚙️', 'SFT': '🔬', 'Accounting': '📊', 'Economics': '📈', 'Business Studies': '💼',
-            'Logic': '🧠', 'Political Science': '⚖️', 'Sinhala': '✍️', 'English': '🔤', 'History': '📜'
+            'Logic': '🧠', 'Political Science': '⚖️', 'Sinhala': '✍️', 'English': '🔤', 'History': '📜',
+            'Mathematics': '🔢', 'Science': '🧪', 'Religion': '🙏', 'Geography': '🌍', 'Civics': '🏛️', 
+            'Tamil': '✍️', 'Art': '🎨', 'Music': '🎶', 'Drama': '🎭', 'Health': '🍎', 'Commerce': '💰', 'Home Science': '🏠'
         };
 
         const DISTRICTS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle"];
@@ -496,6 +498,8 @@
             const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('theme') === 'light');
             const [deferredPrompt, setDeferredPrompt] = useState(null);
 
+            const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
+
             useEffect(() => {
                 const handleBeforeInstall = (e) => {
                     e.preventDefault();
@@ -537,7 +541,8 @@
                             district: data.district, 
                             subjects: data.subjects, 
                             examYear: data.exam_year, 
-                            examMonth: data.exam_month 
+                            examMonth: data.exam_month,
+                            examLevel: data.exam_level || 'A/L'
                         });
                         setHistory(data.history || {});
                         setMarks(data.marks || []);
@@ -558,6 +563,7 @@
                     subjects: p.subjects,
                     exam_year: p.examYear,
                     exam_month: p.examMonth,
+                    exam_level: p.examLevel,
                     history: history,
                     marks: marks
                 };
@@ -572,7 +578,8 @@
                 await sb.from('study_tracker_v2').upsert({ 
                     user_id: user.id, 
                     name: profile.name, district: profile.district, subjects: profile.subjects,
-                    exam_year: profile.examYear, exam_month: profile.examMonth, history: h, marks: m 
+                    exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel, 
+                    history: h, marks: m 
                 });
             };
 
@@ -605,9 +612,7 @@
                             </div>
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
-                                {profile.subjects.map(s => (
-                                    <div key={s} className={`nav-link ${currentPage === s ? 'active' : ''}`} onClick={() => setCurrentPage(s)}>{s}</div>
-                                ))}
+                                <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
                                 <div className={`nav-link ${currentPage === 'tutorial' ? 'active' : ''}`} onClick={() => setCurrentPage('tutorial')}>How to Use</div>
                                 <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
                                 <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
@@ -641,9 +646,9 @@
 
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
-                        {profile.subjects.map(s => <MobileItem key={s} active={currentPage === s} icon={SUBJECT_ICONS[s] || '📚'} label={getNavLabel(s)} onClick={() => setCurrentPage(s)} />)}
-                        <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Guide" onClick={() => setCurrentPage('tutorial')} />
-                        <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
+                        <MobileItem active={currentPage === 'subjects' || profile.subjects.includes(currentPage)} icon="📚" label="Subjects" onClick={() => setCurrentPage('subjects')} />
+                        <MobileItem active={currentPage === 'tutorial'} icon="Guide" label="Guide" onClick={() => setCurrentPage('tutorial')} />
+                        <MobileItem active={currentPage === 'feedback'} icon="Rate" label="Rate" onClick={() => setCurrentPage('feedback')} />
                         <div className="mobile-item tg-item" onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
                             <span className="m-icon">✈️</span>
                             <span className="m-label">Join</span>
@@ -654,6 +659,8 @@
                         <div className="container">
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} />
+                            ) : currentPage === 'subjects' ? (
+                                <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
@@ -696,10 +703,12 @@
 
         const SetupWizard = ({ onComplete, initialData, onCancel }) => {
             const [step, setStep] = useState(1);
-            const [form, setForm] = useState(initialData ? { ...initialData } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August' });
+            const [form, setForm] = useState(initialData ? { ...initialData, examLevel: initialData.examLevel || 'A/L' } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L' });
             const [customSub, setCustomSub] = useState('');
-            const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < 3 ? [...f.subjects, s] : f.subjects) }));
-            const addCustom = () => { if(customSub && form.subjects.length < 3 && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
+            const limit = form.examLevel === 'A/L' ? 3 : 9;
+
+            const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < limit ? [...f.subjects, s] : f.subjects) }));
+            const addCustom = () => { if(customSub && form.subjects.length < limit && !form.subjects.includes(customSub)) { toggleS(customSub); setCustomSub(''); } };
             const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}>
@@ -709,6 +718,14 @@
                                 <h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2>
                                 <p className="setup-subtitle">Let's set up your profile.</p>
                                 <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                                <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                                    <div onClick={() => setForm({...form, examLevel: 'A/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
+                                        <div style={{ fontWeight: '800' }}>A/L</div>
+                                    </div>
+                                    <div onClick={() => setForm({...form, examLevel: 'O/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
+                                        <div style={{ fontWeight: '800' }}>O/L</div>
+                                    </div>
+                                </div>
                                 <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
                                 <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
                                 {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
@@ -729,7 +746,7 @@
                         {step === 3 && (
                             <div>
                                 <h2 className="setup-title">Subjects 📚</h2>
-                                <p className="setup-subtitle">Choose exactly 3 subjects.</p>
+                                <p className="setup-subtitle">Choose exactly {limit} subjects.</p>
                                 <div className="chip-container">
                                     {form.subjects.map(s => (
                                         <div key={s} className="subject-chip">{s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span></div>
@@ -737,13 +754,13 @@
                                     {form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>
-                                    {SUBJECT_LIST.map(s => <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= 3 ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div></div>)}
+                                    {SUBJECT_LIST.map(s => <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div></div>)}
                                 </div>
                                 <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
                                     <input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} />
-                                    <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= 3}>+</button>
+                                    <button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= limit}>+</button>
                                 </div>
-                                <button className="btn-primary" disabled={form.subjects.length !== 3} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
+                                <button className="btn-primary" disabled={form.subjects.length !== limit} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button>
                                 <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button>
                             </div>
                         )}
