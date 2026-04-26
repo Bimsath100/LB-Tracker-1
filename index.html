@@ -532,13 +532,15 @@
             
             const fetchReal = async () => {
                 const today = new Date().toISOString().split('T')[0];
-                const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(10);
+                const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(20);
                 if (data && data.length > 0) {
-                    return data.map(u => ({
+                    const mapped = data.map(u => ({
                         id: u.name + Math.random(),
                         text: `${u.name} from ${u.district} marked ${u.history[today].filter(Boolean).length} hours! 🎯`,
+                        hrs: u.history[today].filter(Boolean).length,
                         type: 'real'
                     }));
+                    return mapped.sort((a, b) => b.hrs - a.hrs);
                 }
                 return [];
             };
