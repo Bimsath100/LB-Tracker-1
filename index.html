@@ -549,8 +549,18 @@
                     setFeeds(realOnes.slice(0, 5));
                 };
                 updateFeed();
-                const interval = setInterval(updateFeed, 30000);
-                return () => clearInterval(interval);
+
+                const channel = sb.channel('feed-realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
+                        updateFeed();
+                    })
+                    .subscribe();
+
+                const interval = setInterval(updateFeed, 60000);
+                return () => {
+                    clearInterval(interval);
+                    sb.removeChannel(channel);
+                };
             }, []);
 
             return ( 
@@ -581,8 +591,18 @@
                     setLoading(false);
                 };
                 fetchStats();
+
+                const channel = sb.channel('ranks-realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
+                        fetchStats();
+                    })
+                    .subscribe();
+
                 const inv = setInterval(fetchStats, 60000);
-                return () => clearInterval(inv);
+                return () => {
+                    clearInterval(inv);
+                    sb.removeChannel(channel);
+                };
             }, []);
             if (loading) return <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>Loading ranks...</div>;
             return ( <div>{ranks.map((r, i) => ( <div key={r.name} className="district-rank-item"><div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div><div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div><div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div></div> ))}{ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}</div> );
@@ -610,8 +630,18 @@
                     }
                 };
                 fetchLeaders();
-                const inv = setInterval(fetchLeaders, 30000);
-                return () => clearInterval(inv);
+
+                const channel = sb.channel('leaders-realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
+                        fetchLeaders();
+                    })
+                    .subscribe();
+
+                const inv = setInterval(fetchLeaders, 60000);
+                return () => {
+                    clearInterval(inv);
+                    sb.removeChannel(channel);
+                };
             }, []);
 
             const todayCount = (Array.isArray(history[viewDate]) ? history[viewDate].filter(Boolean).length : 0);
