@@ -521,11 +521,8 @@
             }, [liveUsers, markedToday]);
             const items = [
                 { icon: '🚀', val: dynamicStats.online, lbl: 'Students Online Now' },
-                { icon: '🔥', val: 'Someone', lbl: 'from Kandy reached 10h!' },
-                { icon: '⚔️', val: 'Colombo', lbl: 'is Leading District Battle' },
                 { icon: '✨', val: dynamicStats.marked, lbl: 'Students Marked Today' },
-                { icon: '🏆', val: '15h', lbl: 'Today Peak Performance' },
-                { icon: '📊', val: '+12%', lbl: 'Study Hours growth this week' }
+                { icon: '🏆', val: 'Elite Student Dashboard', lbl: '' }
             ];
             return ( 
                 <div className="ticker-wrap">
@@ -542,18 +539,16 @@
 
         const ActivityFeed = () => {
             const [feeds, setFeeds] = useState([]);
-            const locations = ["Colombo", "Kandy", "Gampaha", "Galle", "Matara", "Kurunegala", "Kalutara", "Polonnaruwa", "Badulla", "Kegalle"];
             
             const fetchReal = async () => {
                 const today = new Date().toISOString().split('T')[0];
                 const { data } = await sb.from('study_tracker_v2').select('name, district, history').not(`history->${today}`, 'is', null).limit(10);
                 if (data && data.length > 0) {
-                    const realItems = data.map(u => ({
+                    return data.map(u => ({
                         id: u.name + Math.random(),
                         text: `${u.name} from ${u.district} marked ${u.history[today].filter(Boolean).length} hours! 🎯`,
                         type: 'real'
                     }));
-                    return realItems;
                 }
                 return [];
             };
@@ -561,23 +556,23 @@
             useEffect(() => {
                 const updateFeed = async () => {
                     const realOnes = await fetchReal();
-                    const loc = locations[Math.floor(Math.random() * locations.length)];
-                    const dummyHrs = Math.floor(Math.random() * 5) + 2;
-                    const dummy = { id: Date.now(), text: `Someone from ${loc} reached ${dummyHrs} hours! 💪`, type: 'dummy' };
-                    
-                    setFeeds(prev => {
-                        const combined = [...realOnes, ...prev.filter(f => f.type === 'dummy')];
-                        const unique = Array.from(new Map(combined.map(item => [item.text, item])).values());
-                        return [dummy, ...unique].slice(0, 5);
-                    });
+                    setFeeds(realOnes.slice(0, 5));
                 };
-
                 updateFeed();
-                const interval = setInterval(updateFeed, 15000);
+                const interval = setInterval(updateFeed, 30000);
                 return () => clearInterval(interval);
             }, []);
 
-            return ( <div className="feed-container">{feeds.map(f => ( <div key={f.id} className="feed-item" style={{ borderLeftColor: f.type === 'real' ? '#10B981' : 'var(--primary)', background: f.type === 'real' ? 'rgba(16, 185, 129, 0.05)' : 'var(--input-bg)' }}>{f.text}</div> ))}{feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Connecting to live hub...</div>}</div> );
+            return ( 
+                <div className="feed-container">
+                    {feeds.map(f => ( 
+                        <div key={f.id} className="feed-item" style={{ borderLeftColor: '#10B981', background: 'rgba(16, 185, 129, 0.05)' }}>
+                            {f.text}
+                        </div> 
+                    ))}
+                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No student activity recorded yet today. ⏳</div>}
+                </div> 
+            );
         };
 
         const DistrictLeaderboard = () => {
