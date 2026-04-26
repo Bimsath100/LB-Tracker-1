@@ -495,14 +495,24 @@
         const RadarChart = ({ data }) => {
             const ref = useRef(null);
             const chartRef = useRef(null);
+            const MAX = { mcq: 50, str: 100, esy: 300 };
+            const toP = (val, max) => max > 0 ? Math.min(Math.round((parseFloat(val) || 0) / max * 100), 100) : 0;
             useEffect(() => {
                 if (chartRef.current) chartRef.current.destroy();
                 if (!data || data.length === 0) return;
                 const ctx = ref.current.getContext('2d');
                 const latest = data[data.length - 1];
-                const avgMCQ = Math.round(data.reduce((a, b) => a + (parseFloat(b.mcq) || 0), 0) / data.length);
-                const avgSTR = Math.round(data.reduce((a, b) => a + (parseFloat(b.str) || 0), 0) / data.length);
-                const avgESY = Math.round(data.reduce((a, b) => a + (parseFloat(b.esy) || 0), 0) / data.length);
+                const avgMCQ = data.reduce((a, b) => a + (parseFloat(b.mcq) || 0), 0) / data.length;
+                const avgSTR = data.reduce((a, b) => a + (parseFloat(b.str) || 0), 0) / data.length;
+                const avgESY = data.reduce((a, b) => a + (parseFloat(b.esy) || 0), 0) / data.length;
+                const latestRaw = [parseFloat(latest.mcq) || 0, parseFloat(latest.str) || 0, parseFloat(latest.esy) || 0];
+                const avgRaw = [avgMCQ, avgSTR, avgESY];
+                // Use dynamic max: user's own peak or fallback defaults
+                const peakM = Math.max(...data.map(d => parseFloat(d.mcq) || 0), 1);
+                const peakS = Math.max(...data.map(d => parseFloat(d.str) || 0), 1);
+                const peakE = Math.max(...data.map(d => parseFloat(d.esy) || 0), 1);
+                const dynMax = { mcq: Math.max(peakM, 50), str: Math.max(peakS, 100), esy: Math.max(peakE, 150) };
+                const maxArr = [dynMax.mcq, dynMax.str, dynMax.esy];
                 chartRef.current = new Chart(ctx, {
                     type: 'radar',
                     data: {
@@ -510,7 +520,7 @@
                         datasets: [
                             {
                                 label: 'Latest Paper',
-                                data: [parseFloat(latest.mcq) || 0, parseFloat(latest.str) || 0, parseFloat(latest.esy) || 0],
+                                data: [toP(latest.mcq, dynMax.mcq), toP(latest.str, dynMax.str), toP(latest.esy, dynMax.esy)],
                                 borderColor: '#6366F1',
                                 backgroundColor: 'rgba(99, 102, 241, 0.25)',
                                 borderWidth: 3,
@@ -522,7 +532,7 @@
                             },
                             {
                                 label: 'Average',
-                                data: [avgMCQ, avgSTR, avgESY],
+                                data: [toP(avgMCQ, dynMax.mcq), toP(avgSTR, dynMax.str), toP(avgESY, dynMax.esy)],
                                 borderColor: '#8B5CF6',
                                 backgroundColor: 'rgba(139, 92, 246, 0.1)',
                                 borderWidth: 2,
@@ -541,17 +551,19 @@
                         scales: {
                             r: {
                                 beginAtZero: true,
+                                max: 100,
                                 angleLines: { color: 'rgba(148, 163, 184, 0.15)' },
                                 grid: { color: 'rgba(148, 163, 184, 0.12)' },
                                 pointLabels: {
                                     color: '#94A3B8',
-                                    font: { size: 13, weight: '700', family: 'Outfit' }
+                                    font: { size: 12, weight: '700', family: 'Outfit' }
                                 },
                                 ticks: {
                                     color: '#64748B',
                                     backdropColor: 'transparent',
                                     font: { size: 9 },
-                                    stepSize: 20
+                                    stepSize: 25,
+                                    callback: (v) => v + '%'
                                 }
                             }
                         },
@@ -565,6 +577,15 @@
                                     pointStyle: 'circle',
                                     padding: 20
                                 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const idx = ctx.dataIndex;
+                                        const raw = ctx.datasetIndex === 0 ? latestRaw[idx] : avgRaw[idx];
+                                        return `${ctx.dataset.label}: ${Math.round(raw)}/${maxArr[idx]} (${ctx.parsed.r}%)`;
+                                    }
+                                }
                             }
                         },
                         animation: { duration: 800, easing: 'easeOutQuart' }
@@ -573,7 +594,7 @@
                 return () => { if (chartRef.current) chartRef.current.destroy(); };
             }, [JSON.stringify(data)]);
             if (!data || data.length === 0) return null;
-            return <div className="chart-box" style={{ height: '280px' }}><canvas ref={ref}></canvas></div>;
+            return <div className="chart-box" style={{ height: '420px', maxWidth: '500px', margin: '0 auto' }}><canvas ref={ref}></canvas></div>;
         };
 
         const ProgressChart = ({ history }) => {
@@ -854,9 +875,9 @@
             const data = marks.filter(m => m.subject === subject);
             const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: getLocalISODate() }); };
             const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
-            const peakMCQ = Math.max(...data.map(m => parseFloat(m.mcq) || 0), 0);
-            const peakSTR = Math.max(...data.map(m => parseFloat(m.str) || 0), 0);
-            const peakESY = Math.max(...data.map(m => parseFloat(m.esy) || 0), 0);
+            const peakTotal = Math.max(...data.map(m => parseFloat(m.total) || 0), 0);
+            const avgTotal = data.length > 0 ? Math.round(data.reduce((a,b) => a + (parseFloat(b.total) || 0), 0) / data.length) : 0;
+            const hasBreakdown = data.some(m => (parseFloat(m.mcq) || 0) > 0 || (parseFloat(m.str) || 0) > 0 || (parseFloat(m.esy) || 0) > 0);
             const avgMastery = Math.round(data.reduce((a,b)=>a+(parseFloat(b.total)||0),0)/data.length / 450 * 100 || 0);
             return (
                 <div>
@@ -870,14 +891,14 @@
                     </div>
                     <div className="dash-grid">
                         <Reveal><div className="glass card"><span className="card-title">Add Paper Marks</span><form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /><div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}><input type="number" placeholder="MCQ" value={form.mcq} onChange={e => setForm({ ...form, mcq: e.target.value })} /><input type="number" placeholder="STR" value={form.str} onChange={e => setForm({ ...form, str: e.target.value })} /><input type="number" placeholder="ESY" value={form.esy} onChange={e => setForm({ ...form, esy: e.target.value })} /></div><button type="submit" className="btn-primary">Add Paper ✍️</button></form></div></Reveal>
-                        <Reveal delay={0.1}><div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}><span className="card-title">Paper History</span><div style={{ marginTop: '1rem' }}>{data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => ( <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}><div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq} S:{m.str} E:{m.esy}</div><div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div></div></div> ))}{data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}</div></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}><span className="card-title">Paper History</span><div style={{ marginTop: '1rem' }}>{data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => ( <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}><div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq || 0} S:{m.str || 0} E:{m.esy || 0}</div><div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div></div></div> ))}{data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}</div></div></Reveal>
                     </div>
                     <div className="stats-grid-3">
-                        <Reveal delay={0.1}><StatCardCircle label="Peak MCQ" value={peakMCQ} max={50} color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.2}><StatCardCircle label="Peak STR" value={peakSTR} max={100} color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.3}><StatCardCircle label="Peak ESY" value={peakESY} max={300} color="#F43F5E" /></Reveal>
+                        <Reveal delay={0.1}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>🏆 Peak Mark</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#10B981' }}>{peakTotal}</div></div></Reveal>
+                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📊 Average</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#6366F1' }}>{avgTotal}</div></div></Reveal>
+                        <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📝 Papers</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#F59E0B' }}>{data.length}</div></div></Reveal>
                     </div>
-                    {data.length > 0 && (
+                    {data.length > 0 && hasBreakdown && (
                         <Reveal delay={0.35}>
                             <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
