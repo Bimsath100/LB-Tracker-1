@@ -1506,11 +1506,11 @@
                                 <span className="nav-tracker">Tracker</span>
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
-                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
+                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('live'); }} style={{ cursor: 'pointer' }}>
                                             <div className="live-dot"></div>
                                             <span>{liveUsers} LIVE</span>
                                         </div>
-                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
+                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('marked'); }} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
                                             <span>{markedToday} MARKED</span>
                                         </div>
@@ -1573,15 +1573,15 @@
                     {adminView && (
                         <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
                             <div className="admin-modal glass" style={{ maxWidth: '900px', width: '95%', height: '85vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-                                <div style={{ display: 'flex', flex: 1 }}>
+                                <div style={{ display: 'flex', flex: 1, flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
                                     {/* Admin Sidebar */}
-                                    <div style={{ width: '220px', background: 'rgba(0,0,0,0.3)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', padding: '20px 10px' }}>
-                                        <div style={{ padding: '0 10px 20px', borderBottom: '1px solid var(--border)', marginBottom: '20px' }}>
+                                    <div style={{ width: window.innerWidth < 768 ? '100%' : '220px', background: 'rgba(0,0,0,0.3)', borderRight: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', borderBottom: window.innerWidth < 768 ? '1px solid var(--border)' : 'none', display: 'flex', flexDirection: window.innerWidth < 768 ? 'row' : 'column', padding: '10px', overflowX: 'auto', gap: '10px' }}>
+                                        <div style={{ padding: '0 10px', borderBottom: window.innerWidth < 768 ? 'none' : '1px solid var(--border)', marginBottom: window.innerWidth < 768 ? '0' : '20px', display: window.innerWidth < 768 ? 'none' : 'block' }}>
                                             <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '2px', fontWeight: '800' }}>SUPER ADMIN</div>
                                             <div style={{ fontFamily: 'Outfit', fontSize: '1.1rem', fontWeight: '800', color: 'var(--primary)' }}>LB TRACKER</div>
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                            <AdminSideItem active={adminTab === 'overview'} icon="📊" label="Overview" onClick={() => setAdminTab('overview')} />
+                                        <div style={{ display: 'flex', flexDirection: window.innerWidth < 768 ? 'row' : 'column', gap: '5px', flex: 1 }}>
+                                            <AdminSideItem active={adminTab === 'overview'} icon="📊" label={window.innerWidth < 768 ? '' : 'Overview'} onClick={() => setAdminTab('overview')} />
                                             <AdminSideItem active={adminTab === 'students'} icon="👥" label="Students" onClick={() => setAdminTab('students')} />
                                             <AdminSideItem active={adminTab === 'resources'} icon="📂" label="Resources" onClick={() => setAdminTab('resources')} />
                                             <AdminSideItem active={adminTab === 'community'} icon="🌍" label="Community" onClick={() => setAdminTab('community')} />
