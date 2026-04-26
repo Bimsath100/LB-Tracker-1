@@ -208,6 +208,34 @@
         .fb-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: 0.3s; cursor: pointer; }
         .fb-dot.active { background: var(--primary); width: 22px; border-radius: 4px; }
 
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #10B981;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #10B981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10B981;
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 90px; } }
         @media (max-width: 600px) { 
@@ -535,6 +563,7 @@
             const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
             const [isLightMode, setIsLightMode] = useState(() => localStorage.getItem('theme') === 'light');
             const [deferredPrompt, setDeferredPrompt] = useState(null);
+            const [liveUsers, setLiveUsers] = useState(1);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -569,6 +598,26 @@
                 });
                 return () => subscription.unsubscribe();
             }, []);
+
+            useEffect(() => {
+                const channel = sb.channel('online-users', {
+                    config: { presence: { key: user?.id || Math.random().toString(36).substring(7) } }
+                });
+
+                channel
+                    .on('presence', { event: 'sync' }, () => {
+                        const newState = channel.presenceState();
+                        const count = Object.keys(newState).length;
+                        setLiveUsers(count > 0 ? count : 1);
+                    })
+                    .subscribe(async (status) => {
+                        if (status === 'SUBSCRIBED') {
+                            await channel.track({ online_at: new Date().toISOString() });
+                        }
+                    });
+
+                return () => { channel.unsubscribe(); };
+            }, [user]);
 
             const fetchUserData = async (uid) => {
                 try {
@@ -634,7 +683,7 @@
             }, [profile]);
 
             if (loading) return <LoadingScreen />;
-            if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} />;
+            if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} liveUsers={liveUsers} />;
             if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
 
             return (
@@ -647,6 +696,10 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
+                                <div className="live-indicator">
+                                    <div className="live-dot"></div>
+                                    <span>{liveUsers} LIVE</span>
+                                </div>
                             </div>
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
@@ -721,12 +774,16 @@
             </div>
         );
 
-        const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
+        const LandingPage = ({ onLogin, deferredPrompt, onInstall, liveUsers }) => (
             <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
                 <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                 <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
                 <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '1.5rem' }}>The elite cloud-synced tracker for serious students.</p>
+                <div style={{ marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                    <div className="live-dot"></div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#10B981' }}>{liveUsers} students online now</span>
+                </div>
                 {deferredPrompt && (
                     <button className="btn-primary" style={{ background: '#10B981', color: 'white', maxWidth: '300px', margin: '0 auto', marginBottom: '1.5rem', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)' }} onClick={onInstall}>
                         📱 Install LB Tracker
