@@ -1134,10 +1134,12 @@
             
             useEffect(() => {
                 const hour = new Date().getHours();
-                const baseOnline = hour < 6 ? 10 : hour < 12 ? 35 : hour < 18 ? 55 : hour < 22 ? 85 : 40;
-                const baseMarked = (hour * 45) + (markedToday * 5) + 120;
+                // Realistic online users based on 161 total (10 to 45 online)
+                const baseOnline = hour < 6 ? 5 : hour < 12 ? 18 : hour < 18 ? 28 : hour < 22 ? 42 : 12;
+                // Realistic marked today (starts low in morning, reaches ~130 by night)
+                const baseMarked = (hour * 5) + (markedToday * 2) + 20;
                 
-                setDynamicStats({ online: baseOnline + liveUsers, marked: baseMarked });
+                setDynamicStats({ online: baseOnline + liveUsers, marked: Math.min(160, baseMarked) });
 
                 const interval = setInterval(() => {
                     setDynamicStats(prev => ({
