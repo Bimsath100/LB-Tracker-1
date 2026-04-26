@@ -697,7 +697,7 @@
             return ( <div>{ranks.map((r, i) => ( <div key={r.name} className="district-rank-item"><div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div><div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div><div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div></div> ))}{ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}</div> );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
+        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal, commGoal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
             useEffect(() => {
@@ -1538,7 +1538,7 @@
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
+                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} commGoal={commGoal} />
                             ) : currentPage === 'resources' ? (
                                 <ResourcesView resources={resources} />
                             ) : currentPage === 'subjects' ? (
