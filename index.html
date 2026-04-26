@@ -346,6 +346,7 @@
             .main-content { padding-top: 80px; }
             .nav-brand { font-size: 1.2rem; }
             .live-indicator { font-size: 0.6rem; padding: 3px 8px; margin-left: 5px; }
+            .registered-badge { display: none; }
         }
         @media (max-width: 600px) { 
             .stats-grid { gap: 0.6rem; } 
@@ -594,7 +595,7 @@
                 return () => { if (chartRef.current) chartRef.current.destroy(); };
             }, [JSON.stringify(data)]);
             if (!data || data.length === 0) return null;
-            return <div className="chart-box" style={{ height: '420px', maxWidth: '500px', margin: '0 auto' }}><canvas ref={ref}></canvas></div>;
+            return <div className="chart-box" style={{ height: window.innerWidth <= 600 ? '280px' : '420px', maxWidth: '500px', margin: '0 auto' }}><canvas ref={ref}></canvas></div>;
         };
 
         const ProgressChart = ({ history }) => {
@@ -1334,7 +1335,7 @@
                             <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
                                 <div className="nav-logo">LB</div>
                                 <span className="nav-tracker">Tracker</span>
-                                <div className="live-indicator" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', marginLeft: '10px' }}>
+                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', marginLeft: '10px' }}>
                                     <div className="live-dot" style={{ background: '#F59E0B', boxShadow: '0 0 8px #F59E0B' }}></div>
                                     <span>{totalRegistered} REGISTERED</span>
                                 </div>
