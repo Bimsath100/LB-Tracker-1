@@ -492,6 +492,90 @@
             return <div className="glass card" style={{ padding: '1.2rem' }}><div style={{ fontWeight: '700', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1rem', textTransform: 'uppercase' }}>{title}</div><div className="chart-box"><canvas ref={ref}></canvas></div></div>;
         };
 
+        const RadarChart = ({ data }) => {
+            const ref = useRef(null);
+            const chartRef = useRef(null);
+            useEffect(() => {
+                if (chartRef.current) chartRef.current.destroy();
+                if (!data || data.length === 0) return;
+                const ctx = ref.current.getContext('2d');
+                const latest = data[data.length - 1];
+                const avgMCQ = Math.round(data.reduce((a, b) => a + (parseFloat(b.mcq) || 0), 0) / data.length);
+                const avgSTR = Math.round(data.reduce((a, b) => a + (parseFloat(b.str) || 0), 0) / data.length);
+                const avgESY = Math.round(data.reduce((a, b) => a + (parseFloat(b.esy) || 0), 0) / data.length);
+                chartRef.current = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['MCQ', 'Structured', 'Essay'],
+                        datasets: [
+                            {
+                                label: 'Latest Paper',
+                                data: [parseFloat(latest.mcq) || 0, parseFloat(latest.str) || 0, parseFloat(latest.esy) || 0],
+                                borderColor: '#6366F1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.25)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#6366F1',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 6,
+                                pointHoverRadius: 8
+                            },
+                            {
+                                label: 'Average',
+                                data: [avgMCQ, avgSTR, avgESY],
+                                borderColor: '#8B5CF6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                borderWidth: 2,
+                                borderDash: [6, 4],
+                                pointBackgroundColor: '#8B5CF6',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                angleLines: { color: 'rgba(148, 163, 184, 0.15)' },
+                                grid: { color: 'rgba(148, 163, 184, 0.12)' },
+                                pointLabels: {
+                                    color: '#94A3B8',
+                                    font: { size: 13, weight: '700', family: 'Outfit' }
+                                },
+                                ticks: {
+                                    color: '#64748B',
+                                    backdropColor: 'transparent',
+                                    font: { size: 9 },
+                                    stepSize: 20
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#94A3B8',
+                                    font: { size: 11, weight: '600' },
+                                    usePointStyle: true,
+                                    pointStyle: 'circle',
+                                    padding: 20
+                                }
+                            }
+                        },
+                        animation: { duration: 800, easing: 'easeOutQuart' }
+                    }
+                });
+                return () => { if (chartRef.current) chartRef.current.destroy(); };
+            }, [JSON.stringify(data)]);
+            if (!data || data.length === 0) return null;
+            return <div className="chart-box" style={{ height: '280px' }}><canvas ref={ref}></canvas></div>;
+        };
+
         const ProgressChart = ({ history }) => {
             const ref = useRef(null);
             useEffect(() => {
@@ -793,11 +877,25 @@
                         <Reveal delay={0.2}><StatCardCircle label="Peak STR" value={peakSTR} max={100} color="#8B5CF6" /></Reveal>
                         <Reveal delay={0.3}><StatCardCircle label="Peak ESY" value={peakESY} max={300} color="#F43F5E" /></Reveal>
                     </div>
+                    {data.length > 0 && (
+                        <Reveal delay={0.35}>
+                            <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <div>
+                                        <div style={{ fontWeight: '800', fontSize: '1rem', fontFamily: 'Outfit', color: 'var(--text-main)' }}>Skill Radar 🕷️</div>
+                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>Latest Paper vs All-Time Average</div>
+                                    </div>
+                                    <div className="glass" style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '0.65rem', fontWeight: '700', color: '#8B5CF6', border: '1px solid rgba(139, 92, 246, 0.2)' }}>{data.length} PAPERS</div>
+                                </div>
+                                <RadarChart data={data} />
+                            </div>
+                        </Reveal>
+                    )}
                     <div className="marks-grid">
-                        <Reveal delay={0.2}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.3}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.4}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
-                        <Reveal delay={0.5}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
+                        <Reveal delay={0.4}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
+                        <Reveal delay={0.5}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
+                        <Reveal delay={0.6}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
+                        <Reveal delay={0.7}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
                     </div>
                 </div>
             );
