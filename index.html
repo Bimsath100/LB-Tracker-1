@@ -1506,11 +1506,11 @@
                                 <span className="nav-tracker">Tracker</span>
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <div style={{ display: 'flex', gap: '5px' }}>
-                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('live'); }} style={{ cursor: 'pointer' }}>
+                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('liveList'); }} style={{ cursor: 'pointer' }}>
                                             <div className="live-dot"></div>
                                             <span>{liveUsers} LIVE</span>
                                         </div>
-                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('marked'); }} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
+                                        <div className="live-indicator" onClick={(e) => { e.stopPropagation(); setAdminView('markedList'); }} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
                                             <span>{markedToday} MARKED</span>
                                         </div>
@@ -1570,7 +1570,52 @@
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
                     </nav>
 
-                    {adminView && (
+                    {adminView === 'liveList' && (
+                        <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
+                            <div className="admin-modal glass" style={{ maxWidth: '400px', width: '92%', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}><div className="live-dot" style={{ position: 'relative', width: '12px', height: '12px' }}></div> Live Students ({liveUsers})</h3>
+                                    <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                                </div>
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {liveDetails.map((u, i) => (
+                                        <div key={i} className="glass" style={{ padding: '12px', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontWeight: '700', fontSize: '0.9rem' }}>{u.name}</span>
+                                            <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</span>
+                                        </div>
+                                    ))}
+                                    {liveDetails.length === 0 && <div style={{ color: 'var(--text-dim)', textAlign: 'center' }}>No students online.</div>}
+                                </div>
+                                <button className="btn-primary" onClick={() => setAdminView('full')} style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}>Open Full Admin Panel</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {adminView === 'markedList' && (
+                        <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
+                            <div className="admin-modal glass" style={{ maxWidth: '400px', width: '92%', padding: '2rem' }} onClick={e => e.stopPropagation()}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                    <h3 style={{ fontFamily: 'Outfit', margin: 0, color: 'var(--primary)' }}>✅ Marked Today ({markedToday})</h3>
+                                    <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                                </div>
+                                <div style={{ maxHeight: '400px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {markedDetails.map((u, i) => (
+                                        <div key={i} className="glass" style={{ padding: '12px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div>
+                                                <div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{u.name}</div>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
+                                            </div>
+                                            <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '1.1rem' }}>{u.hours}h</div>
+                                        </div>
+                                    ))}
+                                    {markedDetails.length === 0 && <div style={{ color: 'var(--text-dim)', textAlign: 'center' }}>No students marked today.</div>}
+                                </div>
+                                <button className="btn-primary" onClick={() => setAdminView('full')} style={{ marginTop: '1.5rem', width: '100%', padding: '12px' }}>Open Full Admin Panel</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {adminView === 'full' && (
                         <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
                             <div className="admin-modal glass" style={{ maxWidth: '900px', width: '95%', height: '85vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
                                 <div style={{ display: 'flex', flex: 1, flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
