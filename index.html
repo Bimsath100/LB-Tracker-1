@@ -399,6 +399,13 @@
         const SUBJECT_LIST = [...Object.keys(SUBJECT_ICONS)];
         const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+        const getLocalISODate = (d = new Date()) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         // Global variable to catch the prompt
         window.deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -493,7 +500,7 @@
                     let total = 0;
                     for (let j = 0; j < 7; j++) {
                         const d = new Date(); d.setDate(d.getDate() - (i * 7 + j));
-                        const k = d.toISOString().split('T')[0];
+                        const k = getLocalISODate(d);
                         total += (Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0);
                     }
                     return total;
@@ -512,7 +519,7 @@
             const ref = useRef(null);
             useEffect(() => {
                 const ctx = ref.current.getContext('2d');
-                const l30 = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.toISOString().split('T')[0]; });
+                const l30 = [...Array(30)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return getLocalISODate(d); });
                 const chart = new Chart(ctx, { 
                     type: 'line', 
                     data: { labels: l30.map(d => d.split('-')[2]), datasets: [{ data: l30.map(k => (Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)), borderColor: '#6366F1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }] }, 
@@ -560,7 +567,7 @@
             const [feeds, setFeeds] = useState([]);
             
             const fetchReal = async () => {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalISODate();
                 const { data } = await sb.from('study_tracker_v2')
                     .select('name, district, history')
                     .not(`history->${today}`, 'is', null)
@@ -634,7 +641,7 @@
             const [loading, setLoading] = useState(true);
             useEffect(() => {
                 const fetchStats = async () => {
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getLocalISODate();
                     const { data } = await sb.from('study_tracker_v2')
                         .select('district, history')
                         .not(`history->${today}`, 'is', null)
@@ -671,7 +678,7 @@
 
             useEffect(() => {
                 const fetchLeaders = async () => {
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getLocalISODate();
                     const { data } = await sb.from('study_tracker_v2')
                         .select('name, district, history')
                         .not(`history->${today}`, 'is', null)
@@ -710,12 +717,12 @@
             }, []);
 
             const todayCount = (Array.isArray(history[viewDate]) ? history[viewDate].filter(Boolean).length : 0);
-            const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
-            const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().split('T')[0]; return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
+            const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
+            const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
             const toggleH = (i) => { const h = [...(history[viewDate] || new Array(15).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
             const isEvening = new Date().getHours() >= 17;
-            const showReminder = todayCount === 0 && isEvening && viewDate === new Date().toISOString().split('T')[0];
+            const showReminder = todayCount === 0 && isEvening && viewDate === getLocalISODate();
             const dismissAnnounce = () => { localStorage.setItem('lastSeenAnnounce', announcement); setShowAnnounceModal(false); };
             return (
                 <div className="dashboard-container">
@@ -740,7 +747,7 @@
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 15 hrs</span></div><div className="hour-grid">{Array.from({ length: 15 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
-                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = d.toISOString().split('T')[0]; return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
@@ -755,9 +762,9 @@
         };
 
         const SubjectView = ({ subject, marks, setMarks }) => {
-            const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] });
+            const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: getLocalISODate() });
             const data = marks.filter(m => m.subject === subject);
-            const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: new Date().toISOString().split('T')[0] }); };
+            const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: getLocalISODate() }); };
             const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
             const peakMCQ = Math.max(...data.map(m => parseFloat(m.mcq) || 0), 0);
             const peakSTR = Math.max(...data.map(m => parseFloat(m.str) || 0), 0);
@@ -909,7 +916,7 @@
             const [profile, setProfile] = useState(null);
             const [loading, setLoading] = useState(true);
             const [currentPage, setCurrentPage] = useState('dashboard');
-            const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]);
+            const [viewDate, setViewDate] = useState(getLocalISODate());
             const [history, setHistory] = useState({});
             const [marks, setMarks] = useState([]);
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -1036,7 +1043,7 @@
                 if (user) {
                     const fetchMarked = async () => {
                         try {
-                            const today = new Date().toISOString().split('T')[0];
+                            const today = getLocalISODate();
                             const { data, error } = await sb.from('study_tracker_v2')
                                 .select('name, district, history')
                                 .not(`history->${today}`, 'is', null)
