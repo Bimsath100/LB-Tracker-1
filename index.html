@@ -708,7 +708,7 @@
                         allProfiles.forEach(p => {
                             const key = p.email || p.name;
                             if (!uniqueMap.has(key) || (p.name !== 'Guest' && uniqueMap.get(key).name === 'Guest')) {
-                                uniqueMap.set(key, { name: p.name || 'Anonymous', email: p.email });
+                                uniqueMap.set(key, { name: p.name || 'Guest Visitor', email: p.email });
                             }
                         });
                         const details = Array.from(uniqueMap.values());
