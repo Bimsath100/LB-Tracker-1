@@ -295,8 +295,16 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        @media (max-width: 1024px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .nav-links { display: none; } .main-content { padding-top: 90px; } }
+        @media (max-width: 1024px) { 
+            .dash-grid, .community-hub { grid-template-columns: 1fr; } 
+            .stats-grid { grid-template-columns: repeat(2, 1fr); } 
+        }
+        @media (max-width: 768px) { 
+            .nav-links { display: none; } 
+            .main-content { padding-top: 80px; }
+            .nav-brand { font-size: 1.2rem; }
+            .live-indicator { font-size: 0.6rem; padding: 3px 8px; margin-left: 5px; }
+        }
         @media (max-width: 600px) { 
             .stats-grid { gap: 0.6rem; } 
             .stat-val { font-size: 1.8rem; } 
@@ -305,9 +313,12 @@
             .main-content { padding-bottom: 100px; } 
             .hour-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
             .hour-btn { font-size: 1.1rem; border-radius: 12px; }
-            .card { padding: 1.5rem; }
+            .card { padding: 1.2rem; }
             .floating-settings { bottom: 88px; right: 20px; width: 50px; height: 50px; }
-            .settings-menu { bottom: 150px; right: 20px; }
+            .settings-menu { bottom: 150px; right: 20px; width: calc(100% - 40px); }
+            .setup-card { padding: 1.5rem; }
+            .nav-brand { gap: 8px; }
+            .nav-logo { width: 32px; height: 32px; font-size: 0.9rem; }
         }
         @media (max-width: 360px) {
             .stats-grid { grid-template-columns: 1fr; }
@@ -1039,9 +1050,9 @@
                             </div>
                         </div>
                     )}
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 6vw, 3.5rem)' }}>Hello, {profile.name}! ✨</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)', marginBottom: '1.5rem' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
+                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}! ✨</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
                         <div className="countdown-container">
                             <CountdownBox val={timeLeft.d} lbl="Days" />
                             <CountdownBox val={timeLeft.h} lbl="Hours" />
