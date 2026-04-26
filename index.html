@@ -267,6 +267,12 @@
             display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800;
         }
 
+        @keyframes pulseBorder {
+            0% { border-color: var(--primary); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            70% { border-color: rgba(99, 102, 241, 0.5); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { border-color: var(--primary); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+
         /* Ticker Styles */
         .ticker-wrap {
             width: 100%; overflow: hidden; background: rgba(99, 102, 241, 0.03);
@@ -933,7 +939,7 @@
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} />
+                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'feedback' ? (
@@ -1049,7 +1055,7 @@
             );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday }) => {
+        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement }) => {
             const todayCount = (history[viewDate] || []).filter(Boolean).length;
             const calcHours = (days) => {
                 let total = 0;
@@ -1071,6 +1077,12 @@
             return (
                 <div>
                     <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} />
+                    {announcement && (
+                        <div style={{ background: 'rgba(99, 102, 241, 0.15)', border: '1px solid var(--primary)', padding: '12px 20px', borderRadius: '15px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px', animation: 'pulseBorder 2s infinite' }}>
+                            <span style={{ fontSize: '1.2rem' }}>📢</span>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'white', lineHeight: '1.4' }}>{announcement}</div>
+                        </div>
+                    )}
                     {showReminder && (
                         <div className="reminder-banner">
                             <div style={{ fontSize: '1.5rem' }}>⏰</div>
