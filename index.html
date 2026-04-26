@@ -506,18 +506,7 @@
         const ActivityTicker = ({ liveUsers, markedToday }) => {
             const [dynamicStats, setDynamicStats] = useState({ online: 0, marked: 0 });
             useEffect(() => {
-                const hour = new Date().getHours();
-                const isPeak = (hour >= 4 && hour <= 6) || (hour >= 21 || hour <= 1);
-                const baseOnline = isPeak ? Math.floor(Math.random() * 15) + 30 : Math.floor(Math.random() * 15) + 15;
-                const baseMarked = (hour * 4) + (markedToday * 1.5) + 30;
-                setDynamicStats({ online: Math.min(60, baseOnline + liveUsers), marked: Math.min(155, Math.floor(baseMarked)) });
-                const interval = setInterval(() => {
-                    setDynamicStats(prev => ({
-                        online: Math.max(10, prev.online + (Math.random() > 0.5 ? 1 : -1)),
-                        marked: prev.marked + (Math.random() > 0.8 ? 1 : 0)
-                    }));
-                }, 5000);
-                return () => clearInterval(interval);
+                setDynamicStats({ online: liveUsers, marked: markedToday });
             }, [liveUsers, markedToday]);
             const items = [
                 { icon: '🚀', val: dynamicStats.online, lbl: 'Students Online Now' },
