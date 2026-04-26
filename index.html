@@ -933,7 +933,7 @@
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} />
+                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'feedback' ? (
@@ -1049,7 +1049,7 @@
             );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft }) => {
+        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday }) => {
             const todayCount = (history[viewDate] || []).filter(Boolean).length;
             const calcHours = (days) => {
                 let total = 0;
