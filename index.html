@@ -784,6 +784,80 @@
             return ( <div>{ranks.map((r, i) => ( <div key={r.name} className="district-rank-item"><div className="rank-num" style={{ background: i < 3 ? 'var(--primary)' : 'var(--input-bg)' }}>{i + 1}</div><div style={{ fontWeight: '700', fontSize: '0.9rem' }}>{r.name}</div><div style={{ marginLeft: 'auto', fontSize: '0.8rem', fontWeight: '800', color: 'var(--primary)' }}>{r.hours}h</div></div> ))}{ranks.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>Initializing rankings...</div>}</div> );
         };
 
+        const FocusTimer = () => {
+            const [mode, setMode] = useState('focus');
+            const [timeLeft, setTimeLeft] = useState(25 * 60);
+            const [isActive, setIsActive] = useState(false);
+
+            useEffect(() => {
+                let interval = null;
+                if (isActive && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                } else if (isActive && timeLeft === 0) {
+                    if (mode === 'focus') {
+                        setMode('break');
+                        setTimeLeft(5 * 60);
+                    } else {
+                        setMode('focus');
+                        setTimeLeft(25 * 60);
+                    }
+                    setIsActive(false);
+                    if (Notification.permission === 'granted') {
+                        new Notification("Time's up! ⏰", { body: mode === 'focus' ? "Take a 5-minute break!" : "Back to focus mode!" });
+                    }
+                }
+                return () => clearInterval(interval);
+            }, [isActive, timeLeft, mode]);
+
+            const toggleTimer = () => setIsActive(!isActive);
+            const resetTimer = () => {
+                setIsActive(false);
+                setTimeLeft(mode === 'focus' ? 25 * 60 : 5 * 60);
+            };
+            const switchMode = (newMode) => {
+                setIsActive(false);
+                setMode(newMode);
+                setTimeLeft(newMode === 'focus' ? 25 * 60 : 5 * 60);
+            };
+
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            const progress = mode === 'focus' ? ((25 * 60 - timeLeft) / (25 * 60)) * 100 : ((5 * 60 - timeLeft) / (5 * 60)) * 100;
+            const strokeColor = mode === 'focus' ? '#6366F1' : '#10B981';
+
+            return (
+                <div className="glass card" style={{ textAlign: 'center', padding: '2rem' }}>
+                    <div style={{ fontWeight: '800', fontSize: '1.2rem', fontFamily: 'Outfit', marginBottom: '4px' }}>Focus Timer ⏳</div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>
+                        {mode === 'focus' ? 'වෙනත් වැඩ නැතුව එක දිගට පාඩම් කරන්න.' : 'විනාඩි 5ක විවේකයක් ගන්න.'}
+                    </p>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '1.5rem' }}>
+                        <button onClick={() => switchMode('focus')} style={{ padding: '6px 16px', borderRadius: '12px', border: 'none', background: mode === 'focus' ? 'var(--primary)' : 'var(--input-bg)', color: mode === 'focus' ? 'white' : 'var(--text-main)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>Focus (25m)</button>
+                        <button onClick={() => switchMode('break')} style={{ padding: '6px 16px', borderRadius: '12px', border: 'none', background: mode === 'break' ? '#10B981' : 'var(--input-bg)', color: mode === 'break' ? 'white' : 'var(--text-main)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>Break (5m)</button>
+                    </div>
+                    
+                    <div style={{ position: 'relative', width: '160px', height: '160px', margin: '0 auto 1.5rem auto' }}>
+                        <svg width="160" height="160" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                            <circle cx="50" cy="50" r="45" stroke="var(--input-bg)" strokeWidth="6" fill="none" />
+                            <circle cx="50" cy="50" r="45" stroke={strokeColor} strokeWidth="6" fill="none" strokeDasharray="282.7" strokeDashoffset={282.7 - (progress / 100) * 282.7} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
+                        </svg>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '800', fontSize: '2.5rem', color: 'var(--text-main)' }}>
+                            {m}:{s}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <button className="btn-primary" onClick={toggleTimer} style={{ width: '120px', padding: '12px', background: isActive ? 'rgba(239, 68, 68, 0.2)' : 'var(--primary)', color: isActive ? '#ef4444' : 'white', border: isActive ? '1px solid rgba(239, 68, 68, 0.5)' : 'none' }}>
+                            {isActive ? 'Pause' : 'Start'}
+                        </button>
+                        <button className="btn-primary" onClick={resetTimer} style={{ width: '120px', padding: '12px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)' }}>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
         const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
@@ -859,6 +933,9 @@
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 24 hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
                         <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
+                    </div>
+                    <div style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
+                        <Reveal delay={0.15}><FocusTimer /></Reveal>
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
