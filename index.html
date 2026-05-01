@@ -1177,103 +1177,65 @@
         };
 
         const StudyDNA = ({ history }) => {
-            const days = 24; 
-            const data = useMemo(() => {
-                const today = new Date();
-                const items = [];
-                for (let i = 0; i < days; i++) {
-                    const d = new Date(today);
-                    d.setDate(today.getDate() - (days - 1 - i));
-                    const k = getLocalISODate(d);
-                    const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
-                    items.push({ hrs, date: d });
-                }
-                return items;
-            }, [history]);
+            const days = 21; 
+            const data = [];
+            const today = new Date();
+            
+            for (let i = 0; i < days; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - (days - 1 - i));
+                const k = getLocalISODate(d);
+                const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
+                data.push({ hrs, date: d });
+            }
+
+            const getIntensity = (hrs) => {
+                if (hrs === 0) return 'rgba(255,255,255,0.05)';
+                if (hrs <= 3) return '#784BA0';
+                if (hrs <= 6) return '#8B5CF6';
+                return '#FF3CAC';
+            };
 
             return (
-                <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', background: '#000', borderRadius: '24px', overflow: 'hidden' }}>
-                    <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FFF', letterSpacing: '10px', textTransform: 'uppercase', textShadow: '0 0 20px rgba(34, 211, 238, 0.5)' }}>Academic DNA 🧬</div>
-                        <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '8px', fontWeight: '800', letterSpacing: '2px' }}>NEURAL CONSISTENCY SEQUENCE</div>
+                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center' }}>
+                    <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px', textTransform: 'uppercase' }}>Academic DNA 🧬</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>Visualizing your neural consistency</div>
                     </div>
                     
-                    <div style={{ width: '100%', maxWidth: '900px', position: 'relative' }}>
-                        <svg width="100%" height="240" viewBox="0 0 900 240" preserveAspectRatio="xMidYMid meet">
-                            <defs>
-                                <filter id="dna-glow">
-                                    <feGaussianBlur stdDeviation="3" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                                </filter>
-                                <linearGradient id="dna-back-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#22D3EE" />
-                                    <stop offset="50%" stopColor="#8B5CF6" />
-                                    <stop offset="100%" stopColor="#FF00FF" />
-                                </linearGradient>
-                            </defs>
-
-                            {/* Helix Strands (Static 3D Look) */}
-                            {[0, Math.PI].map((phase, pIdx) => (
-                                <g key={pIdx}>
-                                    {/* Main Tube */}
-                                    <path d={data.map((_, i) => {
-                                        const x = (i / (days-1)) * 860 + 20;
-                                        const y = 120 + Math.sin((i * 0.6) + phase) * 60;
-                                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                    }).join(' ')} fill="none" stroke="url(#dna-back-grad)" strokeWidth="12" strokeLinecap="round" style={{ opacity: 0.15, filter: 'blur(2px)' }} />
+                    <svg width="200" height="400" viewBox="0 0 200 400" style={{ filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.2))' }}>
+                        {data.map((d, i) => {
+                            const y = i * 18 + 10;
+                            const t = i * 0.5;
+                            const x1 = 100 + Math.sin(t) * 60;
+                            const x2 = 100 - Math.sin(t) * 60;
+                            const color = getIntensity(d.hrs);
+                            const glow = d.hrs > 0 ? `drop-shadow(0 0 5px ${color})` : 'none';
+                            
+                            return (
+                                <g key={i}>
+                                    {/* Connections (Rungs) */}
+                                    <line x1={x1} y1={y} x2={x2} y2={y} stroke={color} strokeWidth="3" strokeLinecap="round" style={{ opacity: d.hrs > 0 ? 0.8 : 0.2, filter: glow }} />
                                     
-                                    <path d={data.map((_, i) => {
-                                        const x = (i / (days-1)) * 860 + 20;
-                                        const y = 120 + Math.sin((i * 0.6) + phase) * 60;
-                                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                    }).join(' ')} fill="none" stroke="url(#dna-back-grad)" strokeWidth="4" strokeLinecap="round" style={{ opacity: 0.4 }} />
+                                    {/* Outer Points */}
+                                    <circle cx={x1} cy={y} r="4" fill={color} style={{ filter: glow }} />
+                                    <circle cx={x2} cy={y} r="4" fill={color} style={{ filter: glow }} />
+                                    
+                                    {/* Tooltip date label on every 5th rung */}
+                                    {i % 7 === 0 && (
+                                        <text x="10" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '800', textTransform: 'uppercase' }}>
+                                            {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                                        </text>
+                                    )}
                                 </g>
-                            ))}
-
-                            {/* Rungs and Nodes */}
-                            {data.map((d, i) => {
-                                const x = (i / (days-1)) * 860 + 20;
-                                const t1 = (i * 0.6);
-                                const t2 = (i * 0.6) + Math.PI;
-                                const y1 = 120 + Math.sin(t1) * 60;
-                                const y2 = 120 + Math.sin(t2) * 60;
-                                
-                                const color = i < days / 2 ? '#22D3EE' : '#FF00FF';
-                                const active = d.hrs > 0;
-                                const intensity = Math.min(d.hrs / 8, 1);
-
-                                return (
-                                    <g key={i}>
-                                        {/* Vertical Rung */}
-                                        <line x1={x} y1={y1} x2={x} y2={y2} stroke="#333" strokeWidth="2" style={{ opacity: 0.3 }} />
-                                        
-                                        {/* Glowing Spheres (Only for Active Days) */}
-                                        {active && (
-                                            <g>
-                                                <circle cx={x} cy={y1} r={6 + (intensity * 6)} fill={color} style={{ filter: 'url(#dna-glow)', opacity: 0.6 + (intensity * 0.4) }} />
-                                                <circle cx={x} cy={y2} r={6 + (intensity * 6)} fill={color} style={{ filter: 'url(#dna-glow)', opacity: 0.6 + (intensity * 0.4) }} />
-                                            </g>
-                                        )}
-                                        
-                                        {/* Date Label on every 4th rung */}
-                                        {i % 4 === 0 && (
-                                            <text x={x} y="230" fill="#666" style={{ fontSize: '8px', fontWeight: '800', textAnchor: 'middle' }}>
-                                                {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                                            </text>
-                                        )}
-                                    </g>
-                                );
-                            })}
-                        </svg>
-                    </div>
-
-                    <div style={{ marginTop: '2rem', display: 'flex', gap: '40px', fontSize: '0.8rem', fontWeight: '900', color: '#666', letterSpacing: '3px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 15px #22D3EE' }}></div> STABLE
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: '#FF00FF', boxShadow: '0 0 15px #FF00FF' }}></div> OVERHEAT
-                        </div>
+                            );
+                        })}
+                    </svg>
+                    
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '15px', fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#rgba(255,255,255,0.05)' }}></div> IDLE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8B5CF6' }}></div> FOCUSED</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC' }}></div> ELITE</div>
                     </div>
                 </div>
             );
