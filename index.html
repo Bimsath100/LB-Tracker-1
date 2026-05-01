@@ -1176,48 +1176,102 @@
             );
         };
 
-        const StudyHeatmap = ({ history }) => {
-            const today = new Date();
-            const days = 84; // 12 weeks
-            const data = [];
-            
-            for (let i = days - 1; i >= 0; i--) {
-                const d = new Date(today);
-                d.setDate(today.getDate() - i);
-                const k = getLocalISODate(d);
-                const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
-                data.push({ date: d, hrs });
-            }
+        const StudyWarMap = ({ history, liveUsers }) => {
+            const districts = [
+                { id: 'Jaffna', x: 35, y: 5 }, { id: 'Kilinochchi', x: 42, y: 12 }, { id: 'Mullaitivu', x: 55, y: 15 },
+                { id: 'Mannar', x: 25, y: 22 }, { id: 'Vavuniya', x: 48, y: 25 }, { id: 'Trincomalee', x: 72, y: 32 },
+                { id: 'Anuradhapura', x: 46, y: 38 }, { id: 'Puttalam', x: 22, y: 45 }, { id: 'Polonnaruwa', x: 68, y: 46 },
+                { id: 'Batticaloa', x: 86, y: 56 }, { id: 'Kurunegala', x: 36, y: 58 }, { id: 'Matale', x: 52, y: 56 },
+                { id: 'Kandy', x: 52, y: 68 }, { id: 'Gampaha', x: 26, y: 68 }, { id: 'Kegalle', x: 38, y: 74 },
+                { id: 'Colombo', x: 22, y: 78 }, { id: 'Badulla', x: 74, y: 72 }, { id: 'Ampara', x: 88, y: 74 },
+                { id: 'Nuwara Eliya', x: 58, y: 78 }, { id: 'Kalutara', x: 28, y: 88 }, { id: 'Ratnapura', x: 48, y: 88 },
+                { id: 'Moneragala', x: 78, y: 88 }, { id: 'Galle', x: 34, y: 96 }, { id: 'Matara', x: 48, y: 96 },
+                { id: 'Hambantota', x: 70, y: 96 }
+            ];
 
-            const getIntensity = (hrs) => {
-                if (hrs === 0) return 'var(--input-bg)';
-                if (hrs <= 2) return 'rgba(99, 102, 241, 0.2)';
-                if (hrs <= 5) return 'rgba(99, 102, 241, 0.5)';
-                if (hrs <= 8) return 'rgba(99, 102, 241, 0.8)';
-                return 'var(--primary)'; // Peak
-            };
+            const [districtStats, setDistrictStats] = useState({});
+            const [topDistrict, setTopDistrict] = useState({ name: 'None', hrs: 0 });
+
+            useEffect(() => {
+                const fetchWarStats = async () => {
+                    const today = getLocalISODate();
+                    const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
+                    if (data) {
+                        const stats = {};
+                        let top = { name: 'None', hrs: 0 };
+                        data.forEach(u => {
+                            const hrs = Array.isArray(u.history[today]) ? u.history[today].filter(Boolean).length : 0;
+                            if (hrs > 0) {
+                                stats[u.district] = (stats[u.district] || 0) + hrs;
+                                if (stats[u.district] > top.hrs) top = { name: u.district, hrs: stats[u.district] };
+                            }
+                        });
+                        setDistrictStats(stats);
+                        setTopDistrict(top);
+                    }
+                };
+                fetchWarStats();
+                const sub = sb.channel('war_map').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'study_tracker_v2' }, fetchWarStats).subscribe();
+                return () => sub.unsubscribe();
+            }, []);
 
             return (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 22px)', gap: '8px', justifyContent: 'center' }}>
-                        {data.map((d, i) => (
-                            <div 
-                                key={i} 
-                                title={`${d.date.toDateString()}: ${d.hrs} hrs`}
-                                style={{
-                                    aspectRatio: '1',
-                                    borderRadius: '4px',
-                                    background: getIntensity(d.hrs),
-                                    transition: '0.2s',
-                                    cursor: 'pointer',
-                                    boxShadow: d.hrs > 8 ? '0 0 10px rgba(217, 70, 239, 0.5)' : 'none'
-                                }}
-                                onMouseEnter={(e) => { e.target.style.transform = 'scale(1.3)'; e.target.style.zIndex = '10'; }}
-                                onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.zIndex = '1'; }}
-                            />
-                        ))}
+                <div style={{ position: 'relative', width: '100%', height: '400px', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 10 }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800' }}>Dominating District</div>
+                        <div style={{ fontSize: '1.4rem', color: 'var(--primary)', fontWeight: '900', textShadow: '0 0 10px var(--primary-glow)' }}>{topDistrict.name.toUpperCase()}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '600' }}>{topDistrict.hrs} Total Hours Today</div>
                     </div>
-                );
-            };
+                    
+                    <div style={{ position: 'relative', width: '300px', height: '380px' }}>
+                        <svg viewBox="0 0 100 100" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.1 }}>
+                            <path d="M40,5 L50,10 L70,25 L85,50 L95,70 L90,90 L70,98 L40,98 L20,90 L10,70 L15,40 L30,10 Z" fill="none" stroke="var(--text-main)" strokeWidth="0.5" />
+                        </svg>
+
+                        {districts.map(d => {
+                            const hrs = districtStats[d.id] || 0;
+                            const size = 6 + Math.min(hrs * 2, 20);
+                            const isActive = hrs > 0;
+                            return (
+                                <div key={d.id} title={`${d.id}: ${hrs} hrs`} style={{
+                                    position: 'absolute',
+                                    left: `${d.x}%`,
+                                    top: `${d.y}%`,
+                                    width: `${size}px`,
+                                    height: `${size}px`,
+                                    background: isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                                    borderRadius: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    boxShadow: isActive ? `0 0 ${size * 1.5}px var(--primary-glow)` : 'none',
+                                    transition: '0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                                    cursor: 'pointer',
+                                    zIndex: isActive ? 5 : 1,
+                                    animation: isActive ? 'pulse 2s infinite' : 'none'
+                                }}>
+                                    {isActive && <div style={{ position: 'absolute', inset: '-4px', border: '1px solid var(--primary)', borderRadius: '50%', opacity: 0.3 }}></div>}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    <div style={{ position: 'absolute', bottom: '20px', right: '20px', textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800' }}>Live Battle Status</div>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '5px' }}>
+                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)', animation: 'pulse 1s infinite' }}></div>
+                            <span style={{ fontSize: '0.65rem', color: 'var(--text-main)', fontWeight: '700' }}>{Object.keys(districtStats).length} DISTRICTS ACTIVE</span>
+                        </div>
+                    </div>
+
+                    <style>{`
+                        @keyframes pulse {
+                            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+                            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                        }
+                    `}</style>
+                </div>
+            );
+        };
 
         const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
@@ -1352,14 +1406,14 @@
                             </div>
                         </Reveal>
 
-                        {/* Row 2: Heatmap & Daily Progress */}
+                        {/* Row 2: War Map & Daily Progress */}
                         <Reveal delay={0.2} style={{ gridColumn: 'span 8' }}>
-                            <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
+                            <div className="glass card" style={{ padding: '2rem', height: '100%', minHeight: '450px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                    <span className="card-title" style={{ margin: 0 }}>Consistency 🔥</span>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800', background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px' }}>Last 12 Weeks</span>
+                                    <span className="card-title" style={{ margin: 0 }}>Study War Map 🇱🇰</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800', background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px' }}>LIVE BATTLE STATUS</span>
                                 </div>
-                                <StudyHeatmap history={history} />
+                                <StudyWarMap history={history} liveUsers={liveUsers} />
                             </div>
                         </Reveal>
 
