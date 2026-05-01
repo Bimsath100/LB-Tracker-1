@@ -91,16 +91,22 @@
         .main-content { margin-left: 280px; width: calc(100% - 280px); padding: 40px 0 100px 0; min-height: 100vh; transition: 0.3s; }
         .container { width: min(92%, 1400px); margin: 0 auto; }
 
-        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4%; margin-bottom: 2.5rem; width: 100%; height: 70px; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4%; margin-bottom: 2.5rem; width: 100%; height: 70px; gap: 15px; }
         .mobile-only-brand { display: none; align-items: center; gap: 8px; cursor: pointer; }
         .desktop-only-admin { display: flex; align-items: center; gap: 12px; }
+
+        .asymmetric-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
 
         @media (max-width: 1024px) {
             .sidebar { transform: translateX(-100%); width: 260px; }
             .main-content { margin-left: 0; width: 100%; padding: 70px 10px 90px 10px !important; }
             .container { width: 100%; padding: 0 5px; }
             .mobile-nav { display: flex; }
-            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); height: 60px; z-index: 1500; border-bottom: var(--glass-border); margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; }
+            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); height: 65px; z-index: 1500; border-bottom: var(--glass-border); margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+            .desktop-only-admin { display: none !important; }
+            .asymmetric-grid { grid-template-columns: 1fr; }
+            .asymmetric-grid > * { grid-column: span 1 !important; }
+        }
             .mobile-only-brand { display: flex; align-items: center; gap: 8px; }
             .desktop-only-admin { display: none; }
             
@@ -1222,12 +1228,7 @@
             };
 
             return (
-                <div className="glass card" style={{ padding: '2.5rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', width: '100%' }}>
-                        <span className="card-title" style={{ margin: 0 }}>Study Consistency Heatmap 🔥</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '800', background: 'var(--input-bg)', padding: '6px 14px', borderRadius: '100px', border: '1px solid var(--border)' }}>Last 12 Weeks</span>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 22px)', gap: '8px', justifyContent: 'center' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 22px)', gap: '8px', justifyContent: 'center' }}>
                         {data.map((d, i) => (
                             <div 
                                 key={i} 
@@ -1348,44 +1349,57 @@
                     </Reveal>
                     <Reveal delay={0.1}><StudyRoadmap profile={profile} /></Reveal>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
-                    <Reveal delay={0.1}>
-                        <div className="glass card" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-                            <div className="dash-grid" style={{ gridTemplateColumns: '1fr 1fr 280px', gap: '3rem', alignItems: 'center', marginBottom: 0 }}>
-                                <div>
-                                    <div className="card-header" style={{ marginBottom: '1.5rem' }}>
-                                        <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
-                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px', fontWeight: '500' }}>{viewDate}</p>
-                                    </div>
-                                    <div className="hour-grid" style={{ maxWidth: '300px' }}>
-                                        {Array.from({ length: 24 }).map((_, i) => (
-                                            <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>
-                                        ))}
-                                    </div>
+                    <div className="asymmetric-grid">
+                        {/* Row 1: Study Grid & Notice Board */}
+                        <Reveal style={{ gridColumn: 'span 8' }}>
+                            <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
+                                <div className="card-header" style={{ marginBottom: '1.5rem' }}>
+                                    <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px', fontWeight: '500' }}>{viewDate}</p>
                                 </div>
-                                
-                                <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--border)', height: '100%', display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
-                                    <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '1rem' }}>📌 Notice Board</div>
-                                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                                        {announcement ? (
-                                            <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6', animation: 'fadeIn 0.5s' }}>
-                                                {announcement}
-                                            </p>
-                                        ) : (
-                                            <div style={{ opacity: 0.4 }}>
-                                                <div style={{ fontSize: '2rem', marginBottom: '10px' }}>✨</div>
-                                                <p style={{ fontSize: '0.8rem', fontWeight: '700' }}>Stay focused and keep pushing toward your goals!</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: '3rem' }}>
-                                    <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
+                                <div className="hour-grid">
+                                    {Array.from({ length: 24 }).map((_, i) => (
+                                        <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
-                    </Reveal>
-                    <Reveal delay={0.2}><StudyHeatmap history={history} /></Reveal>
+                        </Reveal>
+
+                        <Reveal delay={0.1} style={{ gridColumn: 'span 4' }}>
+                            <div className="glass card" style={{ padding: '2rem', height: '100%', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(34, 211, 238, 0.05))' }}>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '1rem' }}>📌</span> Notice Board
+                                </div>
+                                <div style={{ minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                                    {announcement ? (
+                                        <p style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6' }}>{announcement}</p>
+                                    ) : (
+                                        <div style={{ opacity: 0.4 }}>
+                                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>✨</div>
+                                            <p style={{ fontSize: '0.8rem', fontWeight: '700' }}>Stay focused on your journey!</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </Reveal>
+
+                        {/* Row 2: Heatmap & Daily Progress */}
+                        <Reveal delay={0.2} style={{ gridColumn: 'span 8' }}>
+                            <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <span className="card-title" style={{ margin: 0 }}>Consistency 🔥</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '800', background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px' }}>Last 12 Weeks</span>
+                                </div>
+                                <StudyHeatmap history={history} />
+                            </div>
+                        </Reveal>
+
+                        <Reveal delay={0.3} style={{ gridColumn: 'span 4' }}>
+                            <div className="glass card" style={{ padding: '2rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
+                            </div>
+                        </Reveal>
+                    </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
@@ -2046,14 +2060,14 @@
                             <div className="desktop-only-admin" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <React.Fragment>
-                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 12px var(--primary-glow)' }}>📢 POST NOTICE</button>
-                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
+                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 12px var(--primary-glow)', whiteSpace: 'nowrap' }}>📢 NOTICE</button>
+                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0, padding: '8px 12px', borderRadius: '10px' }}>
                                             <div className="live-dot"></div>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{liveUsers} LIVE</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{liveUsers}</span>
                                         </div>
-                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
+                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0, padding: '8px 12px', borderRadius: '10px' }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                            <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{markedToday} MARKED</span>
+                                            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{markedToday}</span>
                                         </div>
                                     </React.Fragment>
                                 )}
