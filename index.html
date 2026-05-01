@@ -1021,16 +1021,19 @@
             else if (monthsLeft <= 0) { phase = "Exam Mode Active 🚀"; prog = 100; }
             
             return (
-                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem', textAlign: 'left' }}>
-                    <div className="card-header" style={{ marginBottom: '1rem' }}><span className="card-title" style={{ margin: 0 }}>A/L Study Roadmap 🗺️</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem', background: 'var(--primary-glow)', padding: '4px 12px', borderRadius: '100px' }}>{monthsLeft > 0 ? `${monthsLeft} Months Left` : 'Exam Time'}</span></div>
-                    <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '700' }}>
-                            <span>Current Phase: <span style={{ color: 'var(--text-main)' }}>{phase}</span></span>
-                            <span>{prog}% Journey</span>
+                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem', textAlign: 'left', borderLeft: '4px solid var(--primary)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+                        <div>
+                            <h3 style={{ margin: 0, fontFamily: 'Outfit', fontSize: '1.2rem', color: 'var(--text-main)' }}>A/L Study Roadmap 🗺️</h3>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '4px' }}>Current Phase: <strong style={{ color: 'var(--text-main)' }}>{phase}</strong></div>
                         </div>
-                        <div style={{ width: '100%', height: '8px', background: 'var(--input-bg)', borderRadius: '10px', overflow: 'hidden' }}>
-                            <div style={{ width: `${prog}%`, height: '100%', background: 'var(--primary)', transition: 'width 1s ease-in-out', borderRadius: '10px' }}></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                            <span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.85rem', background: 'var(--primary-glow)', padding: '6px 14px', borderRadius: '100px' }}>{monthsLeft > 0 ? `${monthsLeft} Months Left` : 'Exam Time'}</span>
+                            <span style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.9rem' }}>{prog}%</span>
                         </div>
+                    </div>
+                    <div style={{ width: '100%', height: '10px', background: 'var(--input-bg)', borderRadius: '10px', overflow: 'hidden' }}>
+                        <div style={{ width: `${prog}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), #a855f7)', transition: 'width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)', borderRadius: '10px' }}></div>
                     </div>
                 </div>
             );
@@ -1118,15 +1121,34 @@
                         </div>
                     )}
                     {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
-                    <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
-                        {streak > 0 && <div style={{ display: 'inline-block', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 14px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.9rem', marginTop: '12px' }}>🔥 {streak} Day Streak!</div>}
-                        <div style={{ marginTop: '10px' }}>
-                            <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</span>
+                    <Reveal>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', alignItems: 'center', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
+                                    {streak > 0 && <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '4px 12px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.8rem' }}>🔥 {streak} Day Streak</div>}
+                                    <div style={{ background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px', color: 'var(--text-dim)', fontSize: '0.8rem', fontWeight: '700', border: '1px solid var(--border)' }}>{profile.examYear} {profile.examMonth} A/L</div>
+                                    <div style={{ background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px', color: 'var(--text-dim)', fontSize: '0.8rem', fontWeight: '700', border: '1px solid var(--border)' }}>📍 {profile.district}</div>
+                                </div>
+                                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 5vw, 3rem)', lineHeight: '1.1', fontWeight: '800', margin: '0 0 10px 0', color: 'var(--text-main)' }}>
+                                    Hello, <span style={{ color: 'var(--primary)' }}>{profile.name}</span>!
+                                    {profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '6px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}
+                                </h1>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: '1.5', maxWidth: '500px', margin: 0 }}>
+                                    Welcome to your premium study dashboard. Plan your day, track your progress, and stay ahead of the curve.
+                                </p>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--card-bg)', padding: '1.5rem', borderRadius: '20px', border: '1px solid var(--border)', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
+                                <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>Exam Countdown</div>
+                                <div className="countdown-container" style={{ justifyContent: 'center', margin: 0 }}>
+                                    <CountdownBox val={timeLeft.d} lbl="Days" />
+                                    <CountdownBox val={timeLeft.h} lbl="Hours" />
+                                    <CountdownBox val={timeLeft.m} lbl="Min" />
+                                    <CountdownBox val={timeLeft.s} lbl="Sec" />
+                                </div>
+                            </div>
                         </div>
-                        <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
-                    </div>
-                    <Reveal><StudyRoadmap profile={profile} /></Reveal>
+                    </Reveal>
+                    <Reveal delay={0.1}><StudyRoadmap profile={profile} /></Reveal>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / {dailyTarget} hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
