@@ -1205,45 +1205,59 @@
                 totalRecent += Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
             }
 
-            const intensity = Math.min(totalRecent / 40, 1); // Max intensity at 40 hrs/week
-            const particleCount = Math.max(Math.floor(intensity * 12), 3);
+            const intensity = Math.min(totalRecent / 40, 1);
+            const particleCount = Math.max(Math.floor(intensity * 15), 5);
+            const coreRadius = 70 + intensity * 30;
 
             return (
-                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center' }}>
-                    <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '3px', textTransform: 'uppercase', fontFamily: 'Outfit' }}>Focus Sphere 🔮</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '700' }}>YOUR COLLECTIVE STUDY ENERGY</div>
+                <div style={{ padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.05), transparent)' }}>
+                    <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.2rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '4px', textTransform: 'uppercase', fontFamily: 'Outfit' }}>Elite Focus Sphere 🔮</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '6px', fontWeight: '800', letterSpacing: '1px' }}>SYNTHESIZING YOUR ACADEMIC ENERGY</div>
                     </div>
 
-                    <div style={{ position: 'relative', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="220" height="220" viewBox="0 0 220 220" style={{ filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.3))' }}>
+                    <div style={{ position: 'relative', width: '350px', height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="350" height="350" viewBox="0 0 350 350" style={{ filter: 'drop-shadow(0 0 30px rgba(139, 92, 246, 0.2))' }}>
                             <defs>
-                                <radialGradient id="sphereGrad">
-                                    <stop offset="0%" stopColor="#FF3CAC" />
-                                    <stop offset="60%" stopColor="#8B5CF6" />
+                                <radialGradient id="sphere3D" cx="35%" cy="35%" r="60%">
+                                    <stop offset="0%" stopColor="#FFF" stopOpacity="0.8" />
+                                    <stop offset="20%" stopColor="#FF3CAC" />
+                                    <stop offset="60%" stopColor="#7C3AED" />
+                                    <stop offset="100%" stopColor="#1E1B4B" />
+                                </radialGradient>
+                                <radialGradient id="auraGlow">
+                                    <stop offset="0%" stopColor="rgba(139, 92, 246, 0.4)" />
                                     <stop offset="100%" stopColor="transparent" />
                                 </radialGradient>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="5" result="blur" />
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                </filter>
                             </defs>
 
-                            {/* Central Sphere */}
-                            <circle cx="110" cy="110" r={40 + intensity * 20} fill="url(#sphereGrad)" style={{ opacity: 0.8 + intensity * 0.2, animation: 'circlePulse 4s ease-in-out infinite' }} />
+                            {/* Reflection/Shadow beneath */}
+                            <ellipse cx="175" cy="300" rx="100" ry="20" fill="rgba(0,0,0,0.4)" style={{ filter: 'blur(10px)' }} />
+
+                            {/* Atmospheric Aura Layers */}
+                            <circle cx="175" cy="175" r={coreRadius + 40} fill="url(#auraGlow)" style={{ animation: 'circlePulse 6s ease-in-out infinite' }} />
+                            <circle cx="175" cy="175" r={coreRadius + 20} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+                            {/* Central 3D Sphere */}
+                            <circle cx="175" cy="175" r={coreRadius} fill="url(#sphere3D)" style={{ animation: 'circlePulse 4s ease-in-out infinite' }} />
                             
-                            {/* Orbits & Particles */}
+                            {/* Orbits with Motion Trails */}
                             {Array.from({ length: particleCount }).map((_, i) => {
-                                const rx = 60 + i * 10;
-                                const ry = 30 + i * 5;
-                                const rot = i * (360 / particleCount);
-                                const dur = 4 + (i * 0.5);
+                                const rx = coreRadius + 30 + i * 15;
+                                const ry = 40 + i * 10;
+                                const rot = i * (360 / particleCount) + 30;
+                                const dur = 5 + (i * 0.8);
                                 
                                 return (
-                                    <g key={i} style={{ transform: `rotate(${rot}deg)`, transformOrigin: '110px 110px' }}>
-                                        <ellipse cx="110" cy="110" rx={rx} ry={ry} fill="none" stroke="rgba(139, 92, 246, 0.1)" strokeWidth="1" />
-                                        <circle r="3" fill="#FF3CAC" style={{ animation: `orbit ${dur}s linear infinite` }}>
-                                            <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={`M ${110-rx},110 a ${rx},${ry} 0 1,0 ${rx*2},0 a ${rx},${ry} 0 1,0 ${-rx*2},0`} />
+                                    <g key={i} style={{ transform: `rotate(${rot}deg)`, transformOrigin: '175px 175px' }}>
+                                        <ellipse cx="175" cy="175" rx={rx} ry={ry} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="0.5" />
+                                        
+                                        {/* Particle with slight tail glow */}
+                                        <circle r="4" fill="#FF3CAC" style={{ filter: 'drop-shadow(0 0 5px #FF3CAC)' }}>
+                                            <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={`M ${175-rx},175 a ${rx},${ry} 0 1,0 ${rx*2},0 a ${rx},${ry} 0 1,0 ${-rx*2},0`} />
+                                        </circle>
+                                        <circle r="2" fill="#FFF" opacity="0.6">
+                                            <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={`M ${175-rx},175 a ${rx},${ry} 0 1,0 ${rx*2},0 a ${rx},${ry} 0 1,0 ${-rx*2},0`} />
                                         </circle>
                                     </g>
                                 );
@@ -1251,14 +1265,19 @@
                         </svg>
                         
                         {/* Center Value */}
-                        <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
-                            <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#FFF', textShadow: '0 0 10px rgba(0,0,0,0.5)' }}>{totalRecent}</div>
-                            <div style={{ fontSize: '0.5rem', fontWeight: '800', color: 'rgba(255,255,255,0.8)' }}>HRS/WK</div>
+                        <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none', zIndex: '10' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#FFF', textShadow: '0 0 20px rgba(0,0,0,0.8)', fontFamily: 'Outfit' }}>{totalRecent}</div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'rgba(255,255,255,0.9)', letterSpacing: '2px' }}>HOURS</div>
                         </div>
                     </div>
 
-                    <div style={{ marginTop: '2rem', fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', background: 'var(--input-bg)', padding: '6px 16px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
-                        ENERGY LEVEL: <span style={{ color: 'var(--primary)' }}>{intensity > 0.8 ? 'ELITE' : intensity > 0.4 ? 'STABLE' : 'CHARGING'}</span>
+                    <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '900', color: 'var(--text-main)', background: 'rgba(139, 92, 246, 0.1)', padding: '8px 24px', borderRadius: '100px', border: '1px solid rgba(139, 92, 246, 0.3)', backdropFilter: 'blur(10px)' }}>
+                            ENERGY STATUS: <span style={{ color: intensity > 0.8 ? '#FF3CAC' : '#8B5CF6' }}>{intensity > 0.8 ? 'MAXIMUM OVERDRIVE' : intensity > 0.4 ? 'OPTIMIZED' : 'CHARGING'}</span>
+                        </div>
+                        <div style={{ height: '4px', width: '200px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #8B5CF6, #FF3CAC)', transition: '1s' }}></div>
+                        </div>
                     </div>
                 </div>
             );
