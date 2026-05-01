@@ -37,32 +37,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary: #6366F1;
-            --primary-glow: rgba(99, 102, 241, 0.3);
-            --secondary: #22D3EE;
-            --bg: #0F172A;
-            --navbar-bg: rgba(15, 23, 42, 0.8);
-            --card-bg: rgba(30, 41, 59, 0.95);
-            --text-main: #F8FAFC;
-            --text-dim: #94A3B8;
-            --border: rgba(255, 255, 255, 0.08);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --primary: #FF3CAC;
+            --primary-glow: rgba(255, 60, 172, 0.3);
+            --secondary: #784BA0;
+            --bg: #000000;
+            --navbar-bg: rgba(0, 0, 0, 0.85);
+            --card-bg: rgba(17, 17, 17, 0.8);
+            --text-main: #CCCCCC;
+            --text-dim: #888888;
+            --border: rgba(34, 34, 34, 0.8);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.05);
             --input-bg: rgba(255, 255, 255, 0.03);
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
             --success: #10B981;
         }
 
         body.light-mode {
-            --primary: #4F46E5;
-            --primary-glow: rgba(79, 70, 229, 0.2);
-            --secondary: #0891B2;
-            --bg: #F8FAFC;
-            --navbar-bg: rgba(248, 250, 252, 0.8);
+            --primary: #FF3CAC;
+            --primary-glow: rgba(255, 60, 172, 0.15);
+            --secondary: #784BA0;
+            --bg: #FFFFFF;
+            --navbar-bg: rgba(255, 255, 255, 0.85);
             --card-bg: #FFFFFF;
-            --text-main: #1E293B;
-            --text-dim: #64748B;
+            --text-main: #111111;
+            --text-dim: #666666;
             --border: rgba(0, 0, 0, 0.08);
-            --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+            --glass-border: 1px solid rgba(0, 0, 0, 0.05);
             --input-bg: rgba(0, 0, 0, 0.04);
             --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
             color-scheme: light;
@@ -110,20 +110,17 @@
             .dash-grid { grid-template-columns: 1fr !important; gap: 1rem; }
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
             .hour-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; }
-        }
             .marks-grid { grid-template-columns: 1fr !important; gap: 1rem; }
             .stats-grid-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
             .card { padding: 1.25rem !important; border-radius: 20px; }
             .hour-btn { font-size: 1.1rem; border-radius: 12px; }
             .stat-val { font-size: 1.8rem; }
             .stat-card { padding: 1.2rem 0.8rem; }
-
             .hero-section { display: flex; flex-direction: column; gap: 2rem; align-items: stretch !important; padding: 1.5rem !important; }
             .hero-section h1 { text-align: center; }
             .hero-section p { text-align: center; margin: 0 auto; }
             .hero-section > div:first-child { display: flex; flex-direction: column; align-items: center; }
             .countdown-card { min-width: 0 !important; width: 100%; }
-            
             .chart-box { height: 160px !important; }
         }
 
@@ -175,10 +172,10 @@
         .hour-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); opacity: 0; transition: 0.3s; }
         .hour-btn:hover:not(.active) { border-color: var(--primary); transform: translateY(-3px); color: var(--text-main); }
         .hour-btn.active { 
-            background: linear-gradient(135deg, var(--primary), #a855f7); 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
             color: white; 
             border-color: transparent; 
-            box-shadow: 0 10px 25px var(--primary-glow); 
+            box-shadow: 0 0 15px var(--primary-glow); 
             transform: scale(1.05) translateY(-2px); 
         }
         .hour-btn.active::after { opacity: 1; }
@@ -206,33 +203,7 @@
         .admin-editor-card { background: var(--input-bg); border-radius: 20px; padding: 1.5rem; border: 1px solid var(--border); margin-top: 2rem; }
         .admin-textarea { width: 100%; background: var(--card-bg); border: var(--glass-border); border-radius: 12px; padding: 12px; color: var(--text-main); font-family: 'Outfit'; font-size: 0.9rem; resize: none; margin-bottom: 10px; min-height: 80px; }
 
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; width: 100%; padding: 70px 10px 90px 10px !important; }
-            .container { width: 100%; padding: 0 5px; }
-            .mobile-nav { display: flex; }
-            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); height: 60px; z-index: 1500; border-bottom: var(--glass-border); margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; }
-            .mobile-only-brand { display: flex; align-items: center; gap: 8px; }
-            .desktop-only-admin { display: none; }
-            
-            .dash-grid { grid-template-columns: 1fr !important; gap: 1rem; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
-            .hour-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; }
-            .marks-grid { grid-template-columns: 1fr !important; gap: 1rem; }
-            .stats-grid-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
-            .card { padding: 1.25rem !important; border-radius: 20px; }
-            .hour-btn { font-size: 1.1rem; border-radius: 12px; }
-            .stat-val { font-size: 1.8rem; }
-            .stat-card { padding: 1.2rem 0.8rem; }
 
-            .hero-section { display: flex; flex-direction: column; gap: 2rem; align-items: stretch !important; padding: 1.5rem !important; }
-            .hero-section h1 { text-align: center; }
-            .hero-section p { text-align: center; margin: 0 auto; }
-            .hero-section > div:first-child { display: flex; flex-direction: column; align-items: center; }
-            .countdown-card { min-width: 0 !important; width: 100%; }
-            
-            .chart-box { height: 160px !important; }
-        }
 
         @media (max-width: 480px) {
             .stats-grid-3 { grid-template-columns: 1fr !important; }
@@ -1244,9 +1215,8 @@
                             />
                         ))}
                     </div>
-                </div>
-            );
-        };
+                );
+            };
 
         const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
