@@ -180,7 +180,12 @@
         }
         .hour-btn.active::after { opacity: 1; }
 
-        .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem; width: 100%; min-width: 0; }
+        @keyframes dnaPulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px var(--p-color)); } 50% { opacity: 0.7; filter: drop-shadow(0 0 10px var(--p-color)); } }
+        @keyframes dnaFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes dnaTwist { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.9); } }
+        
+        .dna-svg { animation: dnaFloat 6s ease-in-out infinite; }
+        .dna-rung-active { animation: dnaPulse 3s ease-in-out infinite; }
         .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem; width: 100%; min-width: 0; }
 
         .notice-board { 
@@ -1190,9 +1195,10 @@
             }
 
             const getIntensity = (hrs) => {
-                if (hrs === 0) return 'rgba(255,255,255,0.05)';
-                if (hrs <= 3) return '#784BA0';
-                if (hrs <= 6) return '#8B5CF6';
+                const isLight = document.body.classList.contains('light-mode');
+                if (hrs === 0) return isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+                if (hrs <= 3) return isLight ? '#7C3AED' : '#784BA0';
+                if (hrs <= 6) return isLight ? '#6D28D9' : '#8B5CF6';
                 return '#FF3CAC';
             };
 
@@ -1203,27 +1209,33 @@
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>Visualizing your neural consistency</div>
                     </div>
                     
-                    <svg width="200" height="400" viewBox="0 0 200 400" style={{ filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.2))' }}>
+                    <svg width="200" height="400" viewBox="0 0 200 400" className="dna-svg" style={{ filter: 'drop-shadow(0 0 5px rgba(139, 92, 246, 0.1))' }}>
                         {data.map((d, i) => {
                             const y = i * 18 + 10;
                             const t = i * 0.5;
                             const x1 = 100 + Math.sin(t) * 60;
                             const x2 = 100 - Math.sin(t) * 60;
                             const color = getIntensity(d.hrs);
-                            const glow = d.hrs > 0 ? `drop-shadow(0 0 5px ${color})` : 'none';
+                            const isActive = d.hrs > 0;
                             
                             return (
-                                <g key={i}>
+                                <g key={i} style={{ animation: 'dnaTwist 8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }}>
                                     {/* Connections (Rungs) */}
-                                    <line x1={x1} y1={y} x2={x2} y2={y} stroke={color} strokeWidth="3" strokeLinecap="round" style={{ opacity: d.hrs > 0 ? 0.8 : 0.2, filter: glow }} />
+                                    <line x1={x1} y1={y} x2={x2} y2={y} stroke={color} strokeWidth={isActive ? "3.5" : "2"} strokeLinecap="round" 
+                                        className={isActive ? 'dna-rung-active' : ''}
+                                        style={{ 
+                                            opacity: isActive ? 1 : 0.4, 
+                                            '--p-color': color,
+                                            transition: '0.3s' 
+                                        }} />
                                     
                                     {/* Outer Points */}
-                                    <circle cx={x1} cy={y} r="4" fill={color} style={{ filter: glow }} />
-                                    <circle cx={x2} cy={y} r="4" fill={color} style={{ filter: glow }} />
+                                    <circle cx={x1} cy={y} r={isActive ? "4.5" : "3"} fill={color} style={{ transition: '0.3s' }} />
+                                    <circle cx={x2} cy={y} r={isActive ? "4.5" : "3"} fill={color} style={{ transition: '0.3s' }} />
                                     
-                                    {/* Tooltip date label on every 5th rung */}
+                                    {/* Tooltip date label on every 7th rung */}
                                     {i % 7 === 0 && (
-                                        <text x="10" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '800', textTransform: 'uppercase' }}>
+                                        <text x="5" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                             {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                                         </text>
                                     )}
@@ -1232,10 +1244,10 @@
                         })}
                     </svg>
                     
-                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '15px', fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#rgba(255,255,255,0.05)' }}></div> IDLE</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8B5CF6' }}></div> FOCUSED</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC' }}></div> ELITE</div>
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '15px', fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(128,128,128,0.2)' }}></div> IDLE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8B5CF6' }}></div> ACTIVE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC' }}></div> ELITE</div>
                     </div>
                 </div>
             );
