@@ -337,6 +337,9 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
+        @media (min-width: 1025px) {
+            .container, .nav-container { width: 96%; max-width: 100%; }
+        }
         @media (max-width: 1024px) { 
             .dash-grid, .community-hub { grid-template-columns: 1fr; } 
             .stats-grid { grid-template-columns: repeat(2, 1fr); } 
