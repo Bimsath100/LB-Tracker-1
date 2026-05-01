@@ -1195,90 +1195,98 @@
             useEffect(() => {
                 let frame;
                 const animate = () => {
-                    setTime(prev => prev + 0.02);
+                    setTime(prev => prev + 0.015);
                     frame = requestAnimationFrame(animate);
                 };
                 frame = requestAnimationFrame(animate);
                 return () => cancelAnimationFrame(frame);
             }, []);
 
-            const getIntensity = (hrs, side) => {
-                if (hrs === 0) return 'rgba(139, 92, 246, 0.1)';
-                return side === 'left' ? '#22D3EE' : '#FF3CAC';
-            };
-
             return (
-                <div style={{ padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', perspective: '1000px', overflow: 'hidden' }}>
-                    <div style={{ marginBottom: '2rem', textAlign: 'center', transform: 'translateZ(50px)' }}>
-                        <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '5px', textTransform: 'uppercase', textShadow: '0 0 20px var(--primary)' }}>Academic DNA 🧬</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '6px', fontWeight: '800' }}>NEURAL CONSISTENCY SYNC</div>
+                <div style={{ padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', perspective: '1200px', overflow: 'hidden', background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 80%)' }}>
+                    <div style={{ marginBottom: '2.5rem', textAlign: 'center', transform: 'translateZ(100px)' }}>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '900', color: '#F3F4F6', letterSpacing: '6px', textTransform: 'uppercase', textShadow: '0 0 20px #8B5CF6, 0 0 40px #8B5CF6' }}>Academic DNA 🧬</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '8px', fontWeight: '800', letterSpacing: '1px' }}>CORE NEURAL ARCHITECTURE</div>
                     </div>
                     
-                    <div style={{ transform: 'rotateX(25deg) rotateY(-15deg) rotateZ(5deg)', transformStyle: 'preserve-3d', transition: '0.5s' }}>
-                        <svg width="260" height="460" viewBox="0 0 260 460">
+                    <div style={{ transform: 'rotateX(30deg) rotateY(-20deg) rotateZ(5deg)', transformStyle: 'preserve-3d' }}>
+                        <svg width="300" height="500" viewBox="0 0 300 500">
                             <defs>
-                                <filter id="glow-3d" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="4" result="blur"/>
-                                    <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                                <filter id="hyper-glow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="5" result="blur"/>
+                                    <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -10" result="goo"/>
+                                    <feComposite in="SourceGraphic" in2="goo" operator="over"/>
                                 </filter>
-                                <linearGradient id="dna-grad-left" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stopColor="#22D3EE" />
-                                    <stop offset="100%" stopColor="#06B6D4" />
+                                    <stop offset="100%" stopColor="#0EA5E9" />
                                 </linearGradient>
-                                <linearGradient id="dna-grad-right" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <linearGradient id="grad-orange" x1="0%" y1="0%" x2="0%" y2="100%">
                                     <stop offset="0%" stopColor="#FF3CAC" />
-                                    <stop offset="100%" stopColor="#D946EF" />
+                                    <stop offset="50%" stopColor="#FF8C00" />
+                                    <stop offset="100%" stopColor="#F59E0B" />
                                 </linearGradient>
                             </defs>
                             
-                            {/* Helix Backbone Paths with Perspective Offset */}
+                            {/* Dense Particle Cloud */}
+                            {Array.from({ length: 30 }).map((_, i) => (
+                                <circle key={`sp-${i}`} 
+                                    cx={150 + Math.sin(time * 0.5 + i) * 100} 
+                                    cy={50 + (i * 15) + Math.cos(time * 0.4 + i) * 30} 
+                                    r={0.8 + Math.random() * 1.5} 
+                                    fill={i % 2 === 0 ? '#22D3EE' : '#FF8C00'} 
+                                    style={{ opacity: 0.4 + Math.sin(time * 2 + i) * 0.3, filter: 'blur(1px)' }}
+                                />
+                            ))}
+
+                            {/* Thick Ribbon Backbones */}
                             <path d={data.map((_, i) => {
-                                const y = i * 20 + 30;
+                                const y = i * 22 + 40;
                                 const t = time + (i * 0.45);
-                                const x = 130 + Math.sin(t) * 80;
+                                const x = 150 + Math.sin(t) * 90;
                                 return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                            }).join(' ')} fill="none" stroke="url(#dna-grad-left)" strokeWidth="4" style={{ opacity: 0.4, filter: 'url(#glow-3d)' }} />
+                            }).join(' ')} fill="none" stroke="url(#grad-cyan)" strokeWidth="10" strokeLinecap="round" style={{ opacity: 0.6, filter: 'url(#hyper-glow)' }} />
                             
                             <path d={data.map((_, i) => {
-                                const y = i * 20 + 30;
+                                const y = i * 22 + 40;
                                 const t = time + (i * 0.45) + Math.PI;
-                                const x = 130 + Math.sin(t) * 80;
+                                const x = 150 + Math.sin(t) * 90;
                                 return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                            }).join(' ')} fill="none" stroke="url(#dna-grad-right)" strokeWidth="4" style={{ opacity: 0.4, filter: 'url(#glow-3d)' }} />
+                            }).join(' ')} fill="none" stroke="url(#grad-orange)" strokeWidth="10" strokeLinecap="round" style={{ opacity: 0.6, filter: 'url(#hyper-glow)' }} />
 
                             {data.map((d, i) => {
-                                const y = i * 20 + 30;
+                                const y = i * 22 + 40;
                                 const t = time + (i * 0.45);
                                 const z1 = Math.cos(t);
                                 const z2 = Math.cos(t + Math.PI);
                                 
-                                const x1 = 130 + Math.sin(t) * 80;
-                                const x2 = 130 + Math.sin(t + Math.PI) * 80;
+                                const x1 = 150 + Math.sin(t) * 90;
+                                const x2 = 150 + Math.sin(t + Math.PI) * 90;
                                 
-                                const leftColor = getIntensity(d.hrs, 'left');
-                                const rightColor = getIntensity(d.hrs, 'right');
+                                const c1 = d.hrs > 0 ? '#22D3EE' : 'rgba(255,255,255,0.05)';
+                                const c2 = d.hrs > 0 ? '#FF8C00' : 'rgba(255,255,255,0.05)';
                                 
                                 return (
                                     <g key={i}>
-                                        {/* Rung connection with depth sorting */}
+                                        {/* Glowing Rungs */}
                                         <line x1={x1} y1={y} x2={x2} y2={y} 
-                                            stroke={d.hrs > 0 ? (z1 > 0 || z2 > 0 ? 'var(--primary)' : 'rgba(139, 92, 246, 0.1)') : 'rgba(255,255,255,0.05)'} 
-                                            strokeWidth={d.hrs > 0 ? 4 : 1}
-                                            style={{ filter: d.hrs > 0 ? 'url(#glow-3d)' : 'none', opacity: d.hrs > 0 ? 0.6 : 0.1 }}
+                                            stroke={d.hrs > 0 ? (z1 > 0 || z2 > 0 ? '#8B5CF6' : 'rgba(139, 92, 246, 0.2)') : 'rgba(255,255,255,0.05)'} 
+                                            strokeWidth={d.hrs > 0 ? 6 : 1}
+                                            style={{ filter: d.hrs > 0 ? 'url(#hyper-glow)' : 'none', opacity: d.hrs > 0 ? 0.8 : 0.1 }}
                                         />
                                         
-                                        {/* Backbone Nodes with Scale and Depth */}
-                                        <circle cx={x1} cy={y} r={d.hrs > 0 ? (6 + z1 * 3) : 3} fill={leftColor} style={{ opacity: 0.3 + (z1 + 1) * 0.5, filter: d.hrs > 0 ? 'url(#glow-3d)' : 'none' }} />
-                                        <circle cx={x2} cy={y} r={d.hrs > 0 ? (6 + z2 * 3) : 3} fill={rightColor} style={{ opacity: 0.3 + (z2 + 1) * 0.5, filter: d.hrs > 0 ? 'url(#glow-3d)' : 'none' }} />
+                                        {/* Large Spherical Nodes */}
+                                        <circle cx={x1} cy={y} r={d.hrs > 0 ? (8 + z1 * 4) : 4} fill={c1} style={{ opacity: 0.4 + (z1 + 1) * 0.5, filter: d.hrs > 0 ? 'url(#hyper-glow)' : 'none' }} />
+                                        <circle cx={x2} cy={y} r={d.hrs > 0 ? (8 + z2 * 4) : 4} fill={c2} style={{ opacity: 0.4 + (z2 + 1) * 0.5, filter: d.hrs > 0 ? 'url(#hyper-glow)' : 'none' }} />
                                     </g>
                                 );
                             })}
                         </svg>
                     </div>
                     
-                    <div style={{ marginTop: '2.5rem', display: 'flex', gap: '25px', fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '2px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 15px #22D3EE' }}></div> CONSISTENT</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#FF3CAC', boxShadow: '0 0 15px #FF3CAC' }}></div> INTENSE</div>
+                    <div style={{ marginTop: '3rem', display: 'flex', gap: '30px', fontSize: '0.8rem', fontWeight: '900', color: '#9CA3AF', letterSpacing: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 20px #22D3EE' }}></div> COLD STATE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: '14px', height: '14px', borderRadius: '50%', background: '#FF8C00', boxShadow: '0 0 20px #FF8C00' }}></div> OVERHEAT</div>
                     </div>
                 </div>
             );
