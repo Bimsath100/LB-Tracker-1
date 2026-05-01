@@ -344,13 +344,31 @@
             .dash-grid, .community-hub { grid-template-columns: 1fr; } 
             .stats-grid { grid-template-columns: repeat(2, 1fr); } 
         }
+        .header-icon-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            transition: 0.2s;
+        }
+
         @media (max-width: 768px) { 
             .nav-links { display: none; } 
             .main-content { padding-top: 80px; }
-            .nav-brand { font-size: 1.2rem; }
+            .nav-brand { font-size: 1.1rem; gap: 4px; }
+            .nav-logo { width: 24px; height: 24px; }
             .live-indicator { font-size: 0.6rem; padding: 3px 8px; margin-left: 5px; }
-            .registered-badge { font-size: 0.55rem; padding: 2px 6px; margin-left: 4px; }
-            .registered-badge .reg-label { display: none; }
+            .registered-badge { display: none; } 
+            .header-icon-btn { width: 30px; height: 30px; font-size: 0.9rem; margin-right: 5px; }
         }
         @media (max-width: 600px) { 
             .stats-grid { gap: 0.6rem; } 
@@ -968,6 +986,56 @@
             );
         };
 
+        const AiAssistant = ({ history, streak, profile }) => {
+            const todayStr = getLocalISODate();
+            const hrsToday = Array.isArray(history[todayStr]) ? history[todayStr].filter(Boolean).length : 0;
+            const target = history.target || 24;
+            let msg = ""; let emotion = "🤖";
+            if (hrsToday >= target && hrsToday > 0) { msg = `Amazing work! You hit your daily target of ${target} hours. Rest up!`; emotion = "🌟"; }
+            else if (hrsToday > 0) { msg = `You've done ${hrsToday} hours today. Just ${target - hrsToday} more to hit your goal. Keep pushing!`; emotion = "🔥"; }
+            else { msg = `Ready to start? Let's aim for ${target} hours today. Your future self will thank you.`; emotion = "💡"; }
+            
+            return (
+                <div style={{ background: 'var(--card-bg)', border: '1px solid var(--primary)', borderRadius: '16px', padding: '1.2rem', display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '1.5rem', boxShadow: '0 4px 20px var(--primary-glow)' }}>
+                    <div style={{ fontSize: '2.5rem', background: 'var(--input-bg)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{emotion}</div>
+                    <div>
+                        <div style={{ fontWeight: '800', color: 'var(--primary)', marginBottom: '4px', fontSize: '0.9rem', letterSpacing: '1px', textTransform: 'uppercase' }}>LB AI Assistant ✨</div>
+                        <div style={{ color: 'var(--text-main)', fontSize: '0.95rem', lineHeight: '1.4' }}>{msg}</div>
+                        {streak > 2 && <div style={{ color: '#F59E0B', fontSize: '0.8rem', marginTop: '6px', fontWeight: '700' }}>You're on a {streak} day streak. Don't break it! 📈</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        const StudyRoadmap = ({ profile }) => {
+            if (!profile || !profile.examYear || !profile.examMonth) return null;
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const targetDate = new Date(profile.examYear, months.indexOf(profile.examMonth), 1);
+            const now = new Date();
+            const monthsLeft = (targetDate.getFullYear() - now.getFullYear()) * 12 + targetDate.getMonth() - now.getMonth();
+            
+            let phase = "Theory & Foundation";
+            let prog = 30;
+            if (monthsLeft <= 6 && monthsLeft > 3) { phase = "Rapid Revision & Past Papers"; prog = 70; }
+            else if (monthsLeft <= 3 && monthsLeft > 0) { phase = "Final Mock Exams & Time Management"; prog = 90; }
+            else if (monthsLeft <= 0) { phase = "Exam Mode Active 🚀"; prog = 100; }
+            
+            return (
+                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem', textAlign: 'left' }}>
+                    <div className="card-header" style={{ marginBottom: '1rem' }}><span className="card-title" style={{ margin: 0 }}>A/L Study Roadmap 🗺️</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem', background: 'var(--primary-glow)', padding: '4px 12px', borderRadius: '100px' }}>{monthsLeft > 0 ? `${monthsLeft} Months Left` : 'Exam Time'}</span></div>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '700' }}>
+                            <span>Current Phase: <span style={{ color: 'var(--text-main)' }}>{phase}</span></span>
+                            <span>{prog}% Journey</span>
+                        </div>
+                        <div style={{ width: '100%', height: '8px', background: 'var(--input-bg)', borderRadius: '10px', overflow: 'hidden' }}>
+                            <div style={{ width: `${prog}%`, height: '100%', background: 'var(--primary)', transition: 'width 1s ease-in-out', borderRadius: '10px' }}></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
@@ -1058,6 +1126,7 @@
                         </div>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
+                    <Reveal><StudyRoadmap profile={profile} /></Reveal>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / {dailyTarget} hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
@@ -1071,7 +1140,7 @@
             );
         };
 
-        const WorkspaceView = ({ viewDate, history, setHistory }) => {
+        const WorkspaceView = ({ viewDate, history, setHistory, streak, profile }) => {
             return (
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1000px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
@@ -1084,8 +1153,9 @@
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '8px' }}>Hours</span>
                         </div>
                     </div>
+                    <Reveal delay={0.1}><AiAssistant history={history} streak={streak} profile={profile} /></Reveal>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
-                        <Reveal><FocusTimer /></Reveal>
+                        <Reveal delay={0.2}><FocusTimer /></Reveal>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <Reveal delay={0.1}><div className="glass card"><span className="card-title">Daily To-Do List 📝</span><TodoList viewDate={viewDate} history={history} setHistory={setHistory} /></div></Reveal>
                             <Reveal delay={0.2}><div className="glass card"><span className="card-title">Resource Links 🔗</span><ResourceLinks history={history} setHistory={setHistory} /></div></Reveal>
@@ -1095,18 +1165,62 @@
             );
         };
 
-        const CommunityView = ({ history, marks, streak }) => {
+        const CommunityView = ({ history, marks, streak, globalLeaders }) => {
+            const quotes = [
+                "Success is the sum of small efforts, repeated day-in and day-out. 🚀",
+                "Don't stop when you're tired. Stop when you're done. 💪",
+                "Your future is created by what you do today, not tomorrow. ⭐",
+                "The pain you feel today will be the strength you feel tomorrow. 🔥",
+                "Push yourself, because no one else is going to do it for you. 📈"
+            ];
+            const randomQuote = quotes[new Date().getDate() % quotes.length];
+
             return (
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1000px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🌍</div>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800' }}>Community Hub</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Your achievements and live global activity.</p>
+                        <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#229ED9', color: 'white', padding: '8px 20px', borderRadius: '100px', fontWeight: '800', textDecoration: 'none', marginTop: '1rem', boxShadow: '0 4px 15px rgba(34, 158, 217, 0.4)' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
+                            Join Telegram Group
+                        </a>
                     </div>
                     <Reveal><BadgesView history={history} marks={marks} streak={streak} /></Reveal>
-                    <div className="community-hub" style={{ marginTop: '2rem' }}>
-                        <Reveal delay={0.1}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
-                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3><DistrictLeaderboard /></div></Reveal>
+
+                    <Reveal delay={0.1}>
+                        <div className="glass card" style={{ padding: '2rem', textAlign: 'center', marginTop: '2rem', background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(139,92,246,0.05) 100%)', border: '1px solid rgba(99,102,241,0.2)' }}>
+                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>💭</div>
+                            <h3 style={{ fontFamily: 'Outfit', marginBottom: '15px', color: 'var(--primary)' }}>Daily Motivation</h3>
+                            <p style={{ color: 'var(--text-main)', fontSize: '1.1rem', fontWeight: '500', fontStyle: 'italic', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>"{randomQuote}"</p>
+                        </div>
+                    </Reveal>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
+                        <Reveal delay={0.2}>
+                            <div className="glass card" style={{ padding: '1.5rem', height: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div>
+                                <ActivityFeed />
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.3}>
+                            <div className="glass card" style={{ padding: '1.5rem', height: '100%' }}>
+                                <h3 style={{ margin: 0, fontFamily: 'Outfit', marginBottom: '1.5rem' }}>Top 10 Scholars 🏆</h3>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {globalLeaders && globalLeaders.map((l, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 15px', borderRadius: '12px' }}>
+                                            <div style={{ fontSize: '1.2rem', marginRight: '15px', width: '25px', textAlign: 'center' }}>{i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div>
+                                            <div>
+                                                <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.9rem' }}>{l.name}</div>
+                                                <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{l.district}</div>
+                                            </div>
+                                            <div style={{ marginLeft: 'auto', fontWeight: '800', color: 'var(--primary)', fontSize: '1rem' }}>{l.hrs}h</div>
+                                        </div>
+                                    ))}
+                                    {(!globalLeaders || globalLeaders.length === 0) && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', textAlign: 'center', padding: '1rem' }}>Loading elite scholars...</div>}
+                                </div>
+                            </div>
+                        </Reveal>
                     </div>
                 </div>
             );
@@ -1155,10 +1269,26 @@
                         </Reveal>
                     )}
                     <div className="marks-grid">
-                        <Reveal delay={0.4}><MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" /></Reveal>
-                        <Reveal delay={0.5}><MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" /></Reveal>
-                        <Reveal delay={0.6}><MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" /></Reveal>
-                        <Reveal delay={0.7}><MarkChart title="Total Score" data={data} field="total" color="#10B981" /></Reveal>
+                        <Reveal delay={0.4}>
+                            <div>
+                                <MarkChart title="MCQ Score" data={data} field="mcq" color="#3B82F6" />
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.5}>
+                            <div>
+                                <MarkChart title="Structured Score" data={data} field="str" color="#8B5CF6" />
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.6}>
+                            <div>
+                                <MarkChart title="Essay Score" data={data} field="esy" color="#F43F5E" />
+                            </div>
+                        </Reveal>
+                        <Reveal delay={0.7}>
+                            <div>
+                                <MarkChart title="Total Score" data={data} field="total" color="#10B981" />
+                            </div>
+                        </Reveal>
                     </div>
                 </div>
             );
@@ -1298,6 +1428,7 @@
             const [liveDetails, setLiveDetails] = useState([]);
             const [markedDetails, setMarkedDetails] = useState([]);
             const [totalRegistered, setTotalRegistered] = useState(0);
+            const [globalLeaders, setGlobalLeaders] = useState([]);
 
             const isAL = profile?.examLevel === 'A/L' || !profile?.examLevel;
 
@@ -1439,6 +1570,23 @@
                         try {
                             const { count, error } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
                             if (!error && count !== null) setTotalRegistered(count);
+
+                            // Fetch global leaders (all time top 10)
+                            const { data: leadData } = await sb.from('study_tracker_v2').select('name, district, history').limit(1000);
+                            if (leadData) {
+                                const scored = leadData.map(u => {
+                                    let hrs = 0;
+                                    if(u.history) {
+                                        Object.keys(u.history).forEach(k => {
+                                            if (k.includes('-') && Array.isArray(u.history[k])) {
+                                                hrs += u.history[k].filter(Boolean).length;
+                                            }
+                                        });
+                                    }
+                                    return { name: u.name, district: u.district, hrs };
+                                }).filter(u => u.hrs > 0).sort((a,b) => b.hrs - a.hrs).slice(0, 10);
+                                setGlobalLeaders(scored);
+                            }
                         } catch (e) { console.error("Fetch Total Error:", e); }
                     };
                     fetchTotalUsers();
@@ -1594,10 +1742,10 @@
                                 )}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setCurrentPage('tutorial')} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '1.1rem', cursor: 'pointer', padding: '6px', borderRadius: '50%', marginRight: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', transition: '0.2s' }} title="How to Use">
+                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="How to Use">
                                     📖
                                 </button>
-                                <button onClick={() => setIsLightMode(!isLightMode)} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '1.1rem', cursor: 'pointer', padding: '6px', borderRadius: '50%', marginRight: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', transition: '0.2s' }} title="Toggle Theme">
+                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="Toggle Theme">
                                     {isLightMode ? '🌙' : '☀️'}
                                 </button>
                                 <div className="nav-links">
@@ -1646,10 +1794,6 @@
                         <MobileItem active={currentPage === 'community'} icon="🌍" label="Community" onClick={() => setCurrentPage('community')} />
                         <MobileItem active={currentPage === 'subjects' || profile.subjects.includes(currentPage)} icon="📚" label="Subjects" onClick={() => setCurrentPage('subjects')} />
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
-                        <div className="mobile-item tg-item" onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
-                            <span className="m-icon">✈️</span>
-                            <span className="m-label">Join</span>
-                        </div>
                     </nav>
 
                     {adminView && (
@@ -1719,9 +1863,24 @@
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'workspace' ? (
-                                <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} />
+                                <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} streak={(() => {
+                                    let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
+                                    let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
+                                    if (todayH === 0) { 
+                                        curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD); 
+                                        let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0; 
+                                        if (yestH > 0) streak = 1; 
+                                    } else streak = 1;
+                                    if (streak > 0) {
+                                        while (true) {
+                                            curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
+                                            let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
+                                            if (hrs > 0) streak++; else break;
+                                        }
+                                    } return streak;
+                                })()} profile={profile} />
                             ) : currentPage === 'community' ? (
-                                <CommunityView history={history} marks={marks} streak={(() => {
+                                <CommunityView history={history} marks={marks} globalLeaders={globalLeaders} streak={(() => {
                                     let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
                                     let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
                                     if (todayH === 0) { 
