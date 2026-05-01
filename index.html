@@ -1195,7 +1195,7 @@
             useEffect(() => {
                 let frame;
                 const animate = () => {
-                    setTime(prev => prev + 0.02);
+                    setTime(prev => prev + 0.025);
                     frame = requestAnimationFrame(animate);
                 };
                 frame = requestAnimationFrame(animate);
@@ -1208,72 +1208,82 @@
             };
 
             return (
-                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%)' }}>
+                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', background: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 80%)' }}>
                     <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '3px', textTransform: 'uppercase', textShadow: '0 0 10px var(--primary)' }}>Neural Helix 🧬</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '800' }}>LIVE CORE STABILITY SYNC</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '4px', textTransform: 'uppercase', textShadow: '0 0 15px var(--primary)' }}>Academic DNA 🧬</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '800' }}>NEURAL CONSISTENCY SEQUENCE</div>
                     </div>
                     
-                    <svg width="240" height="420" viewBox="0 0 240 420" style={{ filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.5))' }}>
+                    <svg width="240" height="420" viewBox="0 0 240 420">
                         <defs>
-                            <filter id="glow">
-                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            <filter id="glow-strong">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
                             </filter>
                         </defs>
                         
                         {/* Background Particles */}
-                        {Array.from({ length: 15 }).map((_, i) => (
+                        {Array.from({ length: 12 }).map((_, i) => (
                             <circle key={`p-${i}`} 
-                                cx={120 + Math.sin(time * 0.5 + i) * 80} 
-                                cy={20 + (i * 25) + Math.cos(time * 0.3 + i) * 20} 
-                                r={Math.random() * 1.5} 
+                                cx={120 + Math.sin(time * 0.4 + i) * 90} 
+                                cy={20 + (i * 30) + Math.cos(time * 0.2 + i) * 20} 
+                                r={Math.random() * 1.2} 
                                 fill={i % 2 === 0 ? '#22D3EE' : '#FF3CAC'} 
-                                style={{ opacity: 0.3 + Math.sin(time + i) * 0.2 }}
+                                style={{ opacity: 0.2 + Math.sin(time + i) * 0.15 }}
                             />
                         ))}
+
+                        {/* Helix Backbones */}
+                        <path d={data.map((_, i) => {
+                            const y = i * 18 + 25;
+                            const t = time + (i * 0.4);
+                            const x = 120 + Math.sin(t) * 70;
+                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                        }).join(' ')} fill="none" stroke="#22D3EE" strokeWidth="2" style={{ opacity: 0.3, filter: 'url(#glow-strong)' }} />
+                        
+                        <path d={data.map((_, i) => {
+                            const y = i * 18 + 25;
+                            const t = time + (i * 0.4) + Math.PI;
+                            const x = 120 + Math.sin(t) * 70;
+                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                        }).join(' ')} fill="none" stroke="#FF3CAC" strokeWidth="2" style={{ opacity: 0.3, filter: 'url(#glow-strong)' }} />
 
                         {data.map((d, i) => {
                             const y = i * 18 + 25;
                             const t = time + (i * 0.4);
-                            const z = Math.cos(t); // Depth
-                            const xOffset = Math.sin(t) * 70;
-                            const x1 = 120 + xOffset;
-                            const x2 = 120 - xOffset;
+                            const z1 = Math.cos(t);
+                            const z2 = Math.cos(t + Math.PI);
+                            
+                            const x1 = 120 + Math.sin(t) * 70;
+                            const x2 = 120 + Math.sin(t + Math.PI) * 70;
                             
                             const leftColor = getIntensity(d.hrs, 'left');
                             const rightColor = getIntensity(d.hrs, 'right');
-                            const size = 3 + (z + 1) * 2; // Scale based on depth
-                            const opacity = 0.2 + (z + 1) * 0.4;
                             
+                            // Visual Depth Sorting logic
+                            const isFront1 = z1 > 0;
+                            const isFront2 = z2 > 0;
+
                             return (
-                                <g key={i} style={{ opacity: d.hrs > 0 ? opacity : 0.15 }}>
-                                    {/* Rung */}
+                                <g key={i}>
+                                    {/* Rung connection */}
                                     <line x1={x1} y1={y} x2={x2} y2={y} 
-                                        stroke={`linear-gradient(to right, ${leftColor}, ${rightColor})`}
-                                        stroke={d.hrs > 0 ? (z > 0 ? '#8B5CF6' : '#4B2C82') : 'rgba(255,255,255,0.1)'} 
-                                        strokeWidth={1 + (z + 1)} 
-                                        strokeLinecap="round"
-                                        style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }}
+                                        stroke={d.hrs > 0 ? (isFront1 || isFront2 ? 'var(--primary)' : 'rgba(139, 92, 246, 0.2)') : 'rgba(255,255,255,0.05)'} 
+                                        strokeWidth={d.hrs > 0 ? 3 : 1}
+                                        style={{ filter: d.hrs > 0 ? 'url(#glow-strong)' : 'none' }}
                                     />
                                     
-                                    {/* Bases */}
-                                    <circle cx={x1} cy={y} r={size} fill={leftColor} style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }} />
-                                    <circle cx={x2} cy={y} r={size} fill={rightColor} style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }} />
-                                    
-                                    {i % 7 === 0 && z > 0.8 && (
-                                        <text x="5" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '900', opacity: 0.5 }}>
-                                            {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                                        </text>
-                                    )}
+                                    {/* Backbone Nodes */}
+                                    <circle cx={x1} cy={y} r={d.hrs > 0 ? (4 + z1 * 2) : 2} fill={leftColor} style={{ opacity: 0.2 + (z1 + 1) * 0.4, filter: d.hrs > 0 ? 'url(#glow-strong)' : 'none' }} />
+                                    <circle cx={x2} cy={y} r={d.hrs > 0 ? (4 + z2 * 2) : 2} fill={rightColor} style={{ opacity: 0.2 + (z2 + 1) * 0.4, filter: d.hrs > 0 ? 'url(#glow-strong)' : 'none' }} />
                                 </g>
                             );
                         })}
                     </svg>
                     
-                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '20px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 10px #22D3EE' }}></div> STABLE</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC', boxShadow: '0 0 10px #FF3CAC' }}></div> OVERDRIVE</div>
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '20px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '2px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 10px #22D3EE' }}></div> STABLE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#FF3CAC', boxShadow: '0 0 10px #FF3CAC' }}></div> OVERDRIVE</div>
                     </div>
                 </div>
             );
