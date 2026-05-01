@@ -76,18 +76,29 @@
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
-        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: var(--navbar-bg); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 2000; border-bottom: var(--glass-border); transition: background 0.3s; }
-        .nav-container { width: 92%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
-        .nav-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; transition: 0.4s; }
-        .nav-tracker { color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; font-weight: 800; }
-        .nav-links { display: flex; gap: 8px; align-items: center; }
-        .nav-link { padding: 10px 18px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.85rem; }
-        .nav-link.active { background: var(--primary); color: white; }
-        .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); }
-        .nav-join { display: flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 100px; background: linear-gradient(135deg, #2AABEE, #1e96d8); color: white; font-weight: 700; font-size: 0.82rem; text-decoration: none; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 0 16px rgba(42, 171, 238, 0.45); animation: tgPulse 2.5s ease-in-out infinite; white-space: nowrap; }
-        .nav-join:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 26px rgba(42, 171, 238, 0.7); }
-        @keyframes tgPulse { 0%, 100% { box-shadow: 0 0 14px rgba(42, 171, 238, 0.4); } 50% { box-shadow: 0 0 28px rgba(42, 171, 238, 0.75); } }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: var(--navbar-bg); backdrop-filter: blur(20px); z-index: 2000; border-right: var(--glass-border); padding: 2rem 1.5rem; display: flex; flexDirection: column; transition: transform 0.3s; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; margin-bottom: 2.5rem; cursor: pointer; }
+        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 15px var(--primary-glow); }
+        .sidebar-label { font-size: 0.7rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.5rem 10px; }
+        .nav-links { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .nav-link { padding: 12px 18px; border-radius: 14px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 8px 20px var(--primary-glow); transform: translateX(5px); }
+        .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); transform: translateX(5px); }
+        .nav-join { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, #2AABEE, #1e96d8); color: white; font-weight: 700; font-size: 0.9rem; text-decoration: none; cursor: pointer; box-shadow: 0 8px 20px rgba(42, 171, 238, 0.3); transition: 0.3s; }
+        .nav-join:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(42, 171, 238, 0.5); }
+        
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px 0; min-height: 100vh; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4%; margin-bottom: 2rem; width: 100%; }
+        .mobile-only-brand { display: none; align-items: center; gap: 8px; cursor: pointer; }
+        .desktop-only-admin { display: flex; align-items: center; gap: 10px; }
+        
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; width: 100%; padding: 20px 0 100px 0; }
+            .desktop-only-admin { display: none; }
+            .mobile-only-brand { display: flex; }
+            .top-header { padding: 0 5%; }
+        }
 
         .main-content { width: 100%; padding: 100px 0 100px 0; min-height: 100vh; }
         .container { width: min(94%, 1200px); margin: 0 auto; }
@@ -1039,6 +1050,91 @@
             );
         };
 
+        const CircularGauge = ({ value, max, label }) => {
+            const radius = 60;
+            const circumference = 2 * Math.PI * radius;
+            const percent = Math.min(value / max, 1);
+            const strokeDashoffset = circumference - percent * circumference;
+
+            return (
+                <div className="glass card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', position: 'relative' }}>
+                    <h3 style={{ margin: '0 0 1rem 0', fontFamily: 'Outfit', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', position: 'absolute', top: '1.5rem', left: '1.5rem' }}>{label}</h3>
+                    <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)', marginTop: '20px' }}>
+                        <circle cx="80" cy="80" r={radius} fill="none" stroke="var(--input-bg)" strokeWidth="12" />
+                        <circle 
+                            cx="80" cy="80" r={radius} 
+                            fill="none" 
+                            stroke="url(#gradient)" 
+                            strokeWidth="12" 
+                            strokeDasharray={circumference} 
+                            strokeDashoffset={strokeDashoffset} 
+                            strokeLinecap="round" 
+                            style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                        />
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#6366F1" />
+                                <stop offset="100%" stopColor="#D946EF" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div style={{ position: 'absolute', top: '55%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '2.2rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)', lineHeight: '1' }}>{Math.round(percent * 100)}%</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '700' }}>{value} / {max} HRS</div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StudyHeatmap = ({ history }) => {
+            const today = new Date();
+            const days = 84; // 12 weeks
+            const data = [];
+            
+            for (let i = days - 1; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                const k = getLocalISODate(d);
+                const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
+                data.push({ date: d, hrs });
+            }
+
+            const getIntensity = (hrs) => {
+                if (hrs === 0) return 'rgba(255, 255, 255, 0.03)';
+                if (hrs <= 2) return 'rgba(99, 102, 241, 0.3)';
+                if (hrs <= 5) return 'rgba(99, 102, 241, 0.6)';
+                if (hrs <= 8) return 'rgba(99, 102, 241, 0.9)';
+                return '#D946EF'; // Peak
+            };
+
+            return (
+                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <span className="card-title">Study Consistency Heatmap 🔥</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '700', background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px' }}>Last 12 Weeks</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(12px, 1fr))', gap: '6px', justifyContent: 'start' }}>
+                        {data.map((d, i) => (
+                            <div 
+                                key={i} 
+                                title={`${d.date.toDateString()}: ${d.hrs} hrs`}
+                                style={{
+                                    aspectRatio: '1',
+                                    borderRadius: '4px',
+                                    background: getIntensity(d.hrs),
+                                    transition: '0.2s',
+                                    cursor: 'pointer',
+                                    boxShadow: d.hrs > 8 ? '0 0 10px rgba(217, 70, 239, 0.5)' : 'none'
+                                }}
+                                onMouseEnter={(e) => { e.target.style.transform = 'scale(1.3)'; e.target.style.zIndex = '10'; }}
+                                onMouseLeave={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.zIndex = '1'; }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
         const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
@@ -1151,9 +1247,12 @@
                     <Reveal delay={0.1}><StudyRoadmap profile={profile} /></Reveal>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
-                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / {dailyTarget} hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
-                        <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
+                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>Log Hours</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
+                        <Reveal delay={0.1}>
+                            <CircularGauge value={todayCount} max={dailyTarget} label="Daily Target" />
+                        </Reveal>
                     </div>
+                    <Reveal delay={0.2}><StudyHeatmap history={history} /></Reveal>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
@@ -1737,56 +1836,70 @@
             if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
 
             return (
-                <div>
+                <div className="app-layout">
                     <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                     <SubjectBackground subject={currentPage} />
 
-                    <nav className="navbar">
-                        <div className="nav-container">
-                            <div className="nav-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
-                                <div className="nav-logo">LB</div>
-                                <span className="nav-tracker">Tracker</span>
-                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', marginLeft: '10px' }}>
-                                    <div className="live-dot" style={{ background: '#F59E0B', boxShadow: '0 0 8px #F59E0B' }}></div>
-                                    <span>{totalRegistered} <span className="reg-label">REGISTERED</span></span>
-                                </div>
+                    <aside className="sidebar">
+                        <div className="sidebar-brand" onClick={() => setCurrentPage('dashboard')}>
+                            <div className="sidebar-logo">LB</div>
+                            <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '1px' }}>Tracker</span>
+                        </div>
+
+                        <div className="sidebar-label">Main Menu</div>
+                        <div className="nav-links">
+                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 Dashboard</div>
+                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 Workspace</div>
+                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 Community</div>
+                        </div>
+
+                        <div className="sidebar-label">Tools</div>
+                        <div className="nav-links">
+                            <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>📚 Subjects</div>
+                            <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>⭐ Feedback</div>
+                        </div>
+
+                        <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
+                            Join Community
+                        </a>
+                    </aside>
+
+                    <main className="main-content">
+                        <header className="top-header">
+                            <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')}>
+                                <div className="sidebar-logo" style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>LB</div>
+                                <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>Tracker</span>
+                            </div>
+                            <div className="desktop-only-admin">
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
-                                    <div style={{ display: 'flex', gap: '5px' }}>
-                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer' }}>
+                                    <>
+                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0 }}>
                                             <div className="live-dot"></div>
                                             <span>{liveUsers} LIVE</span>
                                         </div>
-                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)' }}>
+                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0 }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
                                             <span>{markedToday} MARKED</span>
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="How to Use">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0 }}>
+                                    <span>{totalRegistered} <span className="reg-label" style={{ fontSize: '0.6rem' }}>REG</span></span>
+                                </div>
+                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="How to Use">
                                     📖
                                 </button>
-                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="Toggle Theme">
+                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="Toggle Theme">
                                     {isLightMode ? '🌙' : '☀️'}
                                 </button>
-                                <div className="nav-links">
-                                    <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
-                                    <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>Workspace</div>
-                                    <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>Community</div>
-                                    <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
-                                    <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
-                                    <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
-                                        Join us
-                                    </a>
-                                </div>
                             </div>
-                        </div>
-                    </nav>
+                        </header>
 
-                    <div className="floating-settings" onClick={() => setIsSettingsOpen(!isSettingsOpen)}>{isSettingsOpen ? '✕' : '⚙️'}</div>
-                    {isSettingsOpen && (
+                        <div className="floating-settings" onClick={() => setIsSettingsOpen(!isSettingsOpen)}>{isSettingsOpen ? '✕' : '⚙️'}</div>
+                        {isSettingsOpen && (
                         <div className="glass settings-menu">
                             <div style={{ fontSize: '0.75rem', marginBottom: '15px', color: 'var(--text-dim)', textAlign: 'center' }}>{user.email}</div>
                             {deferredPrompt && (
