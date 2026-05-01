@@ -38,40 +38,43 @@
     <style>
         :root {
             --primary: #6366F1;
-            --primary-glow: rgba(99, 102, 241, 0.2);
-            --bg: #050505;
-            --navbar-bg: rgba(5, 5, 5, 0.8);
-            --card-bg: rgba(20, 20, 20, 0.6);
-            --text-main: #FFFFFF;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --secondary: #22D3EE;
+            --bg: #0F172A;
+            --navbar-bg: rgba(15, 23, 42, 0.8);
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --text-main: #F8FAFC;
             --text-dim: #94A3B8;
             --border: rgba(255, 255, 255, 0.08);
             --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --gradient: #6366F1; /* Simplified to solid for minimalist look */
             --input-bg: rgba(255, 255, 255, 0.03);
             --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             --success: #10B981;
         }
 
         body.light-mode {
-            --bg: #F1F5F9;
-            --navbar-bg: rgba(255, 255, 255, 0.8);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #4F46E5;
+            --primary-glow: rgba(79, 70, 229, 0.2);
+            --secondary: #0891B2;
+            --bg: #F8FAFC;
+            --navbar-bg: rgba(248, 250, 252, 0.8);
+            --card-bg: #FFFFFF;
             --text-main: #1E293B;
             --text-dim: #64748B;
-            --border: rgba(0, 0, 0, 0.1);
-            --glass-border: 1px solid rgba(0, 0, 0, 0.12);
-            --input-bg: rgba(0, 0, 0, 0.05);
+            --border: rgba(0, 0, 0, 0.08);
+            --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(0, 0, 0, 0.04);
             --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
             color-scheme: light;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; transition: background 0.3s, color 0.3s; line-height: 1.5; }
+        body { background-color: var(--bg); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; transition: background 0.4s ease, color 0.4s ease; line-height: 1.5; }
 
-        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: var(--bg); }
-        .blob { position: absolute; width: min(80vw, 800px); height: min(80vw, 800px); filter: blur(min(15vw, 150px)); border-radius: 50%; opacity: 0.25; animation: move 25s infinite alternate; }
-        .blob-1 { top: -20%; right: -10%; background: linear-gradient(135deg, var(--primary), #818cf8); }
-        .blob-2 { bottom: -20%; left: -10%; background: linear-gradient(135deg, #D946EF, #f472b6); }
+        .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: var(--bg); transition: background 0.4s ease; }
+        .blob { position: absolute; width: min(80vw, 800px); height: min(80vw, 800px); filter: blur(min(15vw, 150px)); border-radius: 50%; opacity: 0.15; animation: move 25s infinite alternate; }
+        .blob-1 { top: -20%; right: -10%; background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        .blob-2 { bottom: -20%; left: -10%; background: linear-gradient(135deg, var(--secondary), var(--primary)); }
         @keyframes move { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 100% { transform: translate(100px, 50px) scale(1.2) rotate(45deg); } }
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
@@ -1179,7 +1182,7 @@
                             <defs>
                                 <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stopColor="var(--primary)" />
-                                    <stop offset="100%" stopColor="#a855f7" />
+                                    <stop offset="100%" stopColor="var(--secondary)" />
                                 </linearGradient>
                             </defs>
                             <circle cx="90" cy="90" r={radius} stroke="var(--input-bg)" strokeWidth="14" fill="transparent" />
