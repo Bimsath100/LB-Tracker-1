@@ -1194,73 +1194,71 @@
             );
         };
 
-        const StudyDNA = ({ history }) => {
-            const days = 21; 
-            const data = [];
+        const StudyAuraSphere = ({ history }) => {
             const today = new Date();
-            
+            let totalRecent = 0;
+            const days = 7;
             for (let i = 0; i < days; i++) {
                 const d = new Date(today);
-                d.setDate(today.getDate() - (days - 1 - i));
+                d.setDate(today.getDate() - i);
                 const k = getLocalISODate(d);
-                const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
-                data.push({ hrs, date: d });
+                totalRecent += Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
             }
 
-            const getIntensity = (hrs) => {
-                const isLight = document.body.classList.contains('light-mode');
-                if (hrs === 0) return isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
-                if (hrs <= 3) return isLight ? '#7C3AED' : '#784BA0';
-                if (hrs <= 6) return isLight ? '#6D28D9' : '#8B5CF6';
-                return '#FF3CAC';
-            };
+            const intensity = Math.min(totalRecent / 40, 1); // Max intensity at 40 hrs/week
+            const particleCount = Math.max(Math.floor(intensity * 12), 3);
 
             return (
                 <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center' }}>
-                    <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px', textTransform: 'uppercase' }}>Academic DNA 🧬</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>Visualizing your neural consistency</div>
+                    <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '1rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '3px', textTransform: 'uppercase', fontFamily: 'Outfit' }}>Focus Sphere 🔮</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '700' }}>YOUR COLLECTIVE STUDY ENERGY</div>
                     </div>
-                    
-                    <svg width="200" height="400" viewBox="0 0 200 400" className="dna-svg" style={{ filter: 'drop-shadow(0 0 5px rgba(139, 92, 246, 0.1))' }}>
-                        {data.map((d, i) => {
-                            const y = i * 18 + 10;
-                            const t = i * 0.5;
-                            const x1 = 100 + Math.sin(t) * 60;
-                            const x2 = 100 - Math.sin(t) * 60;
-                            const color = getIntensity(d.hrs);
-                            const isActive = d.hrs > 0;
+
+                    <div style={{ position: 'relative', width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="220" height="220" viewBox="0 0 220 220" style={{ filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.3))' }}>
+                            <defs>
+                                <radialGradient id="sphereGrad">
+                                    <stop offset="0%" stopColor="#FF3CAC" />
+                                    <stop offset="60%" stopColor="#8B5CF6" />
+                                    <stop offset="100%" stopColor="transparent" />
+                                </radialGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="5" result="blur" />
+                                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                </filter>
+                            </defs>
+
+                            {/* Central Sphere */}
+                            <circle cx="110" cy="110" r={40 + intensity * 20} fill="url(#sphereGrad)" style={{ opacity: 0.8 + intensity * 0.2, animation: 'circlePulse 4s ease-in-out infinite' }} />
                             
-                            return (
-                                <g key={i} style={{ animation: 'dnaTwist 8s ease-in-out infinite', animationDelay: `${i * 0.1}s` }}>
-                                    {/* Connections (Rungs) */}
-                                    <line x1={x1} y1={y} x2={x2} y2={y} stroke={color} strokeWidth={isActive ? "3.5" : "2"} strokeLinecap="round" 
-                                        className={isActive ? 'dna-rung-active' : ''}
-                                        style={{ 
-                                            opacity: isActive ? 1 : 0.4, 
-                                            '--p-color': color,
-                                            transition: '0.3s' 
-                                        }} />
-                                    
-                                    {/* Outer Points */}
-                                    <circle cx={x1} cy={y} r={isActive ? "4.5" : "3"} fill={color} style={{ transition: '0.3s' }} />
-                                    <circle cx={x2} cy={y} r={isActive ? "4.5" : "3"} fill={color} style={{ transition: '0.3s' }} />
-                                    
-                                    {/* Tooltip date label on every 7th rung */}
-                                    {i % 7 === 0 && (
-                                        <text x="5" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                            {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                                        </text>
-                                    )}
-                                </g>
-                            );
-                        })}
-                    </svg>
-                    
-                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '15px', fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'rgba(128,128,128,0.2)' }}></div> IDLE</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8B5CF6' }}></div> ACTIVE</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC' }}></div> ELITE</div>
+                            {/* Orbits & Particles */}
+                            {Array.from({ length: particleCount }).map((_, i) => {
+                                const rx = 60 + i * 10;
+                                const ry = 30 + i * 5;
+                                const rot = i * (360 / particleCount);
+                                const dur = 4 + (i * 0.5);
+                                
+                                return (
+                                    <g key={i} style={{ transform: `rotate(${rot}deg)`, transformOrigin: '110px 110px' }}>
+                                        <ellipse cx="110" cy="110" rx={rx} ry={ry} fill="none" stroke="rgba(139, 92, 246, 0.1)" strokeWidth="1" />
+                                        <circle r="3" fill="#FF3CAC" style={{ animation: `orbit ${dur}s linear infinite` }}>
+                                            <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={`M ${110-rx},110 a ${rx},${ry} 0 1,0 ${rx*2},0 a ${rx},${ry} 0 1,0 ${-rx*2},0`} />
+                                        </circle>
+                                    </g>
+                                );
+                            })}
+                        </svg>
+                        
+                        {/* Center Value */}
+                        <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#FFF', textShadow: '0 0 10px rgba(0,0,0,0.5)' }}>{totalRecent}</div>
+                            <div style={{ fontSize: '0.5rem', fontWeight: '800', color: 'rgba(255,255,255,0.8)' }}>HRS/WK</div>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '2rem', fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', background: 'var(--input-bg)', padding: '6px 16px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
+                        ENERGY LEVEL: <span style={{ color: 'var(--primary)' }}>{intensity > 0.8 ? 'ELITE' : intensity > 0.4 ? 'STABLE' : 'CHARGING'}</span>
                     </div>
                 </div>
             );
@@ -1399,9 +1397,10 @@
                             </div>
                         </Reveal>
 
+                        {/* Row 2: StudyAuraSphere & Daily Progress */}
                         <Reveal delay={0.2} style={{ gridColumn: 'span 8' }}>
                             <div className="glass card" style={{ padding: '0', height: '100%', position: 'relative', overflow: 'hidden' }}>
-                                <StudyDNA history={history} />
+                                <StudyAuraSphere history={history} />
                             </div>
                         </Reveal>
 
