@@ -1775,6 +1775,85 @@
             );
         };
 
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered }) => {
+            return (
+                <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1200px', margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👑</div>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: '3rem', fontWeight: '800' }}>Admin Command Center</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage the LB Tracker empire from one place.</p>
+                    </div>
+
+                    <div className="asymmetric-grid">
+                        {/* Column 1: Broadcast & Cleanup */}
+                        <div style={{ gridColumn: 'span 7', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div className="glass card" style={{ padding: '2rem' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span>📢</span> GLOBAL BROADCAST MESSAGE
+                                </div>
+                                <textarea className="glass-input" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message to all students..." style={{ minHeight: '120px', marginBottom: '1.5rem', width: '100%' }} />
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="hour-btn active" onClick={updateAnnouncement} style={{ flex: 1 }}>POST NOTICE 🚀</button>
+                                    <button className="hour-btn" onClick={() => { setAnnouncementInput(''); updateAnnouncement(); }} style={{ flex: 0, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>CLEAR</button>
+                                </div>
+                            </div>
+
+                            <div className="glass card" style={{ padding: '2rem' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#EF4444', marginBottom: '1rem' }}>🛡️ STORAGE MAINTENANCE</div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>Physically delete community posts and files older than 7 days to free up Supabase space.</p>
+                                <button className="hour-btn active" style={{ background: 'linear-gradient(135deg, #EF4444, #B91C1C)', border: 'none', width: '100%' }} onClick={async () => {
+                                    if(!confirm('Delete all posts and files older than 7 days?')) return;
+                                    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+                                    const { data: expired } = await sb.from('community_posts').select('*').lt('created_at', sevenDaysAgo);
+                                    if(expired && expired.length > 0) {
+                                        for(const post of expired) {
+                                            const fileUrl = post.image_url || post.file_url;
+                                            if(fileUrl) { const fileName = fileUrl.split('/').pop(); await sb.storage.from('community_assets').remove([fileName]); }
+                                        }
+                                        await sb.from('community_posts').delete().lt('created_at', sevenDaysAgo);
+                                        alert(`Successfully purged ${expired.length} expired resources! 🧹`);
+                                    } else alert('No expired resources found. ✅');
+                                }}>PURGE EXPIRED CONTENT 🧹</button>
+                            </div>
+                        </div>
+
+                        {/* Column 2: Live Activity */}
+                        <div style={{ gridColumn: 'span 5', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem' }}>👥 ONLINE NOW ({liveDetails.length})</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                                    {liveDetails.map((u, i) => (
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 15px', borderRadius: '12px' }}>
+                                            <div>
+                                                <div style={{ fontWeight: '800', fontSize: '0.85rem' }}>{u.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{u.email}</div>
+                                            </div>
+                                            <div className="live-dot"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#10B981', marginBottom: '1.5rem' }}>📈 TODAY'S ACTIVITY ({markedDetails.length})</div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
+                                    {markedDetails.map((u, i) => (
+                                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 15px', borderRadius: '12px' }}>
+                                            <div>
+                                                <div style={{ fontWeight: '800', fontSize: '0.85rem' }}>{u.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{u.district}</div>
+                                            </div>
+                                            <div style={{ fontWeight: '900', color: '#10B981', fontSize: '0.9rem' }}>{u.hours}H</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const TutorialView = () => (
             <div style={{ paddingBottom: '2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📖</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>How to Use</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>LB Tracker එක පාවිච්චි කරන විදිය මෙතනින් දැනගන්න.</p></div>
@@ -2118,6 +2197,7 @@
                     const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
                     if (data) {
                         setProfile({ 
+                            id: uid, // Include the ID here
                             name: data.name, 
                             district: data.district, 
                             subjects: data.subjects, 
@@ -2150,7 +2230,7 @@
                 };
                 const { error } = await sb.from('study_tracker_v2').upsert(payload);
                 if (error) { console.error("Save Error:", error); alert("Error saving profile: " + error.message); }
-                else { setProfile(p); setIsEditMode(false); setCurrentPage('dashboard'); }
+                else { setProfile({ ...p, id: user.id }); setIsEditMode(false); setCurrentPage('dashboard'); }
                 setLoading(false);
             };
 
@@ -2200,6 +2280,7 @@
                             <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 Dashboard</div>
                             <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 Workspace</div>
                             <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 Community</div>
+                            {user?.email === 'lomithabimsath51@gmail.com' && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 Admin Center</div>}
                         </div>
 
                         <div className="sidebar-label">Tools</div>
@@ -2275,100 +2356,13 @@
 
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
-                        <MobileItem active={currentPage === 'workspace'} icon="💻" label="Workspace" onClick={() => setCurrentPage('workspace')} />
-                        <MobileItem active={currentPage === 'community'} icon="🌍" label="Community" onClick={() => setCurrentPage('community')} />
-                        <MobileItem active={currentPage === 'subjects' || profile.subjects.includes(currentPage)} icon="📚" label="Subjects" onClick={() => setCurrentPage('subjects')} />
+                        <MobileItem active={currentPage === 'workspace'} icon="💻" label="Work" onClick={() => setCurrentPage('workspace')} />
+                        <MobileItem active={currentPage === 'community'} icon="🌍" label="Comm" onClick={() => setCurrentPage('community')} />
+                        {user?.email === 'lomithabimsath51@gmail.com' && <MobileItem active={currentPage === 'admin'} icon="👑" label="Admin" onClick={() => setCurrentPage('admin')} />}
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
                     </nav>
 
-                    {adminView && (
-                        <div className="admin-modal-overlay" onClick={() => setAdminView(null)}>
-                            <div className="admin-modal glass" onClick={e => e.stopPropagation()}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                                    <h2 style={{ fontFamily: 'Outfit', margin: 0 }}>Admin Controls</h2>
-                                    <button onClick={() => setAdminView(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-                                </div>
 
-                                <div className="glass" style={{ padding: '1.2rem', marginBottom: '1.5rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid var(--primary-glow)', borderRadius: '18px' }}>
-                                    <div style={{ fontWeight: '800', fontSize: '0.8rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <span>📢</span> BROADCAST MESSAGE
-                                    </div>
-                                    <textarea 
-                                        value={announcementInput}
-                                        onChange={e => setAnnouncementInput(e.target.value)}
-                                        placeholder="Type a message to all students..."
-                                        style={{ width: '100%', minHeight: '80px', background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '12px', padding: '10px', color: 'white', fontSize: '0.85rem', marginBottom: '10px', outline: 'none' }}
-                                    />
-                                    <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '40px', fontSize: '0.8rem' }}>Update Broadcast</button>
-                                </div>
-                                
-                                <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', opacity: 0.8 }}>{adminView === 'live' ? 'Online Students' : 'Today\'s Progress'}</h4>
-                                
-                                {adminView === 'notice' ? (
-                                    <div className="admin-editor-card" style={{ marginTop: 0 }}>
-                                        <div style={{ marginBottom: '1.5rem' }}>
-                                            <h3 style={{ margin: 0, fontFamily: 'Outfit', fontSize: '1.1rem' }}>Global Notice Editor 📢</h3>
-                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px' }}>This message will be visible to all students on their dashboard.</p>
-                                        </div>
-                                        <textarea 
-                                            className="admin-textarea" 
-                                            value={announcementInput} 
-                                            onChange={(e) => setAnnouncementInput(e.target.value)}
-                                            placeholder="Type your notice here..."
-                                        />
-                                        <button 
-                                            className="btn-primary" 
-                                            onClick={updateAnnouncement}
-                                            style={{ marginTop: '10px' }}
-                                        >
-                                            🚀 Post Global Notice
-                                        </button>
-                                        <button 
-                                            className="btn-primary" 
-                                            onClick={() => { setAnnouncementInput(''); updateAnnouncement(); }}
-                                            style={{ marginTop: '10px', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', boxShadow: 'none' }}
-                                        >
-                                            🗑️ Clear Notice
-                                        </button>
-                                    </div>
-                                ) : adminView === 'live' ? (
-                                    <div>
-                                        {liveDetails.length === 0 ? <p>No one online</p> : 
-                                            liveDetails.map((u, i) => (
-                                                <div key={i} className="admin-list-item">
-                                                    <div>
-                                                        <div style={{ fontWeight: '700' }}>
-                                                            {u.name}
-                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.email}</div>
-                                                    </div>
-                                                    <div className="live-dot"></div>
-                                                </div>
-                                            ))
-                                        }
-                                    </div>
-                                ) : (
-                                    <div>
-                                        {markedDetails.length === 0 ? <p>No one marked today</p> : 
-                                            markedDetails.map((u, i) => (
-                                                <div key={i} className="admin-list-item">
-                                                    <div>
-                                                        <div style={{ fontWeight: '700' }}>
-                                                            {u.name}
-                                                            {u.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
-                                                        </div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{u.district}</div>
-                                                    </div>
-                                                    <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{u.hours} hrs</div>
-                                                </div>
-                                            ))
-                                        }
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
 
                         <div className="container" id="mainContainer" style={{ marginTop: '2rem' }}>
                             {currentPage === 'dashboard' ? (
@@ -2409,7 +2403,9 @@
                                 })()} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
-                            ) : currentPage === 'feedback' ? (
+                             ) : currentPage === 'admin' ? (
+                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} />
+                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
                                 <TutorialView />
