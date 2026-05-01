@@ -147,16 +147,16 @@
 
         .hero-section { display: flex; justify-content: space-between; align-items: center; gap: 3rem; }
 
-        .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; max-width: 450px; }
+        .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; max-width: 320px; }
         .hour-btn { 
             aspect-ratio: 1; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
-            border-radius: 14px; 
+            border-radius: 12px; 
             font-weight: 800; 
-            font-size: 1.2rem; 
+            font-size: 1.1rem; 
             font-family: 'Outfit'; 
             color: var(--text-main); 
             background: var(--input-bg); 
@@ -1206,7 +1206,7 @@
                         <span className="card-title" style={{ margin: 0 }}>Study Consistency Heatmap 🔥</span>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '800', background: 'var(--input-bg)', padding: '6px 14px', borderRadius: '100px', border: '1px solid var(--border)' }}>Last 12 Weeks</span>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '8px', width: '100%' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 22px)', gap: '6px', justifyContent: 'start', overflowX: 'auto', padding: '5px 0' }}>
                         {data.map((d, i) => (
                             <div 
                                 key={i} 
