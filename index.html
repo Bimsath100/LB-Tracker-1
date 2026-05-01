@@ -135,9 +135,10 @@
         .btn-google { background: var(--card-bg); color: var(--text-main); border: var(--glass-border); padding: 14px 28px; border-radius: 16px; cursor: pointer; font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; margin: 2rem auto; }
         .btn-google:hover { border-color: var(--primary); transform: translateY(-2px); }
 
+        .dashboard-container { max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 1rem; }
         .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; width: 100%; min-width: 0; align-items: start; }
-        .card { padding: 2.5rem; margin-bottom: 2rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border-radius: 28px; background: var(--card-bg); border: var(--glass-border); box-shadow: var(--card-shadow); }
-        .card-title { font-family: 'Outfit'; font-size: 1.5rem; font-weight: 800; word-wrap: break-word; margin-bottom: 1.5rem; display: block; }
+        .card { padding: 2rem; margin-bottom: 2rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border-radius: 28px; background: var(--card-bg); border: var(--glass-border); box-shadow: var(--card-shadow); }
+        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 800; word-wrap: break-word; margin-bottom: 1.5rem; display: block; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; width: 100%; min-width: 0; }
         .stat-card { padding: 2rem 1.5rem; text-align: center; border-radius: 28px; border: var(--glass-border); background: var(--card-bg); transition: 0.3s; }
@@ -1336,28 +1337,37 @@
                         </div>
                     </Reveal>
                     <Reveal delay={0.1}><StudyRoadmap profile={profile} /></Reveal>
-                    <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
+                    <div className="stats-grid" style={{ marginBottom: '2rem' }}>
+                        <StatBox val={todayCount} lbl="Today" sub="අද" />
+                        <StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" />
+                        <StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" />
+                        <StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" />
+                    </div>
                     <Reveal delay={0.1}>
-                        <div className="glass card" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-                            <div className="dash-grid" style={{ gridTemplateColumns: '1fr 340px', gap: '3rem', alignItems: 'center', marginBottom: 0 }}>
+                        <div className="glass card" style={{ padding: '2rem', marginBottom: '2rem', maxWidth: '1000px', marginInline: 'auto' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 300px', gap: '3rem', alignItems: 'center' }}>
                                 <div>
-                                    <div className="card-header" style={{ marginBottom: '2rem' }}>
+                                    <div className="card-header" style={{ marginBottom: '1.5rem' }}>
                                         <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
-                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '5px', fontWeight: '500' }}>Log your study hours for {viewDate}</p>
+                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', marginTop: '4px', fontWeight: '500' }}>Log hours for {viewDate}</p>
                                     </div>
-                                    <div className="hour-grid" style={{ maxWidth: '400px' }}>
+                                    <div className="hour-grid" style={{ maxWidth: '320px' }}>
                                         {Array.from({ length: 24 }).map((_, i) => (
                                             <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>
                                         ))}
                                     </div>
                                 </div>
-                                <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: '3rem' }}>
+                                <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: '3rem', display: 'flex', justifyContent: 'center' }}>
                                     <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
                                 </div>
                             </div>
                         </div>
                     </Reveal>
-                    <Reveal delay={0.2}><StudyHeatmap history={history} /></Reveal>
+                    <Reveal delay={0.2}>
+                        <div style={{ maxWidth: '1000px', marginInline: 'auto' }}>
+                            <StudyHeatmap history={history} />
+                        </div>
+                    </Reveal>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
