@@ -547,7 +547,7 @@
             });
         }
 
-        const Reveal = ({ children, delay = 0 }) => {
+        const Reveal = ({ children, delay = 0, style = {} }) => {
             const ref = useRef(null);
             const [visible, setVisible] = useState(false);
             useEffect(() => {
@@ -555,7 +555,7 @@
                 if(ref.current) obs.observe(ref.current);
                 return () => obs.disconnect();
             }, []);
-            return ( <div ref={ref} style={{ width: '100%', minWidth: 0, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s` }}>{children}</div> );
+            return ( <div ref={ref} style={{ width: '100%', minWidth: 0, ...style, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(20px)', transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s` }}>{children}</div> );
         };
 
         const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
