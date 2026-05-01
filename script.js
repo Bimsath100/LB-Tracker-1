@@ -8,7 +8,7 @@ const getLocalDateString = (d = new Date()) => {
 };
 
 const App = () => {
-    const [todayHours, setTodayHours] = useState(new Array(15).fill(false));
+    const [todayHours, setTodayHours] = useState(new Array(24).fill(false));
     const [history, setHistory] = useState(() => {
         const saved = localStorage.getItem('studyHistory');
         return saved ? JSON.parse(saved) : {};
@@ -111,7 +111,7 @@ const App = () => {
         if (history[viewDate]) {
             setTodayHours(history[viewDate]);
         } else {
-            setTodayHours(new Array(15).fill(false));
+            setTodayHours(new Array(24).fill(false));
         }
     }, [viewDate, history]);
 
@@ -179,7 +179,7 @@ const App = () => {
             <section className="glass tracker-section tracker-anim">
                 <h1 className="tracker-title">Daily Study Grid</h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-                    Focus Target: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>15 Hours</span> | 
+                    Focus Target: <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>24 Hours</span> | 
                     Date: {new Date(viewDate + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
                 
@@ -197,7 +197,7 @@ const App = () => {
                 </div>
                 
                 <div style={{ marginTop: '2rem', fontSize: '1.2rem', fontWeight: '600' }}>
-                    Progress: <span style={{ color: 'var(--accent)' }}>{Math.round((totalHoursToday / 15) * 100)}%</span>
+                    Progress: <span style={{ color: 'var(--accent)' }}>{Math.round((totalHoursToday / 24) * 100)}%</span>
                 </div>
             </section>
 
@@ -237,7 +237,7 @@ const App = () => {
                                 Object.keys(history).sort().reverse().slice(0, 5).map(date => (
                                     <div key={date} className="history-item">
                                         <span style={{ fontSize: '0.9rem' }}>{date}</span>
-                                        <span style={{ color: 'var(--accent)', fontWeight: '700' }}>{history[date].filter(Boolean).length} / 15</span>
+                                        <span style={{ color: 'var(--accent)', fontWeight: '700' }}>{history[date].filter(Boolean).length} / 24</span>
                                     </div>
                                 ))
                             )}
@@ -332,7 +332,7 @@ const ProgressChart = ({ history }) => {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 15,
+                        max: 24,
                         grid: { color: 'rgba(255, 255, 255, 0.05)' },
                         ticks: { color: '#A1A1AA', stepSize: 5 }
                     },
