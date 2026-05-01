@@ -69,10 +69,10 @@
         body { background-color: var(--bg); color: var(--text-main); overflow-x: hidden; min-height: 100vh; color-scheme: dark; transition: background 0.3s, color 0.3s; line-height: 1.5; }
 
         .live-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: var(--bg); }
-        .blob { position: absolute; width: min(60vw, 600px); height: min(60vw, 600px); filter: blur(min(10vw, 100px)); border-radius: 50%; opacity: 0.15; animation: move 20s infinite alternate; }
-        .blob-1 { top: -10%; right: -10%; background: var(--primary); }
-        .blob-2 { bottom: -10%; left: -10%; background: #D946EF; }
-        @keyframes move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
+        .blob { position: absolute; width: min(80vw, 800px); height: min(80vw, 800px); filter: blur(min(15vw, 150px)); border-radius: 50%; opacity: 0.25; animation: move 25s infinite alternate; }
+        .blob-1 { top: -20%; right: -10%; background: linear-gradient(135deg, var(--primary), #818cf8); }
+        .blob-2 { bottom: -20%; left: -10%; background: linear-gradient(135deg, #D946EF, #f472b6); }
+        @keyframes move { 0% { transform: translate(0, 0) scale(1) rotate(0deg); } 100% { transform: translate(100px, 50px) scale(1.2) rotate(45deg); } }
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
@@ -1499,13 +1499,52 @@
 
         const LoadingScreen = () => ( <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}><div style={{ fontSize: '1.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div></div> );
         const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '1.5rem', background: 'var(--bg)' }}>
-                <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
-                <div className="nav-logo" style={{ width: '64px', height: '64px', fontSize: '1.5rem', marginBottom: '2rem' }}>LB</div>
-                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', lineHeight: 1.1, marginBottom: '1.5rem', color: 'var(--text-main)' }}>Empowering <span style={{ color: 'var(--primary)' }}>Sri Lankan</span><br />A/L Students</h1>
-                <p style={{ fontSize: '1.1rem', color: 'var(--text-dim)', maxWidth: '600px', marginBottom: '3rem' }}>The elite cloud-synced tracker for serious students.</p>
-                {deferredPrompt && ( <button className="btn-primary" style={{ background: '#10B981', color: 'white', maxWidth: '300px', margin: '0 auto', marginBottom: '1.5rem', boxShadow: '0 8px 20px rgba(16, 185, 129, 0.4)' }} onClick={onInstall}>📱 Install LB Tracker</button> )}
-                <button className="btn-google" style={{ marginTop: deferredPrompt ? '0' : '2rem', margin: '0 auto' }} onClick={onLogin}><svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>Sign in with Google</button>
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
+                <div className="live-bg">
+                    <div className="blob blob-1"></div>
+                    <div className="blob blob-2" style={{ animationDelay: '-10s' }}></div>
+                </div>
+                
+                <Reveal>
+                    <div className="sidebar-logo" style={{ width: '80px', height: '80px', fontSize: '1.8rem', margin: '0 auto 2.5rem', borderRadius: '20px', boxShadow: '0 10px 40px var(--primary-glow)' }}>LB</div>
+                </Reveal>
+
+                <Reveal delay={0.1}>
+                    <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.8rem, 10vw, 5rem)', fontWeight: '800', lineHeight: 1, marginBottom: '1.5rem', color: 'var(--text-main)', letterSpacing: '-2px' }}>
+                        Empowering <span style={{ background: 'linear-gradient(to right, var(--primary), #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Sri Lankan</span><br />A/L Students
+                    </h1>
+                </Reveal>
+
+                <Reveal delay={0.2}>
+                    <p style={{ fontSize: 'clamp(1.1rem, 3vw, 1.4rem)', color: 'var(--text-dim)', maxWidth: '700px', margin: '0 auto 3.5rem', lineHeight: '1.6', fontWeight: '500' }}>
+                        The most advanced, cloud-synced tracker built for students who are serious about their rank. Track hours, marks, and streaks in one beautiful place.
+                    </p>
+                </Reveal>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%', maxWidth: '340px', margin: '0 auto' }}>
+                    <Reveal delay={0.3}>
+                        {deferredPrompt && ( 
+                            <button className="btn-primary" style={{ background: 'linear-gradient(135deg, #10B981, #059669)', color: 'white', width: '100%', marginBottom: '0.5rem', boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)', height: '56px', fontSize: '1.1rem' }} onClick={onInstall}>📱 Install LB Tracker</button> 
+                        )}
+                        <button className="btn-google" style={{ width: '100%', height: '56px', fontSize: '1.1rem', background: 'var(--card-bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }} onClick={onLogin}>
+                            <svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/>
+                            </svg>
+                            Sign in with Google
+                        </button>
+                    </Reveal>
+                </div>
+
+                <Reveal delay={0.4}>
+                    <div style={{ marginTop: '4rem', display: 'flex', gap: '30px', justifyContent: 'center', opacity: 0.6, flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '1px' }}>✨ 24/7 CLOUD SYNC</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '1px' }}>🏆 GLOBAL RANKING</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '700', letterSpacing: '1px' }}>🔒 SECURE DATA</div>
+                    </div>
+                </Reveal>
             </div>
         );
 
