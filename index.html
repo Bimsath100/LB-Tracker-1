@@ -1177,53 +1177,92 @@
         };
 
         const StudyDNA = ({ history }) => {
-            const days = 21; 
-            const data = [];
-            const today = new Date();
-            
-            for (let i = 0; i < days; i++) {
-                const d = new Date(today);
-                d.setDate(today.getDate() - (days - 1 - i));
-                const k = getLocalISODate(d);
-                const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
-                data.push({ hrs, date: d });
-            }
+            const [time, setTime] = useState(0);
+            const days = 21;
+            const data = useMemo(() => {
+                const today = new Date();
+                const items = [];
+                for (let i = 0; i < days; i++) {
+                    const d = new Date(today);
+                    d.setDate(today.getDate() - (days - 1 - i));
+                    const k = getLocalISODate(d);
+                    const hrs = Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
+                    items.push({ hrs, date: d });
+                }
+                return items;
+            }, [history]);
 
-            const getIntensity = (hrs) => {
+            useEffect(() => {
+                let frame;
+                const animate = () => {
+                    setTime(prev => prev + 0.02);
+                    frame = requestAnimationFrame(animate);
+                };
+                frame = requestAnimationFrame(animate);
+                return () => cancelAnimationFrame(frame);
+            }, []);
+
+            const getIntensity = (hrs, side) => {
                 if (hrs === 0) return 'rgba(255,255,255,0.05)';
-                if (hrs <= 3) return '#784BA0';
-                if (hrs <= 6) return '#8B5CF6';
-                return '#FF3CAC';
+                return side === 'left' ? '#22D3EE' : '#FF3CAC';
             };
 
             return (
-                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center' }}>
+                <div style={{ padding: '2rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%)' }}>
                     <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px', textTransform: 'uppercase' }}>Academic DNA 🧬</div>
-                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>Visualizing your neural consistency</div>
+                        <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--text-main)', letterSpacing: '3px', textTransform: 'uppercase', textShadow: '0 0 10px var(--primary)' }}>Neural Helix 🧬</div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '800' }}>LIVE CORE STABILITY SYNC</div>
                     </div>
                     
-                    <svg width="200" height="400" viewBox="0 0 200 400" style={{ filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.2))' }}>
+                    <svg width="240" height="420" viewBox="0 0 240 420" style={{ filter: 'drop-shadow(0 0 15px rgba(0,0,0,0.5))' }}>
+                        <defs>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        
+                        {/* Background Particles */}
+                        {Array.from({ length: 15 }).map((_, i) => (
+                            <circle key={`p-${i}`} 
+                                cx={120 + Math.sin(time * 0.5 + i) * 80} 
+                                cy={20 + (i * 25) + Math.cos(time * 0.3 + i) * 20} 
+                                r={Math.random() * 1.5} 
+                                fill={i % 2 === 0 ? '#22D3EE' : '#FF3CAC'} 
+                                style={{ opacity: 0.3 + Math.sin(time + i) * 0.2 }}
+                            />
+                        ))}
+
                         {data.map((d, i) => {
-                            const y = i * 18 + 10;
-                            const t = i * 0.5;
-                            const x1 = 100 + Math.sin(t) * 60;
-                            const x2 = 100 - Math.sin(t) * 60;
-                            const color = getIntensity(d.hrs);
-                            const glow = d.hrs > 0 ? `drop-shadow(0 0 5px ${color})` : 'none';
+                            const y = i * 18 + 25;
+                            const t = time + (i * 0.4);
+                            const z = Math.cos(t); // Depth
+                            const xOffset = Math.sin(t) * 70;
+                            const x1 = 120 + xOffset;
+                            const x2 = 120 - xOffset;
+                            
+                            const leftColor = getIntensity(d.hrs, 'left');
+                            const rightColor = getIntensity(d.hrs, 'right');
+                            const size = 3 + (z + 1) * 2; // Scale based on depth
+                            const opacity = 0.2 + (z + 1) * 0.4;
                             
                             return (
-                                <g key={i}>
-                                    {/* Connections (Rungs) */}
-                                    <line x1={x1} y1={y} x2={x2} y2={y} stroke={color} strokeWidth="3" strokeLinecap="round" style={{ opacity: d.hrs > 0 ? 0.8 : 0.2, filter: glow }} />
+                                <g key={i} style={{ opacity: d.hrs > 0 ? opacity : 0.15 }}>
+                                    {/* Rung */}
+                                    <line x1={x1} y1={y} x2={x2} y2={y} 
+                                        stroke={`linear-gradient(to right, ${leftColor}, ${rightColor})`}
+                                        stroke={d.hrs > 0 ? (z > 0 ? '#8B5CF6' : '#4B2C82') : 'rgba(255,255,255,0.1)'} 
+                                        strokeWidth={1 + (z + 1)} 
+                                        strokeLinecap="round"
+                                        style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }}
+                                    />
                                     
-                                    {/* Outer Points */}
-                                    <circle cx={x1} cy={y} r="4" fill={color} style={{ filter: glow }} />
-                                    <circle cx={x2} cy={y} r="4" fill={color} style={{ filter: glow }} />
+                                    {/* Bases */}
+                                    <circle cx={x1} cy={y} r={size} fill={leftColor} style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }} />
+                                    <circle cx={x2} cy={y} r={size} fill={rightColor} style={{ filter: d.hrs > 0 ? 'url(#glow)' : 'none' }} />
                                     
-                                    {/* Tooltip date label on every 5th rung */}
-                                    {i % 7 === 0 && (
-                                        <text x="10" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '800', textTransform: 'uppercase' }}>
+                                    {i % 7 === 0 && z > 0.8 && (
+                                        <text x="5" y={y + 4} fill="var(--text-dim)" style={{ fontSize: '8px', fontWeight: '900', opacity: 0.5 }}>
                                             {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                                         </text>
                                     )}
@@ -1232,10 +1271,9 @@
                         })}
                     </svg>
                     
-                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '15px', fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#rgba(255,255,255,0.05)' }}></div> IDLE</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8B5CF6' }}></div> FOCUSED</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC' }}></div> ELITE</div>
+                    <div style={{ marginTop: '1.5rem', display: 'flex', gap: '20px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--text-dim)', letterSpacing: '1px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 10px #22D3EE' }}></div> STABLE</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FF3CAC', boxShadow: '0 0 10px #FF3CAC' }}></div> OVERDRIVE</div>
                     </div>
                 </div>
             );
