@@ -32,9 +32,10 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary: #8B5CF6;
@@ -1177,39 +1178,30 @@
         };
 
         const StudyWarMap = ({ history }) => {
+            const mapRef = useRef(null);
+            const mapInstance = useRef(null);
+            const markersRef = useRef({});
             const [districtStats, setDistrictStats] = useState({});
             const [topDistrict, setTopDistrict] = useState({ name: 'None', hrs: 0 });
 
-            // Elite-Grade Simplified SVG District Paths
-            const districts = [
-                { id: 'Jaffna', name: 'Jaffna', d: "M38,3 L42,5 L44,10 L40,15 L35,12 Z" },
-                { id: 'Kilinochchi', name: 'Kilinochchi', d: "M40,15 L44,10 L48,15 L45,20 L40,18 Z" },
-                { id: 'Mannar', name: 'Mannar', d: "M40,18 L45,20 L42,25 L35,28 L30,25 Z" },
-                { id: 'Mullaitivu', name: 'Mullaitivu', d: "M48,15 L55,18 L60,25 L55,30 L48,25 Z" },
-                { id: 'Vavuniya', name: 'Vavuniya', d: "M48,25 L55,30 L52,35 L45,35 L42,30 Z" },
-                { id: 'Puttalam', name: 'Puttalam', d: "M30,25 L35,28 L32,45 L25,50 L22,40 Z" },
-                { id: 'Anuradhapura', name: 'Anuradhapura', d: "M45,35 L52,35 L60,45 L55,55 L40,55 L35,45 Z" },
-                { id: 'Trincomalee', name: 'Trincomalee', d: "M60,25 L75,35 L70,50 L60,45 Z" },
-                { id: 'Polonnaruwa', name: 'Polonnaruwa', d: "M60,45 L70,50 L68,60 L58,60 Z" },
-                { id: 'Kurunegala', name: 'Kurunegala', d: "M25,50 L32,45 L40,55 L45,70 L35,75 L25,65 Z" },
-                { id: 'Matale', name: 'Matale', d: "M55,55 L58,60 L55,70 L48,70 L45,60 Z" },
-                { id: 'Batticaloa', name: 'Batticaloa', d: "M70,50 L85,60 L80,75 L70,70 Z" },
-                { id: 'Ampara', name: 'Ampara', d: "M80,75 L90,85 L85,95 L75,90 Z" },
-                { id: 'Badulla', name: 'Badulla', d: "M68,60 L75,70 L70,85 L60,85 L58,75 Z" },
-                { id: 'Moneragala', name: 'Moneragala', d: "M75,70 L85,95 L75,98 L65,95 L70,85 Z" },
-                { id: 'Kandy', name: 'Kandy', d: "M48,70 L55,70 L58,75 L55,85 L45,85 L42,75 Z" },
-                { id: 'Kegalle', name: 'Kegalle', d: "M35,75 L45,70 L42,75 L38,85 L32,85 Z" },
-                { id: 'Gampaha', name: 'Gampaha', d: "M25,65 L35,75 L32,85 L22,85 L20,75 Z" },
-                { id: 'Colombo', name: 'Colombo', d: "M22,85 L32,85 L30,90 L20,90 Z" },
-                { id: 'Kalutara', name: 'Kalutara', d: "M30,90 L32,85 L38,95 L28,98 L25,95 Z" },
-                { id: 'Ratnapura', name: 'Ratnapura', d: "M42,75 L55,85 L50,95 L38,95 Z" },
-                { id: 'Nuwara Eliya', name: 'Nuwara Eliya', d: "M55,85 L60,85 L65,95 L55,98 L50,95 Z" },
-                { id: 'Galle', name: 'Galle', d: "M28,98 L38,95 L35,105 L25,102 Z" },
-                { id: 'Matara', name: 'Matara', d: "M38,95 L50,95 L48,105 L35,105 Z" },
-                { id: 'Hambantota', name: 'Hambantota', d: "M50,95 L65,95 L75,98 L65,105 L48,105 Z" }
-            ];
+            const districtCoords = {
+                'Jaffna': [9.6615, 80.0255], 'Kilinochchi': [9.3803, 80.3992], 'Mullaitivu': [9.2671, 80.8142],
+                'Mannar': [8.9810, 79.9044], 'Vavuniya': [8.7542, 80.4982], 'Trincomalee': [8.5873, 81.2152],
+                'Anuradhapura': [8.3114, 80.4037], 'Puttalam': [8.0330, 79.8433], 'Polonnaruwa': [7.9403, 81.0188],
+                'Batticaloa': [7.7310, 81.6747], 'Kurunegala': [7.4863, 80.3647], 'Matale': [7.4675, 80.6234],
+                'Kandy': [7.2906, 80.6337], 'Gampaha': [7.0840, 80.0098], 'Kegalle': [7.2513, 80.3464],
+                'Colombo': [6.9271, 79.8612], 'Badulla': [6.9934, 81.0550], 'Ampara': [7.2842, 81.6747],
+                'Nuwara Eliya': [6.9497, 80.7891], 'Kalutara': [6.5854, 79.9607], 'Ratnapura': [6.6828, 80.3992],
+                'Moneragala': [6.8916, 81.3503], 'Galle': [6.0535, 80.2210], 'Matara': [5.9549, 80.5550],
+                'Hambantota': [6.1247, 81.1245]
+            };
 
             useEffect(() => {
+                if (!mapInstance.current && mapRef.current) {
+                    mapInstance.current = L.map(mapRef.current, { zoomControl: false, attributionControl: false, scrollWheelZoom: false }).setView([7.8731, 80.7718], 7);
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(mapInstance.current);
+                }
+
                 const fetchWarStats = async () => {
                     const today = getLocalISODate();
                     const { data } = await sb.from('study_tracker_v2').select('district, history').not(`history->${today}`, 'is', null);
@@ -1225,62 +1217,49 @@
                         });
                         setDistrictStats(stats);
                         setTopDistrict(top);
+                        updateMarkers(stats);
                     }
                 };
+
+                const updateMarkers = (stats) => {
+                    if (!mapInstance.current) return;
+                    Object.entries(districtCoords).forEach(([name, pos]) => {
+                        const hrs = stats[name] || 0;
+                        if (hrs > 0) {
+                            if (!markersRef.current[name]) {
+                                const icon = L.divIcon({
+                                    className: 'war-marker',
+                                    html: `<div class="pulse-ring"></div><div class="pulse-dot"></div>`,
+                                    iconSize: [20, 20]
+                                });
+                                markersRef.current[name] = L.marker(pos, { icon }).addTo(mapInstance.current);
+                            }
+                        } else if (markersRef.current[name]) {
+                            mapInstance.current.removeLayer(markersRef.current[name]);
+                            delete markersRef.current[name];
+                        }
+                    });
+                };
+
                 fetchWarStats();
-                const sub = sb.channel('war_map').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'study_tracker_v2' }, fetchWarStats).subscribe();
-                return () => sub.unsubscribe();
+                const sub = sb.channel('war_map_rt').on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, fetchWarStats).subscribe();
+                return () => { if(sub) sub.unsubscribe(); };
             }, []);
 
             return (
-                <div style={{ position: 'relative', width: '100%', height: '480px', borderRadius: '28px', overflow: 'hidden', display: 'flex', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ position: 'absolute', top: '30px', left: '30px', zIndex: 10 }}>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800' }}>Dominating District</div>
-                        <div style={{ fontSize: '1.8rem', color: 'var(--primary)', fontWeight: '900', textShadow: '0 0 20px var(--primary-glow)', letterSpacing: '-1px' }}>{topDistrict.name.toUpperCase()}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: '600', marginTop: '4px' }}>{topDistrict.hrs} Collective Hours</div>
-                        
-                        <div style={{ marginTop: '2rem' }}>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '800', marginBottom: '10px' }}>Active Zones</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxWidth: '160px' }}>
-                                {Object.entries(districtStats).sort((a,b) => b[1] - a[1]).slice(0, 3).map(([name, hrs]) => (
-                                    <div key={name} style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>
-                                        {name.toUpperCase()}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                <div style={{ position: 'relative', width: '100%', height: '450px', borderRadius: '28px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: '#000' }}>
+                    <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+                    <div style={{ position: 'absolute', top: '25px', left: '25px', zIndex: 1000, pointerEvents: 'none' }}>
+                        <div style={{ fontSize: '0.65rem', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '800' }}>Dominating Zone</div>
+                        <div style={{ fontSize: '1.8rem', color: 'var(--primary)', fontWeight: '900', textShadow: '0 0 20px var(--primary-glow)' }}>{topDistrict.name.toUpperCase()}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: '600' }}>{topDistrict.hrs} Combined Hours Today</div>
                     </div>
-
-                    <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                        <svg viewBox="10 0 90 115" style={{ height: '100%', width: 'auto', filter: 'drop-shadow(0 0 30px rgba(0,0,0,0.5))' }}>
-                            {districts.map(d => {
-                                const hrs = districtStats[d.id] || 0;
-                                const isActive = hrs > 0;
-                                const opacity = isActive ? 0.2 + Math.min(hrs * 0.1, 0.6) : 0.05;
-                                return (
-                                    <path 
-                                        key={d.id} d={d.d}
-                                        fill={isActive ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}
-                                        fillOpacity={opacity}
-                                        stroke={isActive ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}
-                                        strokeWidth="0.5"
-                                        style={{ transition: '0.5s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer' }}
-                                        onMouseEnter={(e) => { e.target.style.fillOpacity = '0.8'; e.target.style.strokeWidth = '1'; }}
-                                        onMouseLeave={(e) => { e.target.style.fillOpacity = opacity; e.target.style.strokeWidth = '0.5'; }}
-                                    >
-                                        <title>{d.name}: {hrs} hrs</title>
-                                    </path>
-                                );
-                            })}
-                        </svg>
-                    </div>
-
                     <style>{`
-                        @keyframes mapPulse {
-                            0% { transform: scale(1); opacity: 1; }
-                            50% { transform: scale(3); opacity: 0; }
-                            100% { transform: scale(1); opacity: 1; }
-                        }
+                        .war-marker { display: flex; align-items: center; justify-content: center; }
+                        .pulse-ring { position: absolute; width: 30px; height: 30px; border: 2px solid var(--primary); border-radius: 50%; animation: markerPulse 2s infinite; opacity: 0; }
+                        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 15px var(--primary); }
+                        @keyframes markerPulse { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+                        .leaflet-container { background: #000 !important; cursor: default !important; }
                     `}</style>
                 </div>
             );
