@@ -35,15 +35,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            alert("JS Error: " + message + " at line " + lineno);
-            return false;
-        };
-        window.addEventListener("unhandledrejection", function(event) {
-            alert("Promise Error: " + event.reason);
-        });
-    </script>
     <style>
         :root {
             --primary: #6366F1;
@@ -85,7 +76,7 @@
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: var(--navbar-bg); backdrop-filter: blur(20px); z-index: 2000; border-right: var(--glass-border); padding: 2rem 1.5rem; display: flex; flexDirection: column; transition: transform 0.3s; }
+        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: var(--navbar-bg); backdrop-filter: blur(20px); z-index: 2000; border-right: var(--glass-border); padding: 2rem 1.5rem; display: flex; flex-direction: column; transition: transform 0.3s; }
         .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; margin-bottom: 2.5rem; cursor: pointer; }
         .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 15px var(--primary-glow); }
         .sidebar-label { font-size: 0.7rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.5rem 10px; }
@@ -1059,7 +1050,7 @@
             );
         };
 
-        const CircularGauge = ({ value, max, label }) => {
+        const DailyProgressGauge = ({ value, max, label }) => {
             const radius = 60;
             const circumference = 2 * Math.PI * radius;
             const percent = Math.min(value / max, 1);
@@ -1258,7 +1249,7 @@
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>Log Hours</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
                         <Reveal delay={0.1}>
-                            <CircularGauge value={todayCount} max={dailyTarget} label="Daily Target" />
+                            <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Target" />
                         </Reveal>
                     </div>
                     <Reveal delay={0.2}><StudyHeatmap history={history} /></Reveal>
@@ -2002,8 +1993,7 @@
                         </div>
                     )}
 
-                    <main className="main-content">
-                        <div className="container" id="mainContainer">
+                        <div className="container" id="mainContainer" style={{ marginTop: '2rem' }}>
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'workspace' ? (
@@ -2060,7 +2050,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
     </script>
 </body>
 </html>
