@@ -1177,8 +1177,7 @@
         };
 
         const StudyDNA = ({ history }) => {
-            const [time, setTime] = useState(0);
-            const days = 21;
+            const days = 24; 
             const data = useMemo(() => {
                 const today = new Date();
                 const items = [];
@@ -1192,101 +1191,89 @@
                 return items;
             }, [history]);
 
-            useEffect(() => {
-                let frame;
-                const animate = () => {
-                    setTime(prev => prev + 0.015);
-                    frame = requestAnimationFrame(animate);
-                };
-                frame = requestAnimationFrame(animate);
-                return () => cancelAnimationFrame(frame);
-            }, []);
-
             return (
-                <div style={{ padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', perspective: '1200px', overflow: 'hidden', background: '#000' }}>
-                    <div style={{ marginBottom: '2.5rem', textAlign: 'center', transform: 'translateZ(100px)' }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: '900', color: '#FFF', letterSpacing: '8px', textTransform: 'uppercase', textShadow: '0 0 20px #22D3EE' }}>Cyber-Neural Core 🧬</div>
-                        <div style={{ fontSize: '0.7rem', color: '#22D3EE', marginTop: '8px', fontWeight: '800', opacity: 0.8 }}>SYSTEM STATUS: OPTIMIZED</div>
+                <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', background: '#000', borderRadius: '24px', overflow: 'hidden' }}>
+                    <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#FFF', letterSpacing: '10px', textTransform: 'uppercase', textShadow: '0 0 20px rgba(34, 211, 238, 0.5)' }}>Academic DNA 🧬</div>
+                        <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginTop: '8px', fontWeight: '800', letterSpacing: '2px' }}>NEURAL CONSISTENCY SEQUENCE</div>
                     </div>
                     
-                    <div style={{ transform: 'rotateX(25deg) rotateY(-20deg)', transformStyle: 'preserve-3d' }}>
-                        <svg width="320" height="520" viewBox="0 0 320 520">
+                    <div style={{ width: '100%', maxWidth: '900px', position: 'relative' }}>
+                        <svg width="100%" height="240" viewBox="0 0 900 240" preserveAspectRatio="xMidYMid meet">
                             <defs>
-                                <filter id="tech-glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <filter id="dna-glow">
                                     <feGaussianBlur stdDeviation="3" result="blur"/>
                                     <feComposite in="SourceGraphic" in2="blur" operator="over"/>
                                 </filter>
-                                <filter id="bokeh-blur">
-                                    <feGaussianBlur stdDeviation="6"/>
-                                </filter>
+                                <linearGradient id="dna-back-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#22D3EE" />
+                                    <stop offset="50%" stopColor="#8B5CF6" />
+                                    <stop offset="100%" stopColor="#FF00FF" />
+                                </linearGradient>
                             </defs>
-                            
-                            {/* Bokeh Background Particles */}
-                            {Array.from({ length: 20 }).map((_, i) => (
-                                <circle key={`b-${i}`} 
-                                    cx={160 + Math.sin(time * 0.3 + i) * 120} 
-                                    cy={260 + Math.cos(time * 0.2 + i) * 200} 
-                                    r={3 + Math.random() * 8} 
-                                    fill={i % 2 === 0 ? '#22D3EE' : '#FF00FF'} 
-                                    style={{ opacity: 0.1, filter: 'url(#bokeh-blur)' }}
-                                />
-                            ))}
 
-                            {/* Multi-Strand Wire Backbones */}
-                            {[0, 1, 2].map(offset => (
-                                <g key={`strands-${offset}`}>
+                            {/* Helix Strands (Static 3D Look) */}
+                            {[0, Math.PI].map((phase, pIdx) => (
+                                <g key={pIdx}>
+                                    {/* Main Tube */}
                                     <path d={data.map((_, i) => {
-                                        const y = i * 22 + 40;
-                                        const t = time + (i * 0.45) + (offset * 0.1);
-                                        const x = 160 + Math.sin(t) * 85;
+                                        const x = (i / (days-1)) * 860 + 20;
+                                        const y = 120 + Math.sin((i * 0.6) + phase) * 60;
                                         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                    }).join(' ')} fill="none" stroke="#22D3EE" strokeWidth="1" style={{ opacity: 0.4 - offset * 0.1, filter: 'url(#tech-glow)' }} />
+                                    }).join(' ')} fill="none" stroke="url(#dna-back-grad)" strokeWidth="12" strokeLinecap="round" style={{ opacity: 0.15, filter: 'blur(2px)' }} />
                                     
                                     <path d={data.map((_, i) => {
-                                        const y = i * 22 + 40;
-                                        const t = time + (i * 0.45) + Math.PI + (offset * 0.1);
-                                        const x = 160 + Math.sin(t) * 85;
+                                        const x = (i / (days-1)) * 860 + 20;
+                                        const y = 120 + Math.sin((i * 0.6) + phase) * 60;
                                         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                                    }).join(' ')} fill="none" stroke="#FF00FF" strokeWidth="1" style={{ opacity: 0.4 - offset * 0.1, filter: 'url(#tech-glow)' }} />
+                                    }).join(' ')} fill="none" stroke="url(#dna-back-grad)" strokeWidth="4" strokeLinecap="round" style={{ opacity: 0.4 }} />
                                 </g>
                             ))}
 
+                            {/* Rungs and Nodes */}
                             {data.map((d, i) => {
-                                const y = i * 22 + 40;
-                                const t = time + (i * 0.45);
-                                const z1 = Math.cos(t);
-                                const z2 = Math.cos(t + Math.PI);
+                                const x = (i / (days-1)) * 860 + 20;
+                                const t1 = (i * 0.6);
+                                const t2 = (i * 0.6) + Math.PI;
+                                const y1 = 120 + Math.sin(t1) * 60;
+                                const y2 = 120 + Math.sin(t2) * 60;
                                 
-                                const x1 = 160 + Math.sin(t) * 85;
-                                const x2 = 160 + Math.sin(t + Math.PI) * 85;
-                                
+                                const color = i < days / 2 ? '#22D3EE' : '#FF00FF';
                                 const active = d.hrs > 0;
-                                const front = z1 > 0 || z2 > 0;
-                                
+                                const intensity = Math.min(d.hrs / 8, 1);
+
                                 return (
-                                    <g key={i} style={{ opacity: active ? (front ? 1 : 0.4) : 0.1 }}>
-                                        {/* Tech Rung (Glass Tube) */}
-                                        <rect x={Math.min(x1, x2)} y={y - 4} width={Math.abs(x1 - x2)} height="8" rx="4" 
-                                            fill="rgba(34, 211, 238, 0.05)" stroke={active ? "rgba(34, 211, 238, 0.3)" : "#333"} strokeWidth="1" />
+                                    <g key={i}>
+                                        {/* Vertical Rung */}
+                                        <line x1={x} y1={y1} x2={x} y2={y2} stroke="#333" strokeWidth="2" style={{ opacity: 0.3 }} />
                                         
-                                        {/* Microchip on Rung */}
+                                        {/* Glowing Spheres (Only for Active Days) */}
                                         {active && (
-                                            <rect x={(x1 + x2) / 2 - 5} y={y - 5} width="10" height="10" rx="2" 
-                                                fill={i % 2 === 0 ? "#22D3EE" : "#FF00FF"} style={{ filter: 'url(#tech-glow)', animation: 'pulse 2s infinite' }} />
+                                            <g>
+                                                <circle cx={x} cy={y1} r={6 + (intensity * 6)} fill={color} style={{ filter: 'url(#dna-glow)', opacity: 0.6 + (intensity * 0.4) }} />
+                                                <circle cx={x} cy={y2} r={6 + (intensity * 6)} fill={color} style={{ filter: 'url(#dna-glow)', opacity: 0.6 + (intensity * 0.4) }} />
+                                            </g>
                                         )}
                                         
-                                        {/* Backbone Connectors */}
-                                        <circle cx={x1} cy={y} r={active ? 5 : 2} fill="#22D3EE" style={{ filter: active ? 'url(#tech-glow)' : 'none' }} />
-                                        <circle cx={x2} cy={y} r={active ? 5 : 2} fill="#FF00FF" style={{ filter: active ? 'url(#tech-glow)' : 'none' }} />
+                                        {/* Date Label on every 4th rung */}
+                                        {i % 4 === 0 && (
+                                            <text x={x} y="230" fill="#666" style={{ fontSize: '8px', fontWeight: '800', textAnchor: 'middle' }}>
+                                                {d.date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                                            </text>
+                                        )}
                                     </g>
                                 );
                             })}
                         </svg>
                     </div>
-                    
-                    <div style={{ marginTop: '3rem', display: 'flex', gap: '30px', fontSize: '0.75rem', fontWeight: '900', color: '#22D3EE', letterSpacing: '3px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: '12px', height: '12px', background: '#22D3EE', boxShadow: '0 0 15px #22D3EE' }}></div> DATA FLOWING</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><div style={{ width: '12px', height: '12px', background: '#FF00FF', boxShadow: '0 0 15px #FF00FF' }}></div> CORE ACTIVE</div>
+
+                    <div style={{ marginTop: '2rem', display: 'flex', gap: '40px', fontSize: '0.8rem', fontWeight: '900', color: '#666', letterSpacing: '3px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: '#22D3EE', boxShadow: '0 0 15px #22D3EE' }}></div> STABLE
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: '#FF00FF', boxShadow: '0 0 15px #FF00FF' }}></div> OVERHEAT
+                        </div>
                     </div>
                 </div>
             );
