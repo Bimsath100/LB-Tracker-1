@@ -135,8 +135,8 @@
         .btn-google { background: var(--card-bg); color: var(--text-main); border: var(--glass-border); padding: 14px 28px; border-radius: 16px; cursor: pointer; font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; margin: 2rem auto; }
         .btn-google:hover { border-color: var(--primary); transform: translateY(-2px); }
 
-        .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; width: 100%; min-width: 0; align-items: start; }
-        .card { padding: 2.5rem; margin-bottom: 2rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border-radius: 28px; }
+        .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; width: 100%; min-width: 0; align-items: stretch; }
+        .card { padding: 2.5rem; margin-bottom: 2rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border-radius: 28px; display: flex; flexDirection: column; }
         .card-title { font-family: 'Outfit'; font-size: 1.5rem; font-weight: 800; word-wrap: break-word; margin-bottom: 1.5rem; display: block; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; width: 100%; min-width: 0; }
@@ -147,10 +147,34 @@
 
         .hero-section { display: flex; justify-content: space-between; align-items: center; gap: 3rem; }
 
-        .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-        .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 800; font-size: 1.4rem; font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .hour-btn.active { background: var(--primary); color: white; border-color: transparent; box-shadow: 0 8px 20px var(--primary-glow); transform: scale(1.05); }
-        .hour-btn:hover:not(.active) { border-color: var(--primary); transform: translateY(-2px); }
+        .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+        .hour-btn { 
+            aspect-ratio: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            border-radius: 18px; 
+            font-weight: 800; 
+            font-size: 1.5rem; 
+            font-family: 'Outfit'; 
+            color: var(--text-dim); 
+            background: var(--input-bg); 
+            border: var(--glass-border); 
+            transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            position: relative;
+            overflow: hidden;
+        }
+        .hour-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); opacity: 0; transition: 0.3s; }
+        .hour-btn:hover:not(.active) { border-color: var(--primary); transform: translateY(-3px); color: var(--text-main); }
+        .hour-btn.active { 
+            background: linear-gradient(135deg, var(--primary), #a855f7); 
+            color: white; 
+            border-color: transparent; 
+            box-shadow: 0 10px 25px var(--primary-glow); 
+            transform: scale(1.05) translateY(-2px); 
+        }
+        .hour-btn.active::after { opacity: 1; }
 
         .marks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem; width: 100%; min-width: 0; }
         .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem; width: 100%; min-width: 0; }
@@ -1120,36 +1144,36 @@
         };
 
         const DailyProgressGauge = ({ value, max, label }) => {
-            const radius = 60;
+            const radius = 70;
             const circumference = 2 * Math.PI * radius;
             const percent = Math.min(value / max, 1);
             const strokeDashoffset = circumference - percent * circumference;
 
             return (
-                <div className="glass card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', position: 'relative' }}>
-                    <h3 style={{ margin: '0 0 1rem 0', fontFamily: 'Outfit', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '2px', position: 'absolute', top: '1.5rem', left: '1.5rem' }}>{label}</h3>
-                    <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)', marginTop: '20px' }}>
-                        <circle cx="80" cy="80" r={radius} fill="none" stroke="var(--input-bg)" strokeWidth="12" />
-                        <circle 
-                            cx="80" cy="80" r={radius} 
-                            fill="none" 
-                            stroke="url(#gradient)" 
-                            strokeWidth="12" 
-                            strokeDasharray={circumference} 
-                            strokeDashoffset={strokeDashoffset} 
-                            strokeLinecap="round" 
-                            style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-                        />
-                        <defs>
-                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#6366F1" />
-                                <stop offset="100%" stopColor="#D946EF" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div style={{ position: 'absolute', top: '55%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '2.2rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)', lineHeight: '1' }}>{Math.round(percent * 100)}%</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '700' }}>{value} / {max} HRS</div>
+                <div className="glass card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2.5rem 1.5rem', flex: 1 }}>
+                    <div style={{ width: '100%', textAlign: 'center', marginBottom: '2rem' }}>
+                        <h3 style={{ margin: 0, fontFamily: 'Outfit', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '2.5px', fontWeight: '800' }}>{label}</h3>
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ position: 'relative', width: '180px', height: '180px' }}>
+                            <svg width="180" height="180" viewBox="0 0 180 180" style={{ transform: 'rotate(-90deg)' }}>
+                                <defs>
+                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="var(--primary)" />
+                                        <stop offset="100%" stopColor="#a855f7" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="90" cy="90" r={radius} stroke="var(--input-bg)" strokeWidth="14" fill="transparent" />
+                                <circle cx="90" cy="90" r={radius} stroke="url(#gaugeGradient)" strokeWidth="14" fill="transparent" 
+                                    strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} 
+                                    strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
+                            </svg>
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: '900', fontFamily: 'Outfit', color: 'var(--text-main)', lineHeight: '1' }}>{Math.round(percent * 100)}%</div>
+                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{value} / {max} HRS</div>
+                            </div>
+                        </div>
+                        {percent >= 1 && <div style={{ marginTop: '1.5rem', color: '#10B981', fontWeight: '800', fontSize: '0.8rem', animation: 'fadeIn 0.5s' }}>🎯 DAILY GOAL MET!</div>}
                     </div>
                 </div>
             );
