@@ -934,9 +934,6 @@
                         <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 24 hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
                         <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
                     </div>
-                    <div style={{ maxWidth: '600px', margin: '0 auto 2rem auto' }}>
-                        <Reveal delay={0.15}><FocusTimer /></Reveal>
-                    </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
@@ -1433,7 +1430,7 @@
                             <div className="nav-links">
                                 <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
                                 <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
-                                <div className={`nav-link ${currentPage === 'tutorial' ? 'active' : ''}`} onClick={() => setCurrentPage('tutorial')}>How to Use</div>
+                                <div className={`nav-link ${currentPage === 'timer' ? 'active' : ''}`} onClick={() => setCurrentPage('timer')}>Timer</div>
                                 <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>Feedback</div>
                                 <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
@@ -1477,7 +1474,7 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         <MobileItem active={currentPage === 'subjects' || profile.subjects.includes(currentPage)} icon="📚" label="Subjects" onClick={() => setCurrentPage('subjects')} />
-                        <MobileItem active={currentPage === 'tutorial'} icon="📖" label="Guide" onClick={() => setCurrentPage('tutorial')} />
+                        <MobileItem active={currentPage === 'timer'} icon="⏳" label="Timer" onClick={() => setCurrentPage('timer')} />
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
                         <div className="mobile-item tg-item" onClick={() => window.open('https://t.me/+iC6s-QtB3gI5N2U1', '_blank')}>
                             <span className="m-icon">✈️</span>
@@ -1553,6 +1550,10 @@
                                 <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
+                            ) : currentPage === 'timer' ? (
+                                <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', alignItems: 'center', minHeight: '65vh' }}>
+                                    <Reveal><FocusTimer /></Reveal>
+                                </div>
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
