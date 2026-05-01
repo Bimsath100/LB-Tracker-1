@@ -861,7 +861,114 @@
             );
         };
 
-        const DashboardView = ({ profile, history, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
+        const TodoList = ({ viewDate, history, setHistory }) => {
+            const [task, setTask] = useState('');
+            const todosObj = history.todos || {};
+            const todos = todosObj[viewDate] || [];
+            
+            const addTask = (e) => {
+                e.preventDefault();
+                if (!task.trim()) return;
+                const newTodos = [...todos, { id: Date.now(), text: task, done: false }];
+                setHistory({ ...history, todos: { ...todosObj, [viewDate]: newTodos } });
+                setTask('');
+            };
+            const toggleTask = (id) => {
+                const newTodos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+                setHistory({ ...history, todos: { ...todosObj, [viewDate]: newTodos } });
+            };
+            const delTask = (id) => {
+                const newTodos = todos.filter(t => t.id !== id);
+                setHistory({ ...history, todos: { ...todosObj, [viewDate]: newTodos } });
+            };
+            return (
+                <div style={{ marginTop: '1rem' }}>
+                    <form onSubmit={addTask} style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}>
+                        <input value={task} onChange={e=>setTask(e.target.value)} placeholder="Add a task..." style={{ marginBottom: 0, padding: '10px', flex: 1 }} />
+                        <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '0 15px' }}>+</button>
+                    </form>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
+                        {todos.map(t => (
+                            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--input-bg)', padding: '10px', borderRadius: '12px', marginBottom: '8px' }}>
+                                <input type="checkbox" checked={t.done} onChange={() => toggleTask(t.id)} style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)', marginBottom: 0 }} />
+                                <span style={{ flex: 1, textDecoration: t.done ? 'line-through' : 'none', color: t.done ? 'var(--text-dim)' : 'var(--text-main)', fontSize: '0.9rem' }}>{t.text}</span>
+                                <span onClick={() => delTask(t.id)} style={{ cursor: 'pointer', opacity: 0.5, fontSize: '0.8rem' }}>❌</span>
+                            </div>
+                        ))}
+                        {todos.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem 0' }}>No tasks for this date.</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        const ResourceLinks = ({ history, setHistory }) => {
+            const [title, setTitle] = useState('');
+            const [url, setUrl] = useState('');
+            const links = history.links || [];
+            
+            const addLink = (e) => {
+                e.preventDefault();
+                if (!title.trim() || !url.trim()) return;
+                const finalUrl = url.startsWith('http') ? url : `https://${url}`;
+                const newLinks = [...links, { id: Date.now(), title, url: finalUrl }];
+                setHistory({ ...history, links: newLinks });
+                setTitle(''); setUrl('');
+            };
+            const delLink = (id) => {
+                setHistory({ ...history, links: links.filter(l => l.id !== id) });
+            };
+            return (
+                <div style={{ marginTop: '1rem' }}>
+                    <form onSubmit={addLink} style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap' }}>
+                        <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="Title (e.g. Note)" style={{ marginBottom: 0, padding: '10px', flex: 1, minWidth: '80px' }} />
+                        <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="URL link" style={{ marginBottom: 0, padding: '10px', flex: 1, minWidth: '100px' }} />
+                        <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '0 15px' }}>Save</button>
+                    </form>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
+                        {links.map(l => (
+                            <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--input-bg)', padding: '10px', borderRadius: '12px', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '1.2rem' }}>🔗</span>
+                                <a href={l.url} target="_blank" rel="noreferrer" style={{ flex: 1, color: 'var(--primary)', fontSize: '0.9rem', textDecoration: 'none', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.title}</a>
+                                <span onClick={() => delLink(l.id)} style={{ cursor: 'pointer', opacity: 0.5, fontSize: '0.8rem' }}>🗑️</span>
+                            </div>
+                        ))}
+                        {links.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem 0' }}>Save important links here.</div>}
+                    </div>
+                </div>
+            );
+        };
+
+        const BadgesView = ({ history, marks, streak }) => {
+            const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
+            const totalPapers = marks ? marks.length : 0;
+            
+            const badges = [
+                { id: 'first_step', icon: '🐣', title: 'First Step', desc: 'Marked 1st hour', achieved: totalHrs >= 1 },
+                { id: 'streak_3', icon: '🔥', title: 'On Fire', desc: '3 Day Streak', achieved: streak >= 3 },
+                { id: 'streak_7', icon: '⚡', title: 'Unstoppable', desc: '7 Day Streak', achieved: streak >= 7 },
+                { id: 'hours_50', icon: '🥉', title: 'Bronze Scholar', desc: '50 Hours', achieved: totalHrs >= 50 },
+                { id: 'hours_100', icon: '🥈', title: 'Silver Scholar', desc: '100 Hours', achieved: totalHrs >= 100 },
+                { id: 'hours_500', icon: '🏆', title: 'Elite Scholar', desc: '500 Hours', achieved: totalHrs >= 500 },
+                { id: 'papers_5', icon: '📝', title: 'Paper Eater', desc: 'Did 5 Papers', achieved: totalPapers >= 5 }
+            ];
+
+            return (
+                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
+                    <div className="card-header"><span className="card-title">Achievements 🏅</span><span style={{ color: 'var(--text-dim)', fontSize: '0.8rem', fontWeight: '800' }}>{badges.filter(b=>b.achieved).length} / {badges.length} Unlocked</span></div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '15px', marginTop: '1.5rem' }}>
+                        {badges.map(b => (
+                            <div key={b.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', opacity: b.achieved ? 1 : 0.4, filter: b.achieved ? 'none' : 'grayscale(100%)', background: b.achieved ? 'var(--primary-glow)' : 'var(--input-bg)', padding: '15px 5px', borderRadius: '16px', border: b.achieved ? '1px solid var(--primary)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                                <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{b.icon}</div>
+                                <div style={{ fontWeight: '800', fontSize: '0.75rem', lineHeight: '1.1', color: b.achieved ? 'var(--text-main)' : 'var(--text-dim)' }}>{b.title}</div>
+                                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '4px' }}>{b.desc}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
             useEffect(() => {
@@ -905,10 +1012,26 @@
             }, []);
 
             const todayCount = (Array.isArray(history[viewDate]) ? history[viewDate].filter(Boolean).length : 0);
+            const dailyTarget = history.target || 24;
             const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
             const toggleH = (i) => { const h = [...(history[viewDate] || new Array(24).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
+            
+            let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
+            let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
+            if (todayH === 0) { 
+                curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD); 
+                let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0; 
+                if (yestH > 0) streak = 1; 
+            } else streak = 1;
+            if (streak > 0) {
+                while (true) {
+                    curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
+                    let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
+                    if (hrs > 0) streak++; else break;
+                }
+            }
             const isEvening = new Date().getHours() >= 17;
             const showReminder = todayCount === 0 && isEvening && viewDate === getLocalISODate();
             const dismissAnnounce = () => { localStorage.setItem('lastSeenAnnounce', announcement); setShowAnnounceModal(false); };
@@ -929,18 +1052,24 @@
                     {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
+                        {streak > 0 && <div style={{ display: 'inline-block', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 14px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.9rem', marginTop: '12px' }}>🔥 {streak} Day Streak!</div>}
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
-                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / 24 hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
+                        <Reveal><div className="glass card" style={{ height: '100%' }}><div className="card-header"><span className="card-title">Study Grid</span><span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem' }}>{todayCount} / {dailyTarget} hrs</span></div><div className="hour-grid">{Array.from({ length: 24 }).map((_, i) => <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>)}</div></div></Reveal>
                         <Reveal delay={0.1}><div className="glass card"><span className="card-title">Calendar</span><input type="date" value={viewDate} onChange={e => setViewDate(e.target.value)} style={{ marginTop: '1rem' }} /><div style={{ marginTop: '1rem' }}>{[...Array(3)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return <div key={k} style={{ display: 'flex', alignItems: 'center', padding: '12px', background: 'var(--input-bg)', borderRadius: '12px', marginBottom: '8px' }}><span>{d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}</span><span style={{ color: 'var(--primary)', fontWeight: '800', marginLeft: 'auto' }}>{(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0)}h</span></div>; })}</div></div></Reveal>
+                    </div>
+                    <div className="dash-grid" style={{ marginBottom: '2rem' }}>
+                        <Reveal delay={0.15}><div className="glass card" style={{ height: '100%' }}><span className="card-title">Daily To-Do List 📝</span><TodoList viewDate={viewDate} history={history} setHistory={setHistory} /></div></Reveal>
+                        <Reveal delay={0.2}><div className="glass card" style={{ height: '100%' }}><span className="card-title">Resource Links 🔗</span><ResourceLinks history={history} setHistory={setHistory} /></div></Reveal>
                     </div>
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
                     </div>
+                    <Reveal delay={0.35}><BadgesView history={history} marks={marks} streak={streak} /></Reveal>
                     <div className="community-hub">
                         <Reveal delay={0.4}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
                         <Reveal delay={0.5}><div className="glass card" style={{ padding: '1.5rem' }}><h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3><DistrictLeaderboard /></div></Reveal>
@@ -1452,6 +1581,14 @@
                                     📱 Install App
                                 </button>
                             )}
+                            <div style={{ marginBottom: '15px', background: 'var(--input-bg)', padding: '12px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                                <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Daily Study Target (Hours)</label>
+                                <input type="number" min="1" max="24" value={history.target || 24} onChange={e => {
+                                    const h = { ...history, target: parseInt(e.target.value) || 24 };
+                                    setHistory(h);
+                                    pushData(h, marks);
+                                }} style={{ marginBottom: 0, padding: '8px 12px', fontSize: '0.9rem', marginTop: '8px', background: 'var(--card-bg)' }} />
+                            </div>
                             <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--primary-glow)', color: 'var(--text-main)', border: '1px solid var(--primary)' }} onClick={() => { setCurrentPage('tutorial'); setIsSettingsOpen(false); }}>
                                 📖 How to Use
                             </button>
@@ -1550,7 +1687,7 @@
                     <main className="main-content">
                         <div className="container">
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
+                                <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'timer' ? (
