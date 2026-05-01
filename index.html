@@ -1194,20 +1194,21 @@
             );
         };
 
-        const StudyAuraSphere = ({ history }) => {
-            const today = new Date();
-            let totalRecent = 0;
-            const days = 7;
-            for (let i = 0; i < days; i++) {
-                const d = new Date(today);
-                d.setDate(today.getDate() - i);
-                const k = getLocalISODate(d);
-                totalRecent += Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0;
-            }
-
-            const intensity = Math.min(totalRecent / 40, 1);
-            const particleCount = Math.max(Math.floor(intensity * 15), 5);
+        const StudyAuraSphere = ({ history, todayCount }) => {
+            const intensity = Math.min(todayCount / 12, 1); // Max intensity at 12 hours today
+            const particleCount = todayCount; 
             const coreRadius = 70 + intensity * 30;
+
+            // Dynamic Color Logic
+            const getColor = (val) => {
+                if (val === 0) return { primary: '#3B82F6', secondary: '#1D4ED8', aura: 'rgba(59, 130, 246, 0.2)' }; // Blue
+                if (val <= 4) return { primary: '#8B5CF6', secondary: '#6D28D9', aura: 'rgba(139, 92, 246, 0.3)' }; // Purple
+                if (val <= 8) return { primary: '#FF3CAC', secondary: '#784BA0', aura: 'rgba(255, 60, 172, 0.4)' }; // Pink
+                if (val <= 12) return { primary: '#F59E0B', secondary: '#D97706', aura: 'rgba(245, 158, 11, 0.5)' }; // Gold/Orange
+                return { primary: '#EF4444', secondary: '#B91C1C', aura: 'rgba(239, 68, 68, 0.6)' }; // Overdrive Red
+            };
+
+            const colors = getColor(todayCount);
 
             return (
                 <div style={{ padding: '3rem 1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'center', background: 'radial-gradient(circle at center, rgba(139, 92, 246, 0.05), transparent)' }}>
@@ -1221,12 +1222,12 @@
                             <defs>
                                 <radialGradient id="sphere3D" cx="35%" cy="35%" r="60%">
                                     <stop offset="0%" stopColor="#FFF" stopOpacity="0.8" />
-                                    <stop offset="20%" stopColor="#FF3CAC" />
-                                    <stop offset="60%" stopColor="#7C3AED" />
+                                    <stop offset="20%" stopColor={colors.primary} />
+                                    <stop offset="60%" stopColor={colors.secondary} />
                                     <stop offset="100%" stopColor="#1E1B4B" />
                                 </radialGradient>
                                 <radialGradient id="auraGlow">
-                                    <stop offset="0%" stopColor="rgba(139, 92, 246, 0.4)" />
+                                    <stop offset="0%" stopColor={colors.aura} />
                                     <stop offset="100%" stopColor="transparent" />
                                 </radialGradient>
                             </defs>
@@ -1250,10 +1251,10 @@
                                 
                                 return (
                                     <g key={i} style={{ transform: `rotate(${rot}deg)`, transformOrigin: '175px 175px' }}>
-                                        <ellipse cx="175" cy="175" rx={rx} ry={ry} fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="0.5" />
+                                        <ellipse cx="175" cy="175" rx={rx} ry={ry} fill="none" stroke={colors.primary} strokeOpacity="0.1" strokeWidth="0.5" />
                                         
                                         {/* Particle with slight tail glow */}
-                                        <circle r="4" fill="#FF3CAC" style={{ filter: 'drop-shadow(0 0 5px #FF3CAC)' }}>
+                                        <circle r="4" fill={colors.primary} style={{ filter: `drop-shadow(0 0 5px ${colors.primary})` }}>
                                             <animateMotion dur={`${dur}s`} repeatCount="indefinite" path={`M ${175-rx},175 a ${rx},${ry} 0 1,0 ${rx*2},0 a ${rx},${ry} 0 1,0 ${-rx*2},0`} />
                                         </circle>
                                         <circle r="2" fill="#FFF" opacity="0.6">
@@ -1266,17 +1267,17 @@
                         
                         {/* Center Value */}
                         <div style={{ position: 'absolute', textAlign: 'center', pointerEvents: 'none', zIndex: '10' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#FFF', textShadow: '0 0 20px rgba(0,0,0,0.8)', fontFamily: 'Outfit' }}>{totalRecent}</div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'rgba(255,255,255,0.9)', letterSpacing: '2px' }}>HOURS</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#FFF', textShadow: `0 0 20px ${colors.primary}`, fontFamily: 'Outfit' }}>{todayCount}</div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: 'rgba(255,255,255,0.9)', letterSpacing: '2px' }}>HOURS TODAY</div>
                         </div>
                     </div>
 
                     <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: '900', color: 'var(--text-main)', background: 'rgba(139, 92, 246, 0.1)', padding: '8px 24px', borderRadius: '100px', border: '1px solid rgba(139, 92, 246, 0.3)', backdropFilter: 'blur(10px)' }}>
-                            ENERGY STATUS: <span style={{ color: intensity > 0.8 ? '#FF3CAC' : '#8B5CF6' }}>{intensity > 0.8 ? 'MAXIMUM OVERDRIVE' : intensity > 0.4 ? 'OPTIMIZED' : 'CHARGING'}</span>
+                        <div style={{ fontSize: '0.8rem', fontWeight: '900', color: 'var(--text-main)', background: `${colors.aura}`, padding: '8px 24px', borderRadius: '100px', border: `1px solid ${colors.primary}`, backdropFilter: 'blur(10px)', transition: '0.5s' }}>
+                            ENERGY STATUS: <span style={{ color: colors.primary }}>{todayCount > 12 ? 'MAXIMUM OVERDRIVE ⚡' : todayCount > 8 ? 'ELITE POWER 🔥' : todayCount > 4 ? 'STABLE FLOW 🌊' : todayCount > 0 ? 'CHARGING 🔋' : 'IDLE 🌑'}</span>
                         </div>
                         <div style={{ height: '4px', width: '200px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${intensity * 100}%`, background: 'linear-gradient(90deg, #8B5CF6, #FF3CAC)', transition: '1s' }}></div>
+                            <div style={{ height: '100%', width: `${intensity * 100}%`, background: `linear-gradient(90deg, ${colors.secondary}, ${colors.primary})`, transition: '1s' }}></div>
                         </div>
                     </div>
                 </div>
@@ -1419,7 +1420,7 @@
                         {/* Row 2: StudyAuraSphere & Daily Progress */}
                         <Reveal delay={0.2} style={{ gridColumn: 'span 8' }}>
                             <div className="glass card" style={{ padding: '0', height: '100%', position: 'relative', overflow: 'hidden' }}>
-                                <StudyAuraSphere history={history} />
+                                <StudyAuraSphere history={history} todayCount={todayCount} />
                             </div>
                         </Reveal>
 
