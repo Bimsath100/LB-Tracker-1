@@ -76,19 +76,49 @@
 
         .glass { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
-        .sidebar { position: fixed; top: 0; left: 0; width: 260px; height: 100vh; background: var(--navbar-bg); backdrop-filter: blur(20px); z-index: 2000; border-right: var(--glass-border); padding: 2rem 1.5rem; display: flex; flex-direction: column; transition: transform 0.3s; }
-        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; margin-bottom: 2.5rem; cursor: pointer; }
-        .sidebar-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; box-shadow: 0 4px 15px var(--primary-glow); }
-        .sidebar-label { font-size: 0.7rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 1.5rem 0 0.5rem 10px; }
-        .nav-links { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .nav-link { padding: 12px 18px; border-radius: 14px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 12px; }
-        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 8px 20px var(--primary-glow); transform: translateX(5px); }
+        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-right: var(--glass-border); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; z-index: 1000; transition: 0.3s; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 3rem; cursor: pointer; color: var(--text-main); }
+        .sidebar-logo { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 8px 20px var(--primary-glow); }
+        .sidebar-label { font-size: 0.75rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin: 2rem 0 0.8rem 10px; }
+        .nav-links { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .nav-link { padding: 14px 18px; border-radius: 16px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 14px; }
+        .nav-link.active { background: var(--primary); color: white; box-shadow: 0 8px 25px var(--primary-glow); transform: translateX(5px); }
         .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); transform: translateX(5px); }
-        .nav-join { margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, #2AABEE, #1e96d8); color: white; font-weight: 700; font-size: 0.9rem; text-decoration: none; cursor: pointer; box-shadow: 0 8px 20px rgba(42, 171, 238, 0.3); transition: 0.3s; }
-        .nav-join:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(42, 171, 238, 0.5); }
         
-        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px 0 100px 0; min-height: 100vh; transition: 0.3s; }
-        .container { width: min(94%, 1200px); margin: 0 auto; }
+        .main-content { margin-left: 280px; width: calc(100% - 280px); padding: 40px 0 100px 0; min-height: 100vh; transition: 0.3s; }
+        .container { width: min(92%, 1400px); margin: 0 auto; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4%; margin-bottom: 2.5rem; width: 100%; height: 70px; }
+        .mobile-only-brand { display: none; align-items: center; gap: 8px; cursor: pointer; }
+        .desktop-only-admin { display: flex; align-items: center; gap: 12px; }
+
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); width: 260px; }
+            .main-content { margin-left: 0; width: 100%; padding: 70px 10px 90px 10px !important; }
+            .container { width: 100%; padding: 0 5px; }
+            .mobile-nav { display: flex; }
+            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); height: 60px; z-index: 1500; border-bottom: var(--glass-border); margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; }
+            .mobile-only-brand { display: flex; align-items: center; gap: 8px; }
+            .desktop-only-admin { display: none; }
+            
+            .dash-grid { grid-template-columns: 1fr !important; gap: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
+            .hour-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; }
+            .marks-grid { grid-template-columns: 1fr !important; gap: 1rem; }
+            .stats-grid-3 { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
+            .card { padding: 1.25rem !important; border-radius: 20px; }
+            .hour-btn { font-size: 1.1rem; border-radius: 12px; }
+            .stat-val { font-size: 1.8rem; }
+            .stat-card { padding: 1.2rem 0.8rem; }
+
+            .hero-section { display: flex; flex-direction: column; gap: 2rem; align-items: stretch !important; padding: 1.5rem !important; }
+            .hero-section h1 { text-align: center; }
+            .hero-section p { text-align: center; margin: 0 auto; }
+            .hero-section > div:first-child { display: flex; flex-direction: column; align-items: center; }
+            .countdown-card { min-width: 0 !important; width: 100%; }
+            
+            .chart-box { height: 160px !important; }
+        }
 
         .setup-card { max-width: 380px; width: min(92%, 380px); margin: 2rem auto; padding: 2rem; }
         .setup-title { font-family: 'Outfit'; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center; }
@@ -105,14 +135,17 @@
         .btn-google { background: var(--card-bg); color: var(--text-main); border: var(--glass-border); padding: 14px 28px; border-radius: 16px; cursor: pointer; font-weight: 600; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; margin: 2rem auto; }
         .btn-google:hover { border-color: var(--primary); transform: translateY(-2px); }
 
-        .dash-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; width: 100%; min-width: 0; }
-        .card { padding: 2rem; margin-bottom: 1.5rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
-        .card-title { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 700; word-wrap: break-word; }
+        .dash-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; width: 100%; min-width: 0; align-items: start; }
+        .card { padding: 2.5rem; margin-bottom: 2rem; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; border-radius: 28px; }
+        .card-title { font-family: 'Outfit'; font-size: 1.5rem; font-weight: 800; word-wrap: break-word; margin-bottom: 1.5rem; display: block; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; width: 100%; min-width: 0; }
-        .stat-card { padding: 1.5rem 1rem; text-align: center; border-radius: 24px; border: var(--glass-border); }
-        .stat-val { font-family: 'Outfit'; font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; }
-        .stat-lbl { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; width: 100%; min-width: 0; }
+        .stat-card { padding: 2rem 1.5rem; text-align: center; border-radius: 28px; border: var(--glass-border); background: var(--card-bg); transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .stat-val { font-family: 'Outfit'; font-size: 2.5rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 10px; }
+        .stat-lbl { font-size: 0.75rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; }
+
+        .hero-section { display: flex; justify-content: space-between; align-items: center; gap: 3rem; }
 
         .hour-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
         .hour-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 800; font-size: 1.4rem; font-family: 'Outfit'; color: var(--text-dim); background: var(--input-bg); border: var(--glass-border); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -1061,17 +1094,16 @@
             const now = new Date();
             const monthsLeft = (targetDate.getFullYear() - now.getFullYear()) * 12 + targetDate.getMonth() - now.getMonth();
             
-            let phase = "Theory & Foundation";
-            let prog = 30;
-            if (monthsLeft <= 6 && monthsLeft > 3) { phase = "Rapid Revision & Past Papers"; prog = 70; }
-            else if (monthsLeft <= 3 && monthsLeft > 0) { phase = "Final Mock Exams & Time Management"; prog = 90; }
-            else if (monthsLeft <= 0) { phase = "Exam Mode Active 🚀"; prog = 100; }
+            let phase = { label: "Theory & Foundation" };
+            let progress = 30;
+            if (monthsLeft <= 6 && monthsLeft > 3) { phase = { label: "Rapid Revision & Past Papers" }; progress = 70; }
+            else if (monthsLeft <= 3 && monthsLeft > 0) { phase = { label: "Final Mock Exams & Time Management" }; progress = 90; }
+            else if (monthsLeft <= 0) { phase = { label: "Exam Mode Active 🚀" }; progress = 100; }
             
             return (
                 <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem', textAlign: 'left', borderLeft: '4px solid var(--primary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '10px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '15px' }}>
                         <div>
-                            <h3 style={{ margin: 0, fontFamily: 'Outfit', fontSize: '1.2rem', color: 'var(--text-main)' }}>A/L Study Roadmap 🗺️</h3>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '4px' }}>Current Phase: <strong style={{ color: 'var(--text-main)' }}>{phase}</strong></div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -1946,28 +1978,28 @@
                                 <div className="sidebar-logo" style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>LB</div>
                                 <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>Tracker</span>
                             </div>
-                            <div className="desktop-only-admin">
+                            <div className="desktop-only-admin" style={{ display: 'flex', gap: '10px' }}>
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
                                     <React.Fragment>
-                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0 }}>
+                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
                                             <div className="live-dot"></div>
-                                            <span>{liveUsers} LIVE</span>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{liveUsers} LIVE</span>
                                         </div>
-                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0 }}>
+                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
                                             <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                            <span>{markedToday} MARKED</span>
+                                            <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{markedToday} MARKED</span>
                                         </div>
                                     </React.Fragment>
                                 )}
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0 }}>
-                                    <span>{totalRegistered} <span className="reg-label" style={{ fontSize: '0.6rem' }}>REG</span></span>
+                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
+                                    <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{totalRegistered} <span className="reg-label" style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
                                 </div>
-                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="How to Use">
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="How to Use">
                                     📖
                                 </button>
-                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }} title="Toggle Theme">
+                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="Toggle Theme">
                                     {isLightMode ? '🌙' : '☀️'}
                                 </button>
                             </div>
