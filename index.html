@@ -1053,7 +1053,10 @@
                     <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.5rem, 5vw, 3rem)', lineHeight: '1.2' }}>Hello, {profile.name}{profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '4px 8px', borderRadius: '8px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: '800', letterSpacing: '1px', boxShadow: '0 4px 12px var(--primary-glow)' }}>OWNER</span>}! ✨</h1>
                         {streak > 0 && <div style={{ display: 'inline-block', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 14px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.9rem', marginTop: '12px' }}>🔥 {streak} Day Streak!</div>}
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginTop: '10px' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</p>
+                        <div style={{ marginTop: '10px' }}>
+                            <span style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{profile.examYear} {profile.examMonth} A/L - {profile.district}</span>
+                            <button onClick={() => setCurrentPage('tutorial')} style={{ background: 'var(--primary-glow)', color: 'var(--text-main)', border: '1px solid var(--primary)', padding: '4px 12px', borderRadius: '100px', fontSize: '0.8rem', cursor: 'pointer', marginLeft: '10px', fontWeight: '700' }}>📖 How to Use</button>
+                        </div>
                         <div className="countdown-container"><CountdownBox val={timeLeft.d} lbl="Days" /><CountdownBox val={timeLeft.h} lbl="Hours" /><CountdownBox val={timeLeft.m} lbl="Min" /><CountdownBox val={timeLeft.s} lbl="Sec" /></div>
                     </div>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
@@ -1076,6 +1079,11 @@
                         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💻</div>
                         <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800' }}>Your Workspace</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage your focus, tasks, and resources in one place.</p>
+                        <div style={{ marginTop: '1.5rem', display: 'inline-flex', alignItems: 'center', background: 'var(--input-bg)', padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
+                            <label style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '700', marginRight: '10px' }}>🎯 Daily Target:</label>
+                            <input type="number" min="1" max="24" value={history.target || 24} onChange={e => setHistory({ ...history, target: parseInt(e.target.value) || 24 })} style={{ width: '50px', padding: '4px', fontSize: '0.9rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-main)', textAlign: 'center', marginBottom: 0 }} />
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '8px' }}>Hours</span>
+                        </div>
                     </div>
                     <div className="dash-grid" style={{ marginBottom: '2rem' }}>
                         <Reveal><FocusTimer /></Reveal>
@@ -1101,6 +1109,13 @@
                         <Reveal delay={0.1}><div className="glass card" style={{ padding: '1.5rem' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}><h3 style={{ margin: 0, fontFamily: 'Outfit' }}>Live Activity Hub 🌍</h3><div className="live-indicator"><div className="live-dot"></div><span>LIVE UPDATES</span></div></div><ActivityFeed /></div></Reveal>
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><h3 style={{ marginBottom: '1.5rem', fontFamily: 'Outfit' }}>Top Districts Today 🏆</h3><DistrictLeaderboard /></div></Reveal>
                     </div>
+                    <Reveal delay={0.3}>
+                        <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', marginTop: '2rem', border: '1px solid var(--primary)' }}>
+                            <h3 style={{ fontFamily: 'Outfit', marginBottom: '10px' }}>⭐ Have a Suggestion?</h3>
+                            <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '15px' }}>We want to hear from you to make LB Tracker better!</p>
+                            <button className="btn-primary" onClick={() => document.querySelector('.nav-link:nth-child(5)')?.click() || (window.setCurrentPage && window.setCurrentPage('feedback'))} style={{ width: 'auto', padding: '10px 30px' }}>Give Feedback</button>
+                        </div>
+                    </Reveal>
                 </div>
             );
         };
@@ -1586,15 +1601,20 @@
                                     </div>
                                 )}
                             </div>
-                            <div className="nav-links">
-                                <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
-                                <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>Workspace</div>
-                                <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>Community</div>
-                                <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
-                                <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
-                                    Join us
-                                </a>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <button onClick={() => setIsLightMode(!isLightMode)} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', fontSize: '1.2rem', cursor: 'pointer', padding: '6px', borderRadius: '50%', marginRight: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px' }}>
+                                    {isLightMode ? '🌙' : '☀️'}
+                                </button>
+                                <div className="nav-links">
+                                    <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>Dashboard</div>
+                                    <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>Workspace</div>
+                                    <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>Community</div>
+                                    <div className={`nav-link ${currentPage === 'subjects' || profile.subjects.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>Subjects</div>
+                                    <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
+                                        Join us
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </nav>
@@ -1608,20 +1628,6 @@
                                     📱 Install App
                                 </button>
                             )}
-                            <div style={{ marginBottom: '15px', background: 'var(--input-bg)', padding: '12px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Daily Study Target (Hours)</label>
-                                <input type="number" min="1" max="24" value={history.target || 24} onChange={e => {
-                                    const h = { ...history, target: parseInt(e.target.value) || 24 };
-                                    setHistory(h);
-                                    pushData(h, marks);
-                                }} style={{ marginBottom: 0, padding: '8px 12px', fontSize: '0.9rem', marginTop: '8px', background: 'var(--card-bg)' }} />
-                            </div>
-                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--primary-glow)', color: 'var(--text-main)', border: '1px solid var(--primary)' }} onClick={() => { setCurrentPage('tutorial'); setIsSettingsOpen(false); }}>
-                                📖 How to Use
-                            </button>
-                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => { setCurrentPage('feedback'); setIsSettingsOpen(false); }}>
-                                ⭐ Rate & Feedback
-                            </button>
                             <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={async () => {
                                 const permission = await Notification.requestPermission();
                                 if (permission === 'granted') {
@@ -1631,9 +1637,6 @@
                                 }
                             }}>
                                 🔔 Enable Reminders
-                            </button>
-                            <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setIsLightMode(!isLightMode)}>
-                                {isLightMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
                             </button>
                             <button className="btn-primary" style={{ marginBottom: '10px' }} onClick={() => { setIsEditMode(true); setIsSettingsOpen(false); }}>👤 Edit Profile</button>
                             <button className="btn-primary" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} onClick={handleLogout}>🚪 Logout</button>
@@ -1715,7 +1718,7 @@
                     )}
 
                     <main className="main-content">
-                        <div className="container">
+                        <div className="container" id="mainContainer">
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
                             ) : currentPage === 'workspace' ? (
