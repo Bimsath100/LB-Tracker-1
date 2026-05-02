@@ -1614,7 +1614,7 @@
             const toggleH = (i) => { 
                 const h = [...(history[viewDate] || new Array(24).fill(false))]; 
                 h[i] = !h[i]; 
-                const newHistory = { ...history, [viewDate]: h };
+                const newHistory = { ...history, [viewDate]: h, last_updated: new Date().toISOString() };
                 setHistory(newHistory); 
                 
                 // Real-time Broadcast
@@ -1687,8 +1687,15 @@
                         <Reveal style={{ gridColumn: 'span 8' }}>
                             <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
                                 <div className="card-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                                    <div>
-                                        <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
+                                            {history.last_updated && (
+                                                <div style={{ fontSize: '0.65rem', color: 'var(--primary)', background: 'var(--primary-glow)', padding: '2px 8px', borderRadius: '6px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                    ☁️ Last Synced: {timeAgo(history.last_updated)}
+                                                </div>
+                                            )}
+                                        </div>
                                         <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px', fontWeight: '500' }}>Focus on your daily goal</p>
                                     </div>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
