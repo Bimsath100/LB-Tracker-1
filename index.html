@@ -2955,11 +2955,13 @@
                         </button>
 
                         <div className="sidebar-label"><span>Main Menu</span></div>
-                        <nav className="sidebar-nav">
-                            <SidebarItem active={currentPage === 'dashboard'} icon="🏠" label="Dashboard" onClick={() => setCurrentPage('dashboard')} collapsed={sidebarCollapsed} />
-                            <SidebarItem active={currentPage === 'workspace'} icon="📚" label="Workspace" onClick={() => setCurrentPage('workspace')} collapsed={sidebarCollapsed} />
-                            <SidebarItem active={isAiOpen} icon="✨" label="AI Coach" onClick={() => setIsAiOpen(true)} collapsed={sidebarCollapsed} />
-                        </nav>
+                        <div className="nav-links">
+                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 <span>Dashboard</span></div>
+                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 <span>Workspace</span></div>
+                            <div className={`nav-link ${isAiOpen ? 'active' : ''}`} onClick={() => setIsAiOpen(true)}>✨ <span>AI Coach</span></div>
+                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 <span>Community</span></div>
+                            {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 <span>Admin Center</span></div>}
+                        </div>
 
                         <div className="sidebar-label"><span>Tools</span></div>
                         <div className="nav-links">
