@@ -201,7 +201,7 @@
         @media (max-width: 1024px) {
             .sidebar { 
                 left: -280px; 
-                box-shadow: 20px 0 60px rgba(0,0,0,0.5);
+                box-shadow: none;
                 z-index: 1000;
             }
             .sidebar.mobile-show {
@@ -209,6 +209,7 @@
                 width: 280px !important;
                 padding: 2rem 1.25rem !important;
                 display: flex !important;
+                box-shadow: 20px 0 60px rgba(0,0,0,0.5);
             }
             .sidebar.mobile-show .sidebar-brand span,
             .sidebar.mobile-show .sidebar-label span,
