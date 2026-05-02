@@ -2195,32 +2195,25 @@
                                         'Senuri', 'Lihini', 'Methmi', 'Dinuli', 'Piyumi', 'Nethmi', 'Amaya', 'Denuwani', 'Sahasna', 'Vinu', 'Thanuli', 'Melani', 'Sayuri', 'Kavisha', 'Limaya', 'Pabasara', 'Dinethra', 'Thisari', 'Oshadhi', 'Minuli', 'Hiruni', 'Senali', 'Ruvindya', 'Kethmi', 'Nimesha'
                                     ];
                                     const dists = ['Colombo', 'Kandy', 'Galle', 'Kurunegala', 'Matara', 'Gampaha', 'Kalutara', 'Ratnapura', 'Badulla', 'Anuradhapura', 'Kegalle', 'Nuwara Eliya'];
-                                    const msgs = [
-                                        'අද පැය 5ක් ඉවරයි! 🔥 තව පැය 3ක් කරන්න ඕනේ.',
-                                        'Chemistry structured පේපර් එකක් කරා. ලකුණු ටිකක් අඩුයි ඒත් වැඩේ අතහරින්නේ නැහැ. 💪',
-                                        'Morning session done! Ready for a 15min break. ☕',
-                                        'Physics electronics පාඩම අමාරුයි නේද? කාටද තේරෙන්නේ?',
-                                        'Today goal is 10 hours. Who else is aiming high? 🎯',
-                                        'Just joined the hub! Motivation is high today. 🚀',
-                                        'Bio essay එකක් ලියලා ඉවර උනා. අත් දෙකත් රිදෙනවා දැන් නම්. ✍️',
-                                        'Keep going guys! We can do this. 🙌',
-                                        '8 hours already done! Feeling like a beast today. 🔥',
-                                        'Anyone studying tonight? Night owl session starts at 10pm! 🦉'
-                                    ];
+                                    const msgs = ['Physics thama epama karapu subject eka. Kauda thawa physics කරන්නේ? 😫', 'Ada nam mara kammaliyek enne. Kauda inne motivation ekak denna? 🙌', 'Wassa nisa ninda yanawa. Padam karanna mara gemak ganna ona. 🌧️😴', 'Amoo ada nam patta rasne. Padam karannath ba. ☀️🥵', 'Guys, oyalage combined maths marks kohomada? Mata nam kela wela thiyenne. 😂', 'Mata thama organic chemistry therenne na. Help ekak danna puluwan kawuda? 🧪🆘', 'Coffee ekak biwwa. Dan thama full energy. Let\'s go! ☕🔥', 'Kattiyatama kohomada progress? Api atha harinne na neda? 💪✨', 'Ada nam full focus hitiya. Mara happy! 😇', 'Mata nam exam mathak weddi baya hithenawa. Eth api karamu! 📈🎯', 'Night owl session ekata kauda inne? 🦉🦉', 'A/L kiyanne nikan marathon ekak wage neda? 😂🏃‍♂️', 'Combined maths structured paper ekak kara. Mara speed ekak ona neda? ✍️', 'Bio padama kiyawala iwarayi. Dan short notes hadanawa. 📝', 'Ada nam session eka skip una. Dan thama aye start kale. 👀', 'Unit 5 thama iwara na. Stress wela inne dan නම්. 😵‍💫', 'Good night guys! Heta ude 4ta thama aye session eka. 😴', 'Maths thama hithapu tharam lesi na. Practice wenna ona thawa. 📈', 'Motivation nathi unama oyalage tricks monawada? 💡', 'Organic thama asama padama. Chemistry walata love! ❤️🧪'];
                                     
-                                    const count = 2 + Math.floor(Math.random() * 2); // Post 2-3 messages for testing
+                                    const count = 1 + Math.floor(Math.random() * 3);
+                                    let usedNames = new Set();
                                     for(let i=0; i<count; i++) {
-                                        const rName = names[Math.floor(Math.random() * names.length)];
+                                        let rName = names[Math.floor(Math.random() * names.length)];
+                                        while(usedNames.has(rName)) { rName = names[Math.floor(Math.random() * names.length)]; }
+                                        usedNames.add(rName);
+
                                         const rDist = dists[Math.floor(Math.random() * dists.length)];
                                         const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
                                         
-                                        const { error } = await sb.from('community_posts').insert({
+                                        await sb.from('community_posts').insert({
                                             content: rMsg,
-                                            user_name: `${rName} (${rDist})\u200D`,
-                                            user_id: profile?.id || profile?.user_id, // Use admin ID to bypass RLS
+                                            user_name: `${rName} (${rDist})\u200D\u200B`,
+                                            user_id: profile?.id || profile?.user_id,
                                             type: 'text',
                                             viewed_by: [],
-                                            created_at: new Date().toISOString() // Ensure it appears on top
+                                            created_at: new Date(Date.now() - (i * 2000 + Math.random() * 3000)).toISOString()
                                         });
                                         
                                         if(error) {
@@ -2236,7 +2229,7 @@
                                     // Use % like operator to find the hidden character at the end
                                     const { data, error } = await sb.from('community_posts').select('id, user_name');
                                     if(data) {
-                                        const idsToDelete = data.filter(p => p.user_name.endsWith('\u200D')).map(p => p.id);
+                                        const idsToDelete = data.filter(p => p.user_name.includes('\u200D') || p.user_name.includes('\u200B')).map(p => p.id);
                                         if(idsToDelete.length > 0) {
                                             await sb.from('community_posts').delete().in('id', idsToDelete);
                                             alert(`Successfully removed ${idsToDelete.length} booster posts! 🧹`);
