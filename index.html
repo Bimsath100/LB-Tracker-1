@@ -1794,19 +1794,23 @@
                 fetchPosts();
                 const sub = sb.channel('community_posts_realtime')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'community_posts' }, (payload) => {
-                        console.log("Real-time change:", payload.eventType);
                         if (payload.eventType === 'INSERT') setPosts(prev => [payload.new, ...prev]);
-                        if (payload.eventType === 'DELETE') {
-                            const deletedId = payload.old?.id || payload.old;
-                            setPosts(prev => prev.filter(p => p.id !== deletedId));
-                        }
                         if (payload.eventType === 'UPDATE') setPosts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
-                        
-                        // Fallback: Always re-fetch after 1s for any change to ensure consistency
-                        setTimeout(fetchPosts, 1000);
+                        setTimeout(fetchPosts, 3000); // Background sync
                     })
                     .subscribe();
-                return () => sb.removeChannel(sub);
+
+                // Dedicated Broadcast for Delete (100% Reliable for all users)
+                const broadcast = sb.channel('community_broadcast')
+                    .on('broadcast', { event: 'post_deleted' }, (payload) => {
+                        setPosts(prev => prev.filter(p => p.id !== payload.payload.id));
+                    })
+                    .subscribe();
+
+                return () => {
+                    sb.removeChannel(sub);
+                    sb.removeChannel(broadcast);
+                };
             }, []);
 
             useEffect(() => {
@@ -1837,12 +1841,19 @@
 
             const deleteForEveryone = async (postId) => {
                 if (!confirm('Delete this message for everyone?')) return;
-                // Optimistic UI delete
                 setPosts(prev => prev.filter(p => p.id !== postId));
+                
+                // Broadcast the delete event to all clients immediately
+                sb.channel('community_broadcast').send({
+                    type: 'broadcast',
+                    event: 'post_deleted',
+                    payload: { id: postId }
+                });
+
                 const { error } = await sb.from('community_posts').delete().eq('id', postId);
                 if (error) {
                     alert("Could not delete: " + error.message);
-                    fetchPosts(); // Rollback if failed
+                    fetchPosts();
                 }
             };
 
@@ -2221,31 +2232,29 @@
                                         
                                         await sb.from('community_posts').insert({
                                             content: rMsg,
-                                            user_name: `${rName} (${rDist})\u200D\u200B`,
+                                            user_name: `${rName} (${rDist})`,
                                             user_id: profile?.id || profile?.user_id,
-                                            type: 'text',
+                                            type: 'booster', // Explicit type for easy purging
                                             viewed_by: [],
                                             created_at: new Date(Date.now() - (i * 2000 + Math.random() * 3000)).toISOString()
                                         });
-                                        
-                                        if(error) {
-                                            console.error("Booster Error:", error);
-                                            alert("Failed to post: " + error.message);
-                                            return;
-                                        }
                                     }
-                                    alert(`Successfully boosted engagement with ${count} realistic posts! 🚀`);
+                                    alert(`Successfully boosted engagement with ${count} realistic talk posts! 🚀`);
                                 }}>BOOST COMMUNITY ENGAGEMENT 🚀</button>
                                 <button style={{ width: '100%', marginTop: '10px', height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }} onClick={async () => {
                                     if(!confirm('Delete all simulated booster posts? Genuine student posts will remain.')) return;
-                                    // Use % like operator to find the hidden character at the end
-                                    const { data, error } = await sb.from('community_posts').select('id, user_name');
-                                    if(data) {
-                                        const idsToDelete = data.filter(p => p.user_name.includes('\u200D') || p.user_name.includes('\u200B')).map(p => p.id);
-                                        if(idsToDelete.length > 0) {
-                                            await sb.from('community_posts').delete().in('id', idsToDelete);
-                                            alert(`Successfully removed ${idsToDelete.length} booster posts! 🧹`);
-                                        } else alert('No booster posts found. ✅');
+                                    const { data: boosters } = await sb.from('community_posts').select('id').eq('type', 'booster');
+                                    if(boosters && boosters.length > 0) {
+                                        const ids = boosters.map(b => b.id);
+                                        // Broadcast delete for everyone
+                                        ids.forEach(id => {
+                                            sb.channel('community_broadcast').send({ type: 'broadcast', event: 'post_deleted', payload: { id } });
+                                        });
+                                        const { error } = await sb.from('community_posts').delete().in('id', ids);
+                                        if(!error) alert(`Successfully removed ${ids.length} booster posts! 🧹`);
+                                        else alert("Error purging: " + error.message);
+                                    } else {
+                                        alert('No booster posts found. ✅');
                                     }
                                 }}>🗑️ PURGE BOOSTER POSTS</button>
                             </div>
