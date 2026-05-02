@@ -2454,22 +2454,24 @@
 
                 const attempts = [
                     { v: 'v1', m: 'gemini-1.5-flash' },
+                    { v: 'v1', m: 'gemini-1.5-flash-latest' },
                     { v: 'v1beta', m: 'gemini-1.5-flash' },
-                    { v: 'v1', m: 'gemini-pro' },
-                    { v: 'v1beta', m: 'gemini-pro' },
-                    { v: 'v1beta', m: 'gemini-1.0-pro' }
+                    { v: 'v1beta', m: 'gemini-pro' }
                 ];
 
                 const callApi = async (modelName, version) => {
                     const today = getLocalISODate();
                     const hrsToday = Array.isArray(history[today]) ? history[today].filter(Boolean).length : 0;
                     const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
-                    const context = `Name: ${userProfile.name}, Dist: ${userProfile.district}, Lv: ${userProfile.examLevel}, Subj: ${userProfile.subjects?.join(', ')}, Today: ${hrsToday}h, Total: ${totalHrs}h.`;
-                    const prompt = `You are "LB AI Coach", a Sri Lankan mentor. Respond in English and Singlish. Context: ${context} User: ${userMsg}`;
+                    const context = `Name: ${userProfile.name}, Dist: ${userProfile.district}, Lv: ${userProfile.examLevel}, Today: ${hrsToday}h, Total: ${totalHrs}h.`;
+                    const prompt = `You are "LB AI Coach", a Sri Lankan mentor. Use English/Singlish. Context: ${context} User: ${userMsg}`;
                     
                     return fetch(`https://generativelanguage.googleapis.com/${version}/models/${modelName}:generateContent?key=${cleanKey}`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'x-goog-api-key': cleanKey
+                        },
                         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                     });
                 };
@@ -2491,8 +2493,8 @@
                             
                             if (data.error) {
                                 lastError = data.error;
-                                if (data.error.code === 404) continue; // Try next
-                                break; // Other error, stop
+                                if (data.error.code === 404) continue;
+                                break;
                             }
 
                             const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -2501,17 +2503,15 @@
                                 success = true;
                                 break;
                             }
-                        } catch (e) {
-                            console.error(`Attempt failed: ${attempt.m}`, e);
-                        }
+                        } catch (e) { console.error(e); }
                     }
 
                     if (!success) {
-                        const errorMsg = lastError ? `${lastError.message} (Code: ${lastError.code})` : "All connection attempts failed.";
-                        setMessages(prev => [...prev, { role: 'bot', content: `AI Error: ${errorMsg}. Please check if your API Key is correctly enabled in Google AI Studio. ⚠️` }]);
+                        const errorMsg = lastError ? `${lastError.message} (Code: ${lastError.code})` : "Connection failed.";
+                        setMessages(prev => [...prev, { role: 'bot', content: `AI Error: ${errorMsg}. Try creating a NEW API Key in Google AI Studio. ⚠️` }]);
                     }
                 } catch (error) {
-                    setMessages(prev => [...prev, { role: 'bot', content: "Network error. Please check your connection. ⚠️" }]);
+                    setMessages(prev => [...prev, { role: 'bot', content: "Network error. ⚠️" }]);
                 } finally {
                     setLoading(false);
                 }
