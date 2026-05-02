@@ -2981,6 +2981,7 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         <MobileItem active={currentPage === 'workspace'} icon="💻" label="Work" onClick={() => setCurrentPage('workspace')} />
+                        <MobileItem active={currentPage === 'subjects'} icon="📚" label="Sub" onClick={() => setCurrentPage('subjects')} />
                         <MobileItem active={currentPage === 'community'} icon="🌍" label="Comm" onClick={() => setCurrentPage('community')} unread={unreadPosts} />
                         {user?.email === ADMIN_EMAIL && <MobileItem active={currentPage === 'admin'} icon="👑" label="Admin" onClick={() => setCurrentPage('admin')} />}
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
