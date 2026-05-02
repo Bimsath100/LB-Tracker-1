@@ -80,23 +80,33 @@
         .glass { background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: var(--glass-border); border-radius: 24px; box-shadow: var(--card-shadow); position: relative; overflow: hidden; transition: transform 0.3s, background 0.3s, border 0.3s; }
         
         .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; background: var(--navbar-bg); backdrop-filter: blur(20px); border-right: var(--glass-border); padding: 2.5rem 1.5rem; display: flex; flex-direction: column; z-index: 1000; transition: width 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s; overflow: hidden; }
-        .sidebar.collapsed { width: 72px; padding: 2.5rem 0.8rem; }
+        .sidebar.collapsed { width: 72px; padding: 2.5rem 0.75rem; }
         .sidebar.collapsed .sidebar-brand span,
-        .sidebar.collapsed .sidebar-label,
+        .sidebar.collapsed .sidebar-label span,
         .sidebar.collapsed .nav-link span,
-        .sidebar.collapsed .nav-join-text { display: none !important; }
-        .sidebar.collapsed .nav-link { justify-content: center; padding: 14px; }
+        .sidebar.collapsed .nav-join-text { 
+            width: 0; 
+            overflow: hidden; 
+            opacity: 0; 
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .sidebar.collapsed .nav-link { justify-content: center; padding: 14px 10px; gap: 0; }
         .sidebar.collapsed .sidebar-brand { justify-content: center; margin-bottom: 2rem; }
-        .sidebar.collapsed .nav-join { justify-content: center; padding: 14px; width: 44px; margin: 0 auto; }
+        .sidebar.collapsed .sidebar-label { height: 0; margin: 0; overflow: hidden; opacity: 0; }
+        .sidebar.collapsed .nav-join { justify-content: center; padding: 14px 10px; }
         .sidebar-toggle { position: absolute; right: -14px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; background: var(--primary); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; z-index: 1001; box-shadow: 0 4px 12px var(--primary-glow); transition: 0.3s; }
         .sidebar-toggle:hover { transform: translateY(-50%) scale(1.1); }
-        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 3rem; cursor: pointer; color: var(--text-main); white-space: nowrap; }
-        .sidebar-logo { width: 44px; height: 44px; min-width: 44px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 8px 20px var(--primary-glow); }
-        .sidebar-label { font-size: 0.75rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin: 2rem 0 0.8rem 10px; white-space: nowrap; }
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; font-family: 'Outfit'; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; margin-bottom: 3rem; cursor: pointer; color: var(--text-main); white-space: nowrap; overflow: hidden; }
+        .sidebar-logo { width: 44px; height: 44px; min-width: 44px; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; box-shadow: 0 8px 20px var(--primary-glow); flex-shrink: 0; }
+        .sidebar-label { font-size: 0.75rem; color: var(--text-dim); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin: 2rem 0 0.8rem 10px; white-space: nowrap; overflow: hidden; }
         .nav-links { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .nav-link { padding: 14px 18px; border-radius: 16px; cursor: pointer; transition: 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 14px; white-space: nowrap; }
+        .nav-link { padding: 14px 18px; border-radius: 16px; cursor: pointer; transition: all 0.3s; font-weight: 600; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; display: flex; align-items: center; gap: 14px; white-space: nowrap; overflow: hidden; }
+        .nav-link span { transition: opacity 0.2s, width 0.3s; }
         .nav-link.active { background: var(--primary); color: white; box-shadow: 0 8px 25px var(--primary-glow); transform: translateX(5px); }
+        .sidebar.collapsed .nav-link.active { transform: none; }
         .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); transform: translateX(5px); }
+        .sidebar.collapsed .nav-link:hover:not(.active) { transform: none; }
         .nav-join {
             margin-top: auto;
             display: flex;
@@ -539,37 +549,41 @@
             .mobile-item .m-icon { font-size: 1.25rem; }
             .mobile-item .m-label { font-size: 0.46rem; }
         }
-        .chat-bubble-wrapper:hover .chat-bubble-actions {
+        .chat-bubble-wrapper:hover .chat-bubble-actions,
+        .chat-bubble-wrapper:focus-within .chat-bubble-actions {
             opacity: 1;
+            transform: translateY(0);
         }
         .chat-bubble-actions {
-            position: absolute;
-            top: 0;
-            right: -40px;
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            flex-direction: row;
+            gap: 4px;
             opacity: 0;
-            transition: 0.2s;
+            transform: translateY(4px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            margin-top: 4px;
+            justify-content: flex-end;
         }
         .chat-bubble-actions button {
-            background: var(--card-bg);
+            background: var(--input-bg);
             border: 1px solid var(--border);
-            color: white;
-            padding: 4px;
+            color: var(--text-dim);
+            padding: 3px 7px;
             border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             cursor: pointer;
+            transition: 0.2s;
+            line-height: 1;
         }
         .chat-bubble-actions button:hover {
             background: var(--primary);
-            border-color: var(--primary-glow);
+            color: white;
+            border-color: var(--primary);
         }
         @media (max-width: 768px) {
             .chat-bubble-actions {
-                right: 0;
-                top: -25px;
-                flex-direction: row;
+                opacity: 1;
+                transform: none;
             }
         }
     </style>
@@ -1697,7 +1711,7 @@
                                             {post.user_name} 
                                             {post.isTemp && <span style={{ opacity: 0.5 }}>• Sending...</span>}
                                         </div>
-                                        <div className="chat-bubble-wrapper" style={{ position: 'relative', maxWidth: '85%' }}>
+                                        <div className="chat-bubble-wrapper" style={{ maxWidth: '85%' }}>
                                             <div className="glass chat-bubble" style={{ 
                                                 padding: '12px 16px', 
                                                 borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
@@ -2420,18 +2434,18 @@
                             {sidebarCollapsed ? '▶' : '◀'}
                         </button>
 
-                        <div className="sidebar-label">Main Menu</div>
+                        <div className="sidebar-label"><span>Main Menu</span></div>
                         <div className="nav-links">
-                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 Dashboard</div>
-                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 Workspace</div>
-                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 Community</div>
-                            {user?.email === 'lomithabimsath51@gmail.com' && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 Admin Center</div>}
+                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 <span>Dashboard</span></div>
+                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 <span>Workspace</span></div>
+                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 <span>Community</span></div>
+                            {user?.email === 'lomithabimsath51@gmail.com' && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 <span>Admin Center</span></div>}
                         </div>
 
-                        <div className="sidebar-label">Tools</div>
+                        <div className="sidebar-label"><span>Tools</span></div>
                         <div className="nav-links">
-                            <div className={`nav-link ${currentPage === 'subjects' || profile?.subjects?.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>📚 Subjects</div>
-                            <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>⭐ Feedback</div>
+                            <div className={`nav-link ${currentPage === 'subjects' || profile?.subjects?.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>📚 <span>Subjects</span></div>
+                            <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>⭐ <span>Feedback</span></div>
                         </div>
 
                         <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
