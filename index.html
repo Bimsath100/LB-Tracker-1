@@ -2844,9 +2844,15 @@
                     <SubjectBackground subject={currentPage} />
 
                     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-                        <div className="sidebar-brand" onClick={() => setCurrentPage('dashboard')}>
-                            <div className="sidebar-logo">LB</div>
-                            <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '1px' }}>Tracker</span>
+                        <div className="sidebar-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
+                            <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" fillOpacity="0.9"/>
+                                    <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </div>
+                            <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900', fontSize: '0.85rem' }}>LB Tracker</span>
                         </div>
                         <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(c => !c)} title={sidebarCollapsed ? 'Expand' : 'Collapse'}>
                             {sidebarCollapsed ? '▶' : '◀'}
@@ -2881,33 +2887,36 @@
 
                     <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                         <header className="top-header">
-                            <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')}>
-                                <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem' }}>LB</div>
+                            <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
+                                        <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <span style={{ fontWeight: '900', fontSize: '0.9rem', color: 'var(--text-main)', letterSpacing: '1px' }}>LB TRACKER</span>
                             </div>
                             
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 
-                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                                    <button onClick={() => setCurrentPage('dashboard')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '900', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '5px' }} title="Go Home">
-                                        <div style={{ background: 'white', color: 'var(--primary)', padding: '2px 4px', borderRadius: '4px', fontSize: '0.55rem', fontWeight: '900' }}>LB</div>
-                                        <span className="d-none-mobile" style={{ letterSpacing: '1px' }}>TRACKER</span>
-                                    </button>
-                                    <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
-                                        <div className="live-indicator" onClick={() => user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && setAdminView('live')} style={{ cursor: user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'pointer' : 'default', background: 'transparent', border: 'none', margin: 0, padding: '4px' }} title="Students Online">
-                                            <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
-                                            <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
-                                        </div>
-                                        <div className="live-indicator" onClick={() => user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && setAdminView('marked')} style={{ cursor: user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'pointer' : 'default', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }} title="Students Marked Today">
-                                            <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                            <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
+                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                            📢 <span className="d-none-mobile">NOTICE</span>
+                                        </button>
+                                        <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
+                                            <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', margin: 0, padding: '4px' }}>
+                                                <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
+                                            </div>
+                                            <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }}>
+                                                <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
-                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)', padding: '4px 8px', borderRadius: '8px', fontSize: '0.6rem', fontWeight: '800', cursor: 'pointer' }}>
-                                            📢
-                                        </button>
-                                    )}
-                                </div>
+                                )}
 
                                 <div className="live-indicator registered-badge d-none-mobile" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '6px 12px', borderRadius: '12px' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{totalRegistered} <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
