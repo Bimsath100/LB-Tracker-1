@@ -184,14 +184,15 @@
             .sidebar { display: none; }
             .main-content { margin-left: 0 !important; width: 100% !important; padding: 100px 16px 120px 16px !important; }
             .container { width: 100%; padding: 0; }
-            .top-header { padding: 0 18px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(40px); height: 75px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+            .top-header { padding: 0 16px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(40px); height: 70px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
             .hero-section { flex-direction: column; gap: 2rem; padding: 1.2rem !important; margin-bottom: 2rem; align-items: flex-start !important; }
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
             .asymmetric-grid { display: flex; flex-direction: column; gap: 1.8rem; }
             .card { padding: 1.5rem 1.2rem !important; border-radius: 28px; margin-bottom: 0; }
             .stat-val { font-size: 2rem; }
             .stat-lbl { font-size: 0.65rem; }
-            .header-icon-btn { width: 40px !important; height: 40px !important; }
+            .header-icon-btn { width: 38px !important; height: 38px !important; border-radius: 12px !important; }
+            .desktop-only-admin { gap: 8px !important; }
         }
 
         .setup-card { max-width: 380px; width: min(92%, 380px); margin: 2rem auto; padding: 2rem; }
@@ -564,6 +565,7 @@
             .setup-card { padding: 1.5rem; }
             .nav-brand { gap: 8px; }
             .nav-logo { width: 32px; height: 32px; font-size: 0.9rem; }
+            .d-none-mobile { display: none !important; }
         }
         @media (max-width: 360px) {
             .stats-grid { grid-template-columns: 1fr; }
@@ -2978,40 +2980,41 @@
                     <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                         <header className="top-header">
                             <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')}>
-                                <div className="sidebar-logo" style={{ width: '32px', height: '32px', fontSize: '0.9rem' }}>LB</div>
-                                <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '1px', textTransform: 'uppercase' }}>Tracker</span>
+                                <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem' }}>LB</div>
                             </div>
-                            <div className="desktop-only-admin" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                <button className="timer-mini-btn" onClick={() => setIsAiOpen(true)} style={{ width: 'auto', padding: '0 15px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', color: 'var(--primary)', fontWeight: '800', fontSize: '0.75rem', gap: '6px' }}>
-                                    ✨ AI COACH
+                            
+                            <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <button className="header-icon-btn" onClick={() => setIsAiOpen(true)} style={{ width: 'auto', padding: '0 12px', background: 'var(--primary-glow)', border: '1px solid var(--primary)', color: 'var(--primary)', fontWeight: '800', fontSize: '0.7rem', gap: '6px', borderRadius: '12px' }}>
+                                    ✨ <span className="d-none-mobile">AI COACH</span>
                                 </button>
+                                
                                 {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
-                                    <React.Fragment>
-                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '8px 12px', borderRadius: '10px', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 12px var(--primary-glow)', whiteSpace: 'nowrap' }}>📢 NOTICE</button>
-                                        <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'var(--card-bg)', border: 'var(--glass-border)', margin: 0, padding: '8px 12px', borderRadius: '10px' }}>
-                                            <div className="live-dot"></div>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{liveUsers}</span>
+                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                            📢 <span className="d-none-mobile">NOTICE</span>
+                                        </button>
+                                        <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
+                                            <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', margin: 0, padding: '4px' }}>
+                                                <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
+                                            </div>
+                                            <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }}>
+                                                <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
+                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
+                                            </div>
                                         </div>
-                                        <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', color: 'var(--primary)', margin: 0, padding: '8px 12px', borderRadius: '10px' }}>
-                                            <div className="live-dot" style={{ background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                            <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{markedToday}</span>
-                                        </div>
-                                    </React.Fragment>
+                                    </div>
                                 )}
-                                <div className="live-indicator registered-badge" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '8px 15px', borderRadius: '12px' }}>
-                                    <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>{totalRegistered} <span className="reg-label" style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
+
+                                <div className="live-indicator registered-badge d-none-mobile" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '6px 12px', borderRadius: '12px' }}>
+                                    <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{totalRegistered} <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="How to Use">
-                                    📖
-                                </button>
-                                <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="header-icon-btn" style={{ background: isSettingsOpen ? 'var(--primary)' : 'var(--input-bg)', border: 'var(--glass-border)', color: isSettingsOpen ? 'white' : 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="Settings">
-                                    ⚙️
-                                </button>
-                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="Toggle Theme">
-                                    {isLightMode ? '🌙' : '☀️'}
-                                </button>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" title="How to Use">📖</button>
+                                <button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className="header-icon-btn" style={{ background: isSettingsOpen ? 'var(--primary)' : 'var(--input-bg)', color: isSettingsOpen ? 'white' : 'inherit' }} title="Settings">⚙️</button>
+                                <button onClick={() => setIsLightMode(!isLightMode)} className="header-icon-btn" title="Toggle Theme">{isLightMode ? '🌙' : '☀️'}</button>
                             </div>
                         </header>
                         {isSettingsOpen && (
