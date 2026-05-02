@@ -844,10 +844,15 @@
 
         const CountdownBox = ({ val, lbl }) => ( <div className="countdown-box"><span className="countdown-num">{String(val).padStart(2, '0')}</span><span className="countdown-label">{lbl}</span></div> );
         const StatBox = ({ val, lbl, sub, color }) => ( <div className="glass stat-card" style={{ borderColor: color ? color + '33' : 'var(--border)' }}><div className="stat-val" style={{ color: color || 'inherit' }}>{val}</div><div className="stat-lbl">{lbl}</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '4px' }}>{sub}</div></div> );
-        const MobileItem = ({ active, icon, label, onClick }) => (
-            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick}>
+        const MobileItem = ({ active, icon, label, onClick, unread = 0 }) => (
+            <div className={`mobile-item ${active ? 'active' : ''}`} onClick={onClick} style={{ position: 'relative' }}>
                 <span className="m-icon">{icon}</span>
                 <span className="m-label">{label}</span>
+                {unread > 0 && (
+                    <span style={{ position: 'absolute', top: '10px', right: '15px', background: '#EF4444', color: 'white', fontSize: '0.6rem', fontWeight: '900', padding: '2px 5px', borderRadius: '10px', border: '2px solid var(--nav-bg)', animation: 'pulse 2s infinite' }}>
+                        {unread}
+                    </span>
+                )}
             </div>
         );
         const NAV_LABELS = { 'ICT':'ICT','Physics':'PHY','Chemistry':'CHEM','Biology':'BIO','Combined Maths':'MATH','ET':'ET','SFT':'SFT','Accounting':'ACC','Economics':'ECO','Business Studies':'BIZ','Logic':'LOG','Political Science':'POL','Sinhala':'SIN','English':'ENG','History':'HIST' };
@@ -2484,6 +2489,7 @@
             const [totalRegistered, setTotalRegistered] = useState(0);
             const [globalLeaders, setGlobalLeaders] = useState([]);
             const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+            const [unreadPosts, setUnreadPosts] = useState(0);
 
             // Global Timer State
             const [timerFocus, setTimerFocus] = useState(() => parseInt(localStorage.getItem('timer_focus')) || 25);
@@ -2737,6 +2743,26 @@
                     };
                 }
             }, [user]);
+            useEffect(() => {
+                if (!user) return;
+                const channel = sb.channel('posts-notifier')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'community_posts' }, (payload) => {
+                        if (currentPage !== 'community') {
+                            setUnreadPosts(prev => prev + 1);
+                            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3').play(); } catch(e) {}
+                            document.title = `(New) Community Hub | LB Tracker`;
+                        }
+                    })
+                    .subscribe();
+                return () => sb.removeChannel(channel);
+            }, [user, currentPage]);
+
+            useEffect(() => {
+                if (currentPage === 'community') {
+                    setUnreadPosts(0);
+                    document.title = 'Elite Onyx | LB Tracker';
+                }
+            }, [currentPage]);
 
             useEffect(() => {
                 const fetchAnnouncement = async () => {
@@ -2865,7 +2891,14 @@
                         <div className="nav-links">
                             <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 <span>Dashboard</span></div>
                             <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 <span>Workspace</span></div>
-                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')}>🌍 <span>Community</span></div>
+                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')} style={{ position: 'relative' }}>
+                                🌍 <span>Community</span>
+                                {unreadPosts > 0 && (
+                                    <span style={{ position: 'absolute', right: '15px', background: '#EF4444', color: 'white', fontSize: '0.65rem', fontWeight: '900', padding: '2px 6px', borderRadius: '10px', boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)' }}>
+                                        {unreadPosts}
+                                    </span>
+                                )}
+                            </div>
                             {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 <span>Admin Center</span></div>}
                         </div>
 
@@ -2947,8 +2980,8 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         <MobileItem active={currentPage === 'workspace'} icon="💻" label="Work" onClick={() => setCurrentPage('workspace')} />
-                        <MobileItem active={currentPage === 'community'} icon="🌍" label="Comm" onClick={() => setCurrentPage('community')} />
-                        {user?.email === 'lomithabimsath51@gmail.com' && <MobileItem active={currentPage === 'admin'} icon="👑" label="Admin" onClick={() => setCurrentPage('admin')} />}
+                        <MobileItem active={currentPage === 'community'} icon="🌍" label="Comm" onClick={() => setCurrentPage('community')} unread={unreadPosts} />
+                        {user?.email === ADMIN_EMAIL && <MobileItem active={currentPage === 'admin'} icon="👑" label="Admin" onClick={() => setCurrentPage('admin')} />}
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
                     </nav>
 
