@@ -2041,15 +2041,33 @@
                     </div>
 
                     <div className="asymmetric-grid">
-                        <div style={{ gridColumn: 'span 8' }}>
-                            {/* Chat (Global Hub) is hidden as per request */}
-                            <div className="glass card" style={{ padding: '2.5rem', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🏆</div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Scholar Stats</h2>
-                                <p style={{ color: 'var(--text-dim)' }}>The leaderboard and achievements are active. Excel to the top!</p>
-                            </div>
+                        <div style={{ gridColumn: 'span 7' }}>
+                            <Reveal>
+                                <div className="glass card" style={{ padding: '2.5rem', height: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>Daily Focus</div>
+                                        <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.8rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Master Your Potential 🚀</h2>
+                                        <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: '1.6' }}>
+                                            "The difference between ordinary and extraordinary is that little extra." Keep pushing your limits, mark your hours consistently, and watch yourself climb the leaderboard!
+                                        </p>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                        <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                                            <div style={{ fontSize: '1.5rem', marginBottom: '10px' }}>💡</div>
+                                            <div style={{ fontWeight: '800', fontSize: '0.9rem', marginBottom: '5px' }}>Pro Tip</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Use the Focus Timer in Workspace to boost concentration.</div>
+                                        </div>
+                                        <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '18px', border: '1px solid var(--border)' }}>
+                                            <div style={{ fontSize: '1.5rem', marginBottom: '10px' }}>📈</div>
+                                            <div style={{ fontWeight: '800', fontSize: '0.9rem', marginBottom: '5px' }}>Consistency</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Study at the same time daily to build a powerful habit.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Reveal>
                         </div>
-                        <div style={{ gridColumn: 'span 4' }}>
+                        <div style={{ gridColumn: 'span 5' }}>
                             <Reveal delay={0.1}>
                                 <div className="glass card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
                                     <h3 style={{ margin: 0, fontFamily: 'Outfit', marginBottom: '1.5rem' }}>Top Scholars 🏆</h3>
@@ -2900,7 +2918,7 @@
                             
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 
-                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && currentPage !== 'dashboard' && (
                                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
                                         <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                                             📢 <span className="d-none-mobile">NOTICE</span>
