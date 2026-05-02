@@ -1645,7 +1645,13 @@
             return (
                 <div className="dashboard-container">
                     <ActivityTicker liveUsers={liveUsers} markedToday={markedToday} topDistrict={leaderStats.district} topPerformer={leaderStats.performer} />
-                    {showReminder && ( <div className="reminder-banner"><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
+                    {announcement && (
+                        <div className="notice-board" style={{ marginBottom: '2rem' }}>
+                            <div className="notice-icon">📌</div>
+                            <div className="notice-content">{announcement}</div>
+                        </div>
+                    )}
+                    {showReminder && ( <div className="reminder-banner" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '1rem 1.5rem', borderRadius: '20px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div> )}
                     <Reveal>
                         <div className="hero-section" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)', padding: 'clamp(1.5rem, 5vw, 2.5rem)', borderRadius: '24px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
                             <div style={{ textAlign: 'left' }}>
@@ -1729,18 +1735,23 @@
                         </Reveal>
 
                         <Reveal delay={0.1} style={{ gridColumn: 'span 4' }}>
-                            <div className="glass card" style={{ padding: '2rem', height: '100%', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(34, 211, 238, 0.05))' }}>
-                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '1rem' }}>📌</span> Notice Board
+                            <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                    📜 My Activity History
                                 </div>
-                                <div style={{ minHeight: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                                    {announcement ? (
-                                        <p style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6' }}>{announcement}</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
+                                    {(history.logs || []).length > 0 ? (
+                                        history.logs.map(log => (
+                                            <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: log.action.includes('Marked') ? '3px solid #10B981' : '3px solid #EF4444' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
+                                                    <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>{new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                </div>
+                                                <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '2px' }}>{log.date}</div>
+                                            </div>
+                                        ))
                                     ) : (
-                                        <div style={{ opacity: 0.4 }}>
-                                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>✨</div>
-                                            <p style={{ fontSize: '0.8rem', fontWeight: '700' }}>Stay focused on your journey!</p>
-                                        </div>
+                                        <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No recent updates.</div>
                                     )}
                                 </div>
                             </div>
@@ -1779,23 +1790,9 @@
                             <div style={{ gridColumn: 'span 5' }}>
                                 <div className="glass card" style={{ padding: '2rem' }}>
                                     <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                        📜 My Activity History
+                                        🏆 District Rankings
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {(history.logs || []).length > 0 ? (
-                                            history.logs.map(log => (
-                                                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: log.action.includes('Marked') ? '3px solid #10B981' : '3px solid #EF4444' }}>
-                                                    <div>
-                                                        <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
-                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{log.date}</div>
-                                                    </div>
-                                                    <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)' }}>{new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No recent updates.</div>
-                                        )}
-                                    </div>
+                                    <DistrictLeaderboard />
                                 </div>
                             </div>
                         </div>
