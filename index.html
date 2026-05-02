@@ -1613,8 +1613,20 @@
             const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
             const toggleH = (i) => { 
                 const h = [...(history[viewDate] || new Array(24).fill(false))]; 
-                h[i] = !h[i]; 
-                const newHistory = { ...history, [viewDate]: h, last_updated: new Date().toISOString() };
+                const isMarking = !h[i];
+                h[i] = isMarking; 
+                
+                // Record activity log
+                const newLog = {
+                    id: Date.now(),
+                    time: new Date().toISOString(),
+                    action: isMarking ? `Marked Hour ${i+1}` : `Unmarked Hour ${i+1}`,
+                    date: viewDate
+                };
+                const existingLogs = history.logs || [];
+                const updatedLogs = [newLog, ...existingLogs].slice(0, 10); // Keep last 10 actions
+
+                const newHistory = { ...history, [viewDate]: h, last_updated: new Date().toISOString(), logs: updatedLogs };
                 setHistory(newHistory); 
                 
                 // Real-time Broadcast
@@ -1787,9 +1799,23 @@
                             <div style={{ gridColumn: 'span 5' }}>
                                 <div className="glass card" style={{ padding: '2rem' }}>
                                     <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                        🏆 District Rankings
+                                        📜 My Activity History
                                     </div>
-                                    <DistrictLeaderboard />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {(history.logs || []).length > 0 ? (
+                                            history.logs.map(log => (
+                                                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: log.action.includes('Marked') ? '3px solid #10B981' : '3px solid #EF4444' }}>
+                                                    <div>
+                                                        <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
+                                                        <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{log.date}</div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)' }}>{new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem' }}>No recent updates.</div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
