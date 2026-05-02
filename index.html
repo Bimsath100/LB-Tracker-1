@@ -2218,82 +2218,6 @@
                                 </div>
                             </div>
 
-                            <div className="glass card" style={{ padding: '2rem' }}>
-                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#10B981', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span>🚀</span> ENGAGEMENT BOOSTER
-                                </div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>Simulate realistic student activity to encourage participation. (Anonymous-looking posts).</p>
-                                <button className="btn-primary" style={{ width: '100%', height: '50px', fontSize: '0.9rem' }} onClick={async () => {
-                                    const names = [
-                                        'Senura', 'Thineth', 'Akila', 'Yeshan', 'Oshada', 'Vinuka', 'Disal', 'Nethum', 'Kevin', 'Minuka', 'Pasindu', 'Saveen', 'Denuwan', 'Tharindu', 'Rusiru', 'Mahil', 'Thanuka', 'Sahela', 'Dewmika', 'Lakshitha', 'Sajitha', 'Dinuka', 'Ravindu', 'Methmika', 'Ishan',
-                                        'Senuri', 'Lihini', 'Methmi', 'Dinuli', 'Piyumi', 'Nethmi', 'Amaya', 'Denuwani', 'Sahasna', 'Vinu', 'Thanuli', 'Melani', 'Sayuri', 'Kavisha', 'Limaya', 'Pabasara', 'Dinethra', 'Thisari', 'Oshadhi', 'Minuli', 'Hiruni', 'Senali', 'Ruvindya', 'Kethmi', 'Nimesha'
-                                    ];
-                                    const dists = ['Colombo', 'Kandy', 'Galle', 'Kurunegala', 'Matara', 'Gampaha', 'Kalutara', 'Ratnapura', 'Badulla', 'Anuradhapura', 'Kegalle', 'Nuwara Eliya'];
-                                    const msgs = ['Physics thama epama karapu subject eka. Kauda thawa physics කරන්නේ? 😫', 'Ada nam mara kammaliyek enne. Kauda inne motivation ekak denna? 🙌', 'Wassa nisa ninda yanawa. Padam karanna mara gemak ganna ona. 🌧️😴', 'Amoo ada nam patta rasne. Padam karannath ba. ☀️🥵', 'Guys, oyalage combined maths marks kohomada? Mata nam kela wela thiyenne. 😂', 'Mata thama organic chemistry therenne na. Help ekak danna puluwan kawuda? 🧪🆘', 'Coffee ekak biwwa. Dan thama full energy. Let\'s go! ☕🔥', 'Kattiyatama kohomada progress? Api atha harinne na neda? 💪✨', 'Ada nam full focus hitiya. Mara happy! 😇', 'Mata nam exam mathak weddi baya hithenawa. Eth api karamu! 📈🎯', 'Night owl session ekata kauda inne? 🦉🦉', 'A/L kiyanne nikan marathon ekak wage neda? 😂🏃‍♂️', 'Combined maths structured paper ekak kara. Mara speed ekak ona neda? ✍️', 'Bio padama kiyawala iwarayi. Dan short notes hadanawa. 📝', 'Ada nam session eka skip una. Dan thama aye start kale. 👀', 'Unit 5 thama iwara na. Stress wela inne dan නම්. 😵‍💫', 'Good night guys! Heta ude 4ta thama aye session eka. 😴', 'Maths thama hithapu tharam lesi na. Practice wenna ona thawa. 📈', 'Motivation nathi unama oyalage tricks monawada? 💡', 'Organic thama asama padama. Chemistry walata love! ❤️🧪'];
-                                    
-                                    const count = 1 + Math.floor(Math.random() * 3);
-                                    let usedNames = new Set();
-                                    for(let i=0; i<count; i++) {
-                                        let rName = names[Math.floor(Math.random() * names.length)];
-                                        while(usedNames.has(rName)) { rName = names[Math.floor(Math.random() * names.length)]; }
-                                        usedNames.add(rName);
-
-                                        const rDist = dists[Math.floor(Math.random() * dists.length)];
-                                        const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                                        
-                                        await sb.from('community_posts').insert({
-                                            content: rMsg,
-                                            user_name: `${rName} (${rDist})`,
-                                            user_id: profile?.id || profile?.user_id,
-                                            type: 'booster', // Explicit type for easy purging
-                                            viewed_by: [],
-                                            created_at: new Date(Date.now() - (i * 2000 + Math.random() * 3000)).toISOString()
-                                        });
-                                    }
-                                    alert(`Successfully boosted engagement with ${count} realistic talk posts! 🚀`);
-                                }}>BOOST COMMUNITY ENGAGEMENT 🚀</button>
-                                <button style={{ width: '100%', marginTop: '10px', height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }} onClick={async () => {
-                                    if(!confirm('Delete all simulated booster posts? Genuine student posts will remain.')) return;
-                                    
-                                    const botNames = ['Senura', 'Thineth', 'Akila', 'Yeshan', 'Oshada', 'Vinuka', 'Disal', 'Nethum', 'Kevin', 'Minuka', 'Pasindu', 'Saveen', 'Denuwan', 'Tharindu', 'Rusiru', 'Mahil', 'Thanuka', 'Sahela', 'Dewmika', 'Lakshitha', 'Sajitha', 'Dinuka', 'Ravindu', 'Methmika', 'Ishan', 'Senuri', 'Lihini', 'Methmi', 'Dinuli', 'Piyumi', 'Nethmi', 'Amaya', 'Denuwani', 'Sahasna', 'Vinu', 'Thanuli', 'Melani', 'Sayuri', 'Kavisha', 'Limaya', 'Pabasara', 'Dinethra', 'Thisari', 'Oshadhi', 'Minuli', 'Hiruni', 'Senali', 'Ruvindya', 'Kethmi', 'Nimesha'];
-                                    
-                                    const { data: allPosts } = await sb.from('community_posts').select('id, user_name, type');
-                                    if(allPosts) {
-                                        const ids = allPosts.filter(p => {
-                                            const nameOnly = p.user_name.split(' (')[0];
-                                            return p.type === 'booster' || 
-                                                   p.user_name.includes('\u200D') || 
-                                                   p.user_name.includes('\u200B') ||
-                                                   botNames.includes(nameOnly);
-                                        }).map(p => p.id);
-
-                                        if(ids.length > 0) {
-                                            sb.channel('community-hub').send({ type: 'broadcast', event: 'post_deleted', payload: { id: ids } });
-                                            const { error } = await sb.from('community_posts').delete().in('id', ids);
-                                            if(!error) alert(`Successfully purged ${ids.length} booster posts! 🧹`);
-                                            else alert("Error: " + error.message);
-                                        } else alert('No booster posts found. ✅');
-                                    }
-                                }}>🗑️ PURGE BOOSTER POSTS</button>
-                            </div>
-
-                            <div className="glass card" style={{ padding: '2rem' }}>
-                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#EF4444', marginBottom: '1rem' }}>🛡️ STORAGE MAINTENANCE</div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>Physically delete community posts and files older than 7 days to free up Supabase space.</p>
-                                <button className="btn-primary" style={{ background: 'linear-gradient(135deg, #EF4444, #B91C1C)', border: 'none', width: '100%', height: '50px', fontSize: '0.9rem' }} onClick={async () => {
-                                    if(!confirm('Delete all posts and files older than 7 days?')) return;
-                                    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-                                    const { data: expired } = await sb.from('community_posts').select('*').lt('created_at', sevenDaysAgo);
-                                    if(expired && expired.length > 0) {
-                                        for(const post of expired) {
-                                            const fileUrl = post.image_url || post.file_url;
-                                            if(fileUrl) { const fileName = fileUrl.split('/').pop(); await sb.storage.from('community_assets').remove([fileName]); }
-                                        }
-                                        await sb.from('community_posts').delete().lt('created_at', sevenDaysAgo);
-                                        alert(`Successfully purged ${expired.length} expired resources! 🧹`);
-                                    } else alert('No expired resources found. ✅');
-                                }}>PURGE EXPIRED CONTENT 🧹</button>
-                            </div>
                         </div>
 
                         {/* Column 2: Live Activity */}
@@ -2963,23 +2887,27 @@
                             
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 
-                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
-                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                                            📢 <span className="d-none-mobile">NOTICE</span>
-                                        </button>
-                                        <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
-                                            <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', margin: 0, padding: '4px' }}>
-                                                <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
-                                            </div>
-                                            <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }}>
-                                                <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
-                                            </div>
+                                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                                    <button onClick={() => setCurrentPage('dashboard')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '900', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '5px' }} title="Go Home">
+                                        <div style={{ background: 'white', color: 'var(--primary)', padding: '2px 4px', borderRadius: '4px', fontSize: '0.55rem', fontWeight: '900' }}>LB</div>
+                                        <span className="d-none-mobile" style={{ letterSpacing: '1px' }}>TRACKER</span>
+                                    </button>
+                                    <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
+                                        <div className="live-indicator" onClick={() => user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && setAdminView('live')} style={{ cursor: user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'pointer' : 'default', background: 'transparent', border: 'none', margin: 0, padding: '4px' }} title="Students Online">
+                                            <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
+                                        </div>
+                                        <div className="live-indicator" onClick={() => user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && setAdminView('marked')} style={{ cursor: user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'pointer' : 'default', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }} title="Students Marked Today">
+                                            <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
+                                            <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
                                         </div>
                                     </div>
-                                )}
+                                    {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--input-bg)', color: 'var(--text-dim)', border: '1px solid var(--border)', padding: '4px 8px', borderRadius: '8px', fontSize: '0.6rem', fontWeight: '800', cursor: 'pointer' }}>
+                                            📢
+                                        </button>
+                                    )}
+                                </div>
 
                                 <div className="live-indicator registered-badge d-none-mobile" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '6px 12px', borderRadius: '12px' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{totalRegistered} <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
