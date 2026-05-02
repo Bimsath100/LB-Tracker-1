@@ -1477,9 +1477,40 @@
                         {/* Row 1: Study Grid & Notice Board */}
                         <Reveal style={{ gridColumn: 'span 8' }}>
                             <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
-                                <div className="card-header" style={{ marginBottom: '1.5rem' }}>
-                                    <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
-                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px', fontWeight: '500' }}>{viewDate}</p>
+                                <div className="card-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                                    <div>
+                                        <span className="card-title" style={{ margin: 0 }}>Study Grid</span>
+                                        <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', marginTop: '4px', fontWeight: '500' }}>Focus on your daily goal</p>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                        <input 
+                                            type="date" 
+                                            value={viewDate} 
+                                            onChange={(e) => setViewDate(e.target.value)} 
+                                            style={{ 
+                                                marginBottom: 0, 
+                                                padding: '8px 12px', 
+                                                fontSize: '0.85rem', 
+                                                width: 'auto',
+                                                background: 'var(--input-bg)',
+                                                border: '1px solid var(--border)',
+                                                borderRadius: '10px',
+                                                cursor: 'pointer'
+                                            }} 
+                                        />
+                                        <button 
+                                            className="btn-primary" 
+                                            onClick={() => setViewDate(getLocalISODate())}
+                                            style={{ 
+                                                width: 'auto', 
+                                                padding: '8px 15px', 
+                                                fontSize: '0.85rem',
+                                                display: viewDate === getLocalISODate() ? 'none' : 'flex'
+                                            }}
+                                        >
+                                            Today
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="hour-grid">
                                     {Array.from({ length: 24 }).map((_, i) => (
@@ -2159,6 +2190,29 @@
                 localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
             }, [isLightMode]);
 
+            // Live Data Synchronization
+            useEffect(() => {
+                if (!user) return;
+                console.log("Setting up real-time subscription for user:", user.id);
+                const sub = sb.channel(`user-sync-${user.id}`)
+                    .on('postgres_changes', { 
+                        event: 'UPDATE', 
+                        schema: 'public', 
+                        table: 'study_tracker_v2', 
+                        filter: `user_id=eq.${user.id}` 
+                    }, (payload) => {
+                        console.log("Live Sync: Update received!", payload.new);
+                        if (payload.new.history) setHistory(payload.new.history);
+                        if (payload.new.marks) setMarks(payload.new.marks);
+                        
+                        // Show a subtle toast if the change wasn't from this tab
+                        // (We can't easily detect tab ID here without extra work, 
+                        // but Supabase usually sends updates back to the sender too)
+                    })
+                    .subscribe();
+                return () => sb.removeChannel(sub);
+            }, [user]);
+
             useEffect(() => {
                 sb.auth.getSession().then(({ data: { session } }) => {
                     if (session) { 
@@ -2479,6 +2533,10 @@
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="desktop-only-admin" style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--input-bg)', padding: '6px 12px', borderRadius: '12px', border: '1px solid var(--border)', marginRight: '5px' }} title="Real-time Sync Active">
+                                    <div className="live-dot" style={{ width: '8px', height: '8px', background: '#10B981', boxShadow: '0 0 10px #10B981' }}></div>
+                                    <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Live Sync</span>
+                                </div>
                                 <button onClick={() => setCurrentPage('tutorial')} className="header-icon-btn" style={{ background: 'var(--input-bg)', border: 'var(--glass-border)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '12px', width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s', fontSize: '1.1rem' }} title="How to Use">
                                     📖
                                 </button>
