@@ -140,6 +140,24 @@
         }
         .nav-link:hover:not(.active) { color: var(--text-main); background: var(--input-bg); }
         
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+        .sidebar-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
         .nav-join {
             margin-top: auto;
             display: flex;
@@ -181,19 +199,53 @@
         .asymmetric-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
 
         @media (max-width: 1024px) {
-            .sidebar { display: none; }
+            .sidebar { 
+                left: -280px; 
+                box-shadow: 20px 0 60px rgba(0,0,0,0.5);
+                z-index: 1000;
+            }
+            .sidebar.mobile-show {
+                left: 0;
+                width: 280px !important;
+                padding: 2rem 1.25rem !important;
+                display: flex !important;
+            }
+            .sidebar.mobile-show .sidebar-brand span,
+            .sidebar.mobile-show .sidebar-label span,
+            .sidebar.mobile-show .nav-link span,
+            .sidebar.mobile-show .nav-join-text { 
+                display: block !important;
+            }
+            .sidebar-toggle { display: none; }
             .main-content { margin-left: 0 !important; width: 100% !important; padding: 100px 16px 120px 16px !important; }
             .container { width: 100%; padding: 0; }
-            .top-header { padding: 0 16px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(40px); height: 70px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+            .top-header { padding: 0 16px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(40px); height: 70px; z-index: 900; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
             .hero-section { flex-direction: column; gap: 2rem; padding: 1.2rem !important; margin-bottom: 2rem; align-items: flex-start !important; }
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
             .asymmetric-grid { display: flex; flex-direction: column; gap: 1.8rem; }
             .card { padding: 1.5rem 1.2rem !important; border-radius: 28px; margin-bottom: 0; }
-            .stat-val { font-size: 2rem; }
             .stat-lbl { font-size: 0.65rem; }
             .header-icon-btn { width: 38px !important; height: 38px !important; border-radius: 12px !important; }
             .desktop-only-admin { gap: 8px !important; }
+            .mobile-menu-btn { display: flex !important; }
         }
+
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: var(--primary-glow); border-color: var(--primary); }
 
         .setup-card { max-width: 380px; width: min(92%, 380px); margin: 2rem auto; padding: 2rem; }
         .setup-title { font-family: 'Outfit'; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center; }
@@ -2491,6 +2543,7 @@
             const [globalLeaders, setGlobalLeaders] = useState([]);
             const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
             const [unreadPosts, setUnreadPosts] = useState(0);
+            const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
             // Global Timer State
             const [timerFocus, setTimerFocus] = useState(() => parseInt(localStorage.getItem('timer_focus')) || 25);
@@ -2866,8 +2919,9 @@
                     <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                     <SubjectBackground subject={currentPage} />
 
-                    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-                        <div className="sidebar-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer' }}>
+                    <div className={`sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}></div>
+                    <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-show' : ''}`}>
+                        <div className="sidebar-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer' }}>
                             <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" fillOpacity="0.9"/>
@@ -2883,9 +2937,9 @@
 
                         <div className="sidebar-label"><span>Main Menu</span></div>
                         <div className="nav-links">
-                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 <span>Dashboard</span></div>
-                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 <span>Workspace</span></div>
-                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')} style={{ position: 'relative' }}>
+                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }}>🏠 <span>Dashboard</span></div>
+                            <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => { setCurrentPage('workspace'); setIsMobileSidebarOpen(false); }}>💻 <span>Workspace</span></div>
+                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => { setCurrentPage('community'); setIsMobileSidebarOpen(false); }} style={{ position: 'relative' }}>
                                 🌍 <span>Community</span>
                                 {unreadPosts > 0 && (
                                     <span style={{ position: 'absolute', right: '15px', background: '#EF4444', color: 'white', fontSize: '0.65rem', fontWeight: '900', padding: '2px 6px', borderRadius: '10px', boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)' }}>
@@ -2893,16 +2947,16 @@
                                     </span>
                                 )}
                             </div>
-                            {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 <span>Admin Center</span></div>}
+                            {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => { setCurrentPage('admin'); setIsMobileSidebarOpen(false); }}>👑 <span>Admin Center</span></div>}
                         </div>
 
                         <div className="sidebar-label"><span>Tools</span></div>
                         <div className="nav-links">
-                            <div className={`nav-link ${currentPage === 'subjects' || profile?.subjects?.includes(currentPage) ? 'active' : ''}`} onClick={() => setCurrentPage('subjects')}>📚 <span>Subjects</span></div>
-                            <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => setCurrentPage('feedback')}>⭐ <span>Feedback</span></div>
+                            <div className={`nav-link ${currentPage === 'subjects' || profile?.subjects?.includes(currentPage) ? 'active' : ''}`} onClick={() => { setCurrentPage('subjects'); setIsMobileSidebarOpen(false); }}>📚 <span>Subjects</span></div>
+                            <div className={`nav-link ${currentPage === 'feedback' ? 'active' : ''}`} onClick={() => { setCurrentPage('feedback'); setIsMobileSidebarOpen(false); }}>⭐ <span>Feedback</span></div>
                         </div>
 
-                        <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join">
+                        <a href="https://t.me/+iC6s-QtB3gI5N2U1" target="_blank" rel="noopener noreferrer" className="nav-join" onClick={() => setIsMobileSidebarOpen(false)}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style={{minWidth:'20px'}}><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
                             <span className="nav-join-text">Join Community</span>
                         </a>
@@ -2910,7 +2964,8 @@
 
                     <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                         <header className="top-header">
-                            <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <button className="mobile-menu-btn" onClick={() => setIsMobileSidebarOpen(true)}>☰</button>
+                            <div className="mobile-only-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
