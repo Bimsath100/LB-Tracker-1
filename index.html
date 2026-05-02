@@ -1795,7 +1795,10 @@
                 const sub = sb.channel('community_posts_realtime')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'community_posts' }, (payload) => {
                         if (payload.eventType === 'INSERT') setPosts(prev => [payload.new, ...prev]);
-                        if (payload.eventType === 'DELETE') setPosts(prev => prev.filter(p => p.id !== payload.old.id));
+                        if (payload.eventType === 'DELETE') {
+                            const deletedId = payload.old.id;
+                            setPosts(prev => prev.filter(p => p.id !== deletedId));
+                        }
                         if (payload.eventType === 'UPDATE') setPosts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
                     })
                     .subscribe();
@@ -1830,8 +1833,13 @@
 
             const deleteForEveryone = async (postId) => {
                 if (!confirm('Delete this message for everyone?')) return;
+                // Optimistic UI delete
+                setPosts(prev => prev.filter(p => p.id !== postId));
                 const { error } = await sb.from('community_posts').delete().eq('id', postId);
-                if (error) alert("Could not delete: " + error.message);
+                if (error) {
+                    alert("Could not delete: " + error.message);
+                    fetchPosts(); // Rollback if failed
+                }
             };
 
             const deleteForMe = (postId) => {
