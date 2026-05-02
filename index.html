@@ -181,19 +181,15 @@
         .asymmetric-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
 
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); display: none; }
-            .main-content { margin-left: 0 !important; width: 100% !important; padding: 80px 15px 120px 15px !important; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0 !important; width: 100% !important; padding: 90px 15px 100px 15px !important; }
             .container { width: 100%; padding: 0 5px; }
-            .mobile-nav { display: flex; }
-            .top-header { padding: 0 20px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(25px); height: 70px; z-index: 1500; border-bottom: var(--glass-border); margin-bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-            .desktop-only-admin { display: none !important; }
-            .asymmetric-grid { grid-template-columns: 1fr; display: flex; flex-direction: column; }
-            .asymmetric-grid > * { grid-column: span 1 !important; }
-            .mobile-only-brand { display: flex; align-items: center; gap: 8px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.8rem; }
-            .hour-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; max-width: 100%; }
-            .card { padding: 1.5rem !important; border-radius: 24px; }
-            .floating-settings { top: 15px; right: 15px; width: 42px; height: 42px; font-size: 1rem; }
+            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(30px); height: 75px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+            .hero-section { flex-direction: column; gap: 1.5rem; text-align: left; padding: 1.5rem !important; margin-top: 10px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1rem; }
+            .card { padding: 1.5rem !important; border-radius: 28px; }
+            .floating-settings { display: none; }
+            .header-icon-btn { width: 38px !important; height: 38px !important; border-radius: 10px !important; font-size: 1rem !important; }
         }
 
         .setup-card { max-width: 380px; width: min(92%, 380px); margin: 2rem auto; padding: 2rem; }
@@ -2454,7 +2450,15 @@
                 setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
                 setLoading(true);
 
-                const callApi = async (modelName, version = 'v1beta') => {
+                const attempts = [
+                    { v: 'v1', m: 'gemini-1.5-flash' },
+                    { v: 'v1beta', m: 'gemini-1.5-flash' },
+                    { v: 'v1', m: 'gemini-pro' },
+                    { v: 'v1beta', m: 'gemini-pro' },
+                    { v: 'v1beta', m: 'gemini-1.0-pro' }
+                ];
+
+                const callApi = async (modelName, version) => {
                     const today = getLocalISODate();
                     const hrsToday = Array.isArray(history[today]) ? history[today].filter(Boolean).length : 0;
                     const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
@@ -2475,27 +2479,34 @@
                         return;
                     }
 
-                    // Attempt 1: v1 + flash
-                    let response = await callApi('gemini-1.5-flash', 'v1');
-                    let data = await response.json();
+                    let success = false;
+                    let lastError = null;
 
-                    // Attempt 2: v1beta + flash (Fallback)
-                    if (data.error && data.error.code === 404) {
-                        response = await callApi('gemini-1.5-flash', 'v1beta');
-                        data = await response.json();
+                    for (const attempt of attempts) {
+                        try {
+                            const response = await callApi(attempt.m, attempt.v);
+                            const data = await response.json();
+                            
+                            if (data.error) {
+                                lastError = data.error;
+                                if (data.error.code === 404) continue; // Try next
+                                break; // Other error, stop
+                            }
+
+                            const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (botReply) {
+                                setMessages(prev => [...prev, { role: 'bot', content: botReply }]);
+                                success = true;
+                                break;
+                            }
+                        } catch (e) {
+                            console.error(`Attempt failed: ${attempt.m}`, e);
+                        }
                     }
 
-                    // Attempt 3: v1beta + pro (Final Fallback)
-                    if (data.error && data.error.code === 404) {
-                        response = await callApi('gemini-pro', 'v1beta');
-                        data = await response.json();
-                    }
-
-                    if (data.error) {
-                        setMessages(prev => [...prev, { role: 'bot', content: `API Error: ${data.error.message} (Code: ${data.error.code}) ⚠️` }]);
-                    } else {
-                        const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm listening, but I have no answer! 🧠";
-                        setMessages(prev => [...prev, { role: 'bot', content: botReply }]);
+                    if (!success) {
+                        const errorMsg = lastError ? `${lastError.message} (Code: ${lastError.code})` : "All connection attempts failed.";
+                        setMessages(prev => [...prev, { role: 'bot', content: `AI Error: ${errorMsg}. Please check if your API Key is correctly enabled in Google AI Studio. ⚠️` }]);
                     }
                 } catch (error) {
                     setMessages(prev => [...prev, { role: 'bot', content: "Network error. Please check your connection. ⚠️" }]);
