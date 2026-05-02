@@ -2422,7 +2422,18 @@
             </div>
         );
 
-        const LoadingScreen = () => ( <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}><div style={{ fontSize: '1.5rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', animation: 'pulse 1.5s infinite' }}>LB TRACKER</div></div> );
+        const LoadingScreen = () => ( 
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 9999, gap: '20px' }}>
+                <div className="sidebar-logo" style={{ width: '60px', height: '60px', animation: 'pulse 1.5s infinite' }}>
+                    <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" fillOpacity="0.9"/>
+                        <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px' }}>LB TRACKER</div>
+            </div> 
+        );
         const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
             <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
                 <div className="live-bg">
@@ -2431,7 +2442,13 @@
                 </div>
                 
                 <Reveal>
-                    <div className="sidebar-logo" style={{ width: '80px', height: '80px', fontSize: '1.8rem', margin: '0 auto 2.5rem', borderRadius: '20px', boxShadow: '0 10px 40px var(--primary-glow)' }}>LB</div>
+                    <div className="sidebar-logo" style={{ width: '100px', height: '100px', margin: '0 auto 2.5rem', borderRadius: '24px', boxShadow: '0 20px 50px var(--primary-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px' }}>
+                        <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" fillOpacity="0.9"/>
+                            <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
                 </Reveal>
 
                 <Reveal delay={0.1}>
@@ -2483,6 +2500,13 @@
             const removeS = (s) => setForm(f => ({ ...f, subjects: f.subjects.filter(x => x !== s) }));
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem' }}><div className="glass setup-card">
+                    <div className="sidebar-logo" style={{ width: '50px', height: '50px', margin: '0 auto 1.5rem', borderRadius: '12px' }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" fillOpacity="0.9"/>
+                            <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                    </div>
                     {step === 1 && ( <div><h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2><p className="setup-subtitle">Let's set up your profile.</p><input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /><div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}><div onClick={() => setForm({...form, examLevel: 'A/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>A/L</div></div><div onClick={() => setForm({...form, examLevel: 'O/L', subjects: []})} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>O/L</div></div></div><select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select><button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>{initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}</div> )}
                     {step === 2 && ( <div><h2 className="setup-title">Target Exam 🎯</h2><p className="setup-subtitle">විභාග විස්තර තෝරන්න.</p><div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}><select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })} style={{ marginBottom: 0 }}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select><input type="number" min="2024" max="2100" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: e.target.value ? parseInt(e.target.value) : '' })} style={{ marginBottom: 0 }} /></div><button className="btn-primary" disabled={!form.examYear} onClick={() => setStep(3)}>Next Step ➡️</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button></div> )}
                     {step === 3 && ( <div><h2 className="setup-title">Subjects 📚</h2><p className="setup-subtitle">Choose exactly {limit} subjects.</p><div className="chip-container">{form.subjects.map(s => ( <div key={s} className="subject-chip">{s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span></div> ))}{form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>{(form.examLevel === 'A/L' ? AL_SUBJECTS : OL_SUBJECTS).map(s => ( <div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div>{form.examLevel === 'O/L' && SINHALA_NAMES[s] && <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{SINHALA_NAMES[s]}</div>}</div> ))}</div><div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}><input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} /><button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= limit}>+</button></div><button className="btn-primary" disabled={form.subjects.length !== limit} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button></div> )}
