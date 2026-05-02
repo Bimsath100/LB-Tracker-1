@@ -2073,26 +2073,22 @@
                         </div>
                         <div style={{ gridColumn: 'span 5' }}>
                             <Reveal delay={0.1}>
-                                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+                                <div className="glass card" style={{ padding: '1.5rem', marginBottom: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
                                     <h3 style={{ margin: 0, fontFamily: 'Outfit', marginBottom: '1.5rem' }}>Top Scholars 🏆</h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                        {globalLeaders.slice(0, 10).map((l, i) => (
-                                            <div key={i} style={{ display: 'flex', alignItems: 'center', background: 'var(--input-bg)', padding: '10px 15px', borderRadius: '12px' }}>
-                                                <div style={{ fontSize: '1.2rem', marginRight: '15px', width: '25px', textAlign: 'center' }}>{i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, overflowY: 'auto' }}>
+                                        {globalLeaders.slice(0, 15).map((l, i) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'center', background: 'var(--input-bg)', padding: '12px 15px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                                <div style={{ fontSize: '1.2rem', marginRight: '15px', width: '25px', textAlign: 'center', fontWeight: '900', color: i < 3 ? 'inherit' : 'var(--text-dim)' }}>
+                                                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                                                </div>
                                                 <div>
                                                     <div style={{ fontWeight: '800', color: 'var(--text-main)', fontSize: '0.9rem' }}>{l.name}</div>
-                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{l.district}</div>
+                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '600' }}>{l.district}</div>
                                                 </div>
-                                                <div style={{ marginLeft: 'auto', fontWeight: '800', color: 'var(--primary)', fontSize: '1rem' }}>{l.hrs}h</div>
+                                                <div style={{ marginLeft: 'auto', fontWeight: '900', color: 'var(--primary)', fontSize: '1.1rem' }}>{l.hrs}<span style={{ fontSize: '0.7rem', marginLeft: '2px', opacity: 0.7 }}>h</span></div>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            </Reveal>
-                            <Reveal delay={0.2}>
-                                <div className="glass card" style={{ padding: '1.5rem' }}>
-                                    <h3 style={{ margin: 0, fontFamily: 'Outfit', marginBottom: '1.5rem' }}>District Rankings 📍</h3>
-                                    <DistrictLeaderboard />
                                 </div>
                             </Reveal>
                         </div>
