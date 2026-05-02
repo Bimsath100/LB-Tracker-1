@@ -1794,12 +1794,16 @@
                 fetchPosts();
                 const sub = sb.channel('community_posts_realtime')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'community_posts' }, (payload) => {
+                        console.log("Real-time change:", payload.eventType);
                         if (payload.eventType === 'INSERT') setPosts(prev => [payload.new, ...prev]);
                         if (payload.eventType === 'DELETE') {
-                            const deletedId = payload.old.id;
+                            const deletedId = payload.old?.id || payload.old;
                             setPosts(prev => prev.filter(p => p.id !== deletedId));
                         }
                         if (payload.eventType === 'UPDATE') setPosts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
+                        
+                        // Fallback: Always re-fetch after 1s for any change to ensure consistency
+                        setTimeout(fetchPosts, 1000);
                     })
                     .subscribe();
                 return () => sb.removeChannel(sub);
