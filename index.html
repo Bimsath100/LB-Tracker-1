@@ -2064,6 +2064,10 @@
                                             <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Study at the same time daily to build a powerful habit.</div>
                                         </div>
                                     </div>
+
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <BadgesView history={history} marks={marks} streak={streak} />
+                                    </div>
                                 </div>
                             </Reveal>
                         </div>
@@ -2085,7 +2089,6 @@
                                     </div>
                                 </div>
                             </Reveal>
-                            <Reveal delay={0.2}><BadgesView history={history} marks={marks} streak={streak} /></Reveal>
                         </div>
                     </div>
                 </div>
