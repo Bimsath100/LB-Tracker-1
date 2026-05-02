@@ -1792,17 +1792,13 @@
 
             useEffect(() => {
                 fetchPosts();
-                const sub = sb.channel('community_posts_realtime')
+                const hub = sb.channel('community-hub')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'community_posts' }, (payload) => {
-                        if (payload.eventType === 'INSERT') setPosts(prev => [payload.new, ...prev]);
-                        if (payload.eventType === 'UPDATE') setPosts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
                         fetchPosts(); 
                     })
-                    .subscribe();
-
-                const broadcast = sb.channel('community_broadcast')
                     .on('broadcast', { event: 'post_deleted' }, (payload) => {
-                        setPosts(prev => prev.filter(p => p.id !== payload.payload.id));
+                        const ids = Array.isArray(payload.payload.id) ? payload.payload.id : [payload.payload.id];
+                        setPosts(prev => prev.filter(p => !ids.includes(p.id)));
                     })
                     .on('broadcast', { event: 'post_inserted' }, (payload) => {
                         setPosts(prev => {
@@ -1815,8 +1811,7 @@
                 const poll = setInterval(fetchPosts, 500);
 
                 return () => {
-                    sb.removeChannel(sub);
-                    sb.removeChannel(broadcast);
+                    sb.removeChannel(hub);
                     clearInterval(poll);
                 };
             }, []);
@@ -1865,13 +1860,8 @@
                 if (!confirm('Delete this message for everyone?')) return;
                 setPosts(prev => prev.filter(p => p.id !== postId));
                 
-                const ch = sb.channel('community_broadcast');
-                ch.subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        ch.send({ type: 'broadcast', event: 'post_deleted', payload: { id: postId } })
-                          .then(() => sb.removeChannel(ch));
-                    }
-                });
+                const hub = sb.channel('community-hub');
+                hub.send({ type: 'broadcast', event: 'post_deleted', payload: { id: postId } });
 
                 const { error } = await sb.from('community_posts').delete().eq('id', postId);
                 if (error) { alert("Error: " + error.message); fetchPosts(); }
@@ -1947,14 +1937,8 @@
                     
                     if (error) throw error;
 
-                    // Broadcast the new post to everyone online
-                    const ch = sb.channel('community_broadcast');
-                    ch.subscribe((status) => {
-                        if (status === 'SUBSCRIBED') {
-                            ch.send({ type: 'broadcast', event: 'post_inserted', payload: data })
-                              .then(() => sb.removeChannel(ch));
-                        }
-                    });
+                    // Broadcast via hub
+                    sb.channel('community-hub').send({ type: 'broadcast', event: 'post_inserted', payload: data });
 
                     setPosts(prev => prev.map(p => p.id === tempId ? data : p));
                     setFile(null);
@@ -2284,13 +2268,8 @@
                                         ).map(p => p.id);
 
                                         if(ids.length > 0) {
-                                            const ch = sb.channel('community_broadcast');
-                                            ch.subscribe((status) => {
-                                                if(status === 'SUBSCRIBED') {
-                                                    ids.forEach(id => ch.send({ type: 'broadcast', event: 'post_deleted', payload: { id } }));
-                                                    setTimeout(() => sb.removeChannel(ch), 2000);
-                                                }
-                                            });
+                                            // Bulk Broadcast delete
+                                            sb.channel('community-hub').send({ type: 'broadcast', event: 'post_deleted', payload: { id: ids } });
 
                                             const { error } = await sb.from('community_posts').delete().in('id', ids);
                                             if(!error) alert(`Successfully purged ${ids.length} booster posts! 🧹`);
