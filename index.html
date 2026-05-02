@@ -2142,7 +2142,7 @@
             );
         };
 
-        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered }) => {
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile }) => {
             return (
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -2208,19 +2208,41 @@
                                         'Anyone studying tonight? Night owl session starts at 10pm! 🦉'
                                     ];
                                     
-                                    const count = 3 + Math.floor(Math.random() * 3); // Post 3-5 messages
+                                    const count = 2 + Math.floor(Math.random() * 2); // Post 2-3 messages for testing
                                     for(let i=0; i<count; i++) {
                                         const rName = names[Math.floor(Math.random() * names.length)];
                                         const rDist = dists[Math.floor(Math.random() * dists.length)];
                                         const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
-                                        await sb.from('community_posts').insert({
+                                        
+                                        const { error } = await sb.from('community_posts').insert({
                                             content: rMsg,
-                                            user_name: `${rName} (${rDist})`,
-                                            created_at: new Date(Date.now() - Math.floor(Math.random() * 1000000)).toISOString() // Slightly older
+                                            user_name: `${rName} (${rDist})\u200D`,
+                                            user_id: profile?.id || profile?.user_id, // Use admin ID to bypass RLS
+                                            type: 'text',
+                                            viewed_by: [],
+                                            created_at: new Date().toISOString() // Ensure it appears on top
                                         });
+                                        
+                                        if(error) {
+                                            console.error("Booster Error:", error);
+                                            alert("Failed to post: " + error.message);
+                                            return;
+                                        }
                                     }
                                     alert(`Successfully boosted engagement with ${count} realistic posts! 🚀`);
                                 }}>BOOST COMMUNITY ENGAGEMENT 🚀</button>
+                                <button style={{ width: '100%', marginTop: '10px', height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }} onClick={async () => {
+                                    if(!confirm('Delete all simulated booster posts? Genuine student posts will remain.')) return;
+                                    // Use % like operator to find the hidden character at the end
+                                    const { data, error } = await sb.from('community_posts').select('id, user_name');
+                                    if(data) {
+                                        const idsToDelete = data.filter(p => p.user_name.endsWith('\u200D')).map(p => p.id);
+                                        if(idsToDelete.length > 0) {
+                                            await sb.from('community_posts').delete().in('id', idsToDelete);
+                                            alert(`Successfully removed ${idsToDelete.length} booster posts! 🧹`);
+                                        } else alert('No booster posts found. ✅');
+                                    }
+                                }}>🗑️ PURGE BOOSTER POSTS</button>
                             </div>
 
                             <div className="glass card" style={{ padding: '2rem' }}>
@@ -3027,7 +3049,7 @@
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                              ) : currentPage === 'admin' ? (
-                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} />
+                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} />
                              ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
