@@ -2940,14 +2940,6 @@
                         <div className="nav-links">
                             <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentPage('dashboard')}>🏠 <span>Dashboard</span></div>
                             <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => setCurrentPage('workspace')}>💻 <span>Workspace</span></div>
-                            <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => setCurrentPage('community')} style={{ position: 'relative' }}>
-                                🌍 <span>Community</span>
-                                {unreadPosts > 0 && (
-                                    <span style={{ position: 'absolute', right: '15px', background: '#EF4444', color: 'white', fontSize: '0.65rem', fontWeight: '900', padding: '2px 6px', borderRadius: '10px', boxShadow: '0 0 10px rgba(239, 68, 68, 0.4)' }}>
-                                        {unreadPosts}
-                                    </span>
-                                )}
-                            </div>
                             {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && <div className={`nav-link ${currentPage === 'admin' ? 'active' : ''}`} onClick={() => setCurrentPage('admin')}>👑 <span>Admin Center</span></div>}
                         </div>
 
@@ -3029,7 +3021,6 @@
                     <nav className="mobile-nav">
                         <MobileItem active={currentPage === 'dashboard'} icon="🏠" label="Home" onClick={() => setCurrentPage('dashboard')} />
                         <MobileItem active={currentPage === 'workspace'} icon="💻" label="Work" onClick={() => setCurrentPage('workspace')} />
-                        <MobileItem active={currentPage === 'community'} icon="🌍" label="Comm" onClick={() => setCurrentPage('community')} unread={unreadPosts} />
                         {user?.email === ADMIN_EMAIL && <MobileItem active={currentPage === 'admin'} icon="👑" label="Admin" onClick={() => setCurrentPage('admin')} />}
                         <MobileItem active={currentPage === 'feedback'} icon="⭐" label="Rate" onClick={() => setCurrentPage('feedback')} />
                     </nav>
@@ -3056,23 +3047,6 @@
                                         }
                                     } return streak;
                                 })()} profile={profile} timerProps={timerProps} />
-                            ) : currentPage === 'community' ? (
-                                <CommunityView profile={profile} history={history} marks={marks} globalLeaders={globalLeaders} streak={(() => {
-                                    let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
-                                    let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                                    if (todayH === 0) { 
-                                        curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD); 
-                                        let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0; 
-                                        if (yestH > 0) streak = 1; 
-                                    } else streak = 1;
-                                    if (streak > 0) {
-                                        while (true) {
-                                            curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
-                                            let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
-                                            if (hrs > 0) streak++; else break;
-                                        }
-                                    } return streak;
-                                })()} liveUsers={liveUsers} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                              ) : currentPage === 'admin' ? (
