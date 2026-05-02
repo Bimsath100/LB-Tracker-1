@@ -2146,6 +2146,25 @@
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage the LB Tracker empire from one place.</p>
                     </div>
 
+                    {/* Quick Stats Summary */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                        <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', borderLeft: '4px solid var(--primary)' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Total Registered 👥</div>
+                            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: 'var(--text-main)', fontFamily: 'Outfit' }}>{totalRegistered || 0}</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '5px' }}>STUDENTS ONBOARDED</div>
+                        </div>
+                        <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', borderLeft: '4px solid #10B981' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Global Study Hours 📈</div>
+                            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: '#10B981', fontFamily: 'Outfit' }}>{markedDetails.reduce((a, b) => a + (b.hours || 0), 0)}H</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '5px' }}>TOTAL RECORDED TODAY</div>
+                        </div>
+                        <div className="glass card" style={{ padding: '1.5rem', textAlign: 'center', borderLeft: '4px solid #F59E0B' }}>
+                            <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Live Activity ⚡</div>
+                            <div style={{ fontSize: '2.2rem', fontWeight: '900', color: '#F59E0B', fontFamily: 'Outfit' }}>{liveDetails.length}</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '5px' }}>STUDENTS CURRENTLY ACTIVE</div>
+                        </div>
+                    </div>
+
                     <div className="asymmetric-grid">
                         {/* Column 1: Broadcast & Cleanup */}
                         <div style={{ gridColumn: 'span 7', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -2155,15 +2174,54 @@
                                 </div>
                                 <textarea className="glass-input" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message to all students..." style={{ minHeight: '120px', marginBottom: '1.5rem', width: '100%' }} />
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button className="hour-btn active" onClick={updateAnnouncement} style={{ flex: 1 }}>POST NOTICE 🚀</button>
-                                    <button className="hour-btn" onClick={() => { setAnnouncementInput(''); updateAnnouncement(); }} style={{ flex: 0, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}>CLEAR</button>
+                                    <button className="btn-primary" onClick={updateAnnouncement} style={{ flex: 1, height: '50px', fontSize: '0.9rem' }}>POST NOTICE 🚀</button>
+                                    <button onClick={() => { setAnnouncementInput(''); updateAnnouncement(); }} style={{ flex: 0, padding: '0 20px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', cursor: 'pointer', fontWeight: '800', fontSize: '0.8rem' }}>CLEAR</button>
                                 </div>
+                            </div>
+
+                            <div className="glass card" style={{ padding: '2rem' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#10B981', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span>🚀</span> ENGAGEMENT BOOSTER
+                                </div>
+                                <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>Simulate realistic student activity to encourage participation. (Anonymous-looking posts).</p>
+                                <button className="btn-primary" style={{ width: '100%', height: '50px', fontSize: '0.9rem' }} onClick={async () => {
+                                    const names = [
+                                        'Senura', 'Thineth', 'Akila', 'Yeshan', 'Oshada', 'Vinuka', 'Disal', 'Nethum', 'Kevin', 'Minuka', 'Pasindu', 'Saveen', 'Denuwan', 'Tharindu', 'Rusiru', 'Mahil', 'Thanuka', 'Sahela', 'Dewmika', 'Lakshitha', 'Sajitha', 'Dinuka', 'Ravindu', 'Methmika', 'Ishan',
+                                        'Senuri', 'Lihini', 'Methmi', 'Dinuli', 'Piyumi', 'Nethmi', 'Amaya', 'Denuwani', 'Sahasna', 'Vinu', 'Thanuli', 'Melani', 'Sayuri', 'Kavisha', 'Limaya', 'Pabasara', 'Dinethra', 'Thisari', 'Oshadhi', 'Minuli', 'Hiruni', 'Senali', 'Ruvindya', 'Kethmi', 'Nimesha'
+                                    ];
+                                    const dists = ['Colombo', 'Kandy', 'Galle', 'Kurunegala', 'Matara', 'Gampaha', 'Kalutara', 'Ratnapura', 'Badulla', 'Anuradhapura', 'Kegalle', 'Nuwara Eliya'];
+                                    const msgs = [
+                                        'අද පැය 5ක් ඉවරයි! 🔥 තව පැය 3ක් කරන්න ඕනේ.',
+                                        'Chemistry structured පේපර් එකක් කරා. ලකුණු ටිකක් අඩුයි ඒත් වැඩේ අතහරින්නේ නැහැ. 💪',
+                                        'Morning session done! Ready for a 15min break. ☕',
+                                        'Physics electronics පාඩම අමාරුයි නේද? කාටද තේරෙන්නේ?',
+                                        'Today goal is 10 hours. Who else is aiming high? 🎯',
+                                        'Just joined the hub! Motivation is high today. 🚀',
+                                        'Bio essay එකක් ලියලා ඉවර උනා. අත් දෙකත් රිදෙනවා දැන් නම්. ✍️',
+                                        'Keep going guys! We can do this. 🙌',
+                                        '8 hours already done! Feeling like a beast today. 🔥',
+                                        'Anyone studying tonight? Night owl session starts at 10pm! 🦉'
+                                    ];
+                                    
+                                    const count = 3 + Math.floor(Math.random() * 3); // Post 3-5 messages
+                                    for(let i=0; i<count; i++) {
+                                        const rName = names[Math.floor(Math.random() * names.length)];
+                                        const rDist = dists[Math.floor(Math.random() * dists.length)];
+                                        const rMsg = msgs[Math.floor(Math.random() * msgs.length)];
+                                        await sb.from('community_posts').insert({
+                                            content: rMsg,
+                                            user_name: `${rName} (${rDist})`,
+                                            created_at: new Date(Date.now() - Math.floor(Math.random() * 1000000)).toISOString() // Slightly older
+                                        });
+                                    }
+                                    alert(`Successfully boosted engagement with ${count} realistic posts! 🚀`);
+                                }}>BOOST COMMUNITY ENGAGEMENT 🚀</button>
                             </div>
 
                             <div className="glass card" style={{ padding: '2rem' }}>
                                 <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#EF4444', marginBottom: '1rem' }}>🛡️ STORAGE MAINTENANCE</div>
                                 <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1.5rem' }}>Physically delete community posts and files older than 7 days to free up Supabase space.</p>
-                                <button className="hour-btn active" style={{ background: 'linear-gradient(135deg, #EF4444, #B91C1C)', border: 'none', width: '100%' }} onClick={async () => {
+                                <button className="btn-primary" style={{ background: 'linear-gradient(135deg, #EF4444, #B91C1C)', border: 'none', width: '100%', height: '50px', fontSize: '0.9rem' }} onClick={async () => {
                                     if(!confirm('Delete all posts and files older than 7 days?')) return;
                                     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
                                     const { data: expired } = await sb.from('community_posts').select('*').lt('created_at', sevenDaysAgo);
@@ -2208,6 +2266,33 @@
                                             <div style={{ fontWeight: '900', color: '#10B981', fontSize: '0.9rem' }}>{u.hours}H</div>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+
+                            <div className="glass card" style={{ padding: '1.5rem', border: '1px solid rgba(245, 158, 11, 0.2)', background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05), transparent)' }}>
+                                <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#F59E0B', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span>🏆</span> DAILY HALL OF FAME (TOP 5)
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {markedDetails
+                                        .sort((a, b) => b.hours - a.hours)
+                                        .slice(0, 5)
+                                        .map((u, i) => (
+                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '12px 15px', borderRadius: '14px', border: '1px solid var(--border)' }}>
+                                                <div style={{ width: '28px', height: '28px', background: i === 0 ? '#F59E0B' : i === 1 ? '#94A3B8' : i === 2 ? '#B45309' : 'var(--input-bg)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: '900', color: i < 3 ? 'white' : 'var(--text-dim)' }}>
+                                                    {i + 1}
+                                                </div>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: '800', fontSize: '0.85rem', color: 'var(--text-main)' }}>{u.name}</div>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{u.district}</div>
+                                                </div>
+                                                <div style={{ textAlign: 'right' }}>
+                                                    <div style={{ fontWeight: '900', color: '#F59E0B', fontSize: '1rem' }}>{u.hours}H</div>
+                                                    <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>STUDIED</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    {markedDetails.length === 0 && <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-dim)', fontSize: '0.8rem' }}>Waiting for performers...</div>}
                                 </div>
                             </div>
                         </div>
