@@ -182,14 +182,16 @@
 
         @media (max-width: 1024px) {
             .sidebar { display: none; }
-            .main-content { margin-left: 0 !important; width: 100% !important; padding: 90px 15px 100px 15px !important; }
-            .container { width: 100%; padding: 0 5px; }
-            .top-header { padding: 0 15px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(30px); height: 75px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-            .hero-section { flex-direction: column; gap: 1.5rem; text-align: left; padding: 1.5rem !important; margin-top: 10px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 1rem; }
-            .card { padding: 1.5rem !important; border-radius: 28px; }
-            .floating-settings { display: none; }
-            .header-icon-btn { width: 38px !important; height: 38px !important; border-radius: 10px !important; font-size: 1rem !important; }
+            .main-content { margin-left: 0 !important; width: 100% !important; padding: 100px 16px 120px 16px !important; }
+            .container { width: 100%; padding: 0; }
+            .top-header { padding: 0 18px; position: fixed; top: 0; left: 0; width: 100%; background: var(--navbar-bg); backdrop-filter: blur(40px); height: 75px; z-index: 2000; border-bottom: var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+            .hero-section { flex-direction: column; gap: 2rem; padding: 1.2rem !important; margin-bottom: 2rem; align-items: flex-start !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+            .asymmetric-grid { display: flex; flex-direction: column; gap: 1.8rem; }
+            .card { padding: 1.5rem 1.2rem !important; border-radius: 28px; margin-bottom: 0; }
+            .stat-val { font-size: 2rem; }
+            .stat-lbl { font-size: 0.65rem; }
+            .header-icon-btn { width: 40px !important; height: 40px !important; }
         }
 
         .setup-card { max-width: 380px; width: min(92%, 380px); margin: 2rem auto; padding: 2rem; }
