@@ -891,75 +891,89 @@
             );
         };
 
-        const ActivityFeed = () => {
+        const ActivityFeed = ({ profile }) => {
             const [feeds, setFeeds] = useState([]);
+            const feedRef = useRef(null);
             
-            const fetchReal = async () => {
+            const fetchInitial = async () => {
                 const today = getLocalISODate();
                 const { data } = await sb.from('study_tracker_v2')
                     .select('name, district, history')
                     .not(`history->${today}`, 'is', null)
                     .order('history->last_updated', { ascending: false })
-                    .limit(100);
-                if (data && data.length > 0) {
-                    const mapped = data
-                        .map(u => {
-                            const hrsToday = (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0;
-                            return {
-                                id: u.name + (u.history?.last_updated || Math.random()),
-                                name: u.name,
-                                district: u.district,
-                                hrs: hrsToday,
-                                time: u.history?.last_updated,
-                                text: `${u.name} from ${u.district} marked ${hrsToday} hours! 🎯`
-                            };
-                        })
-                        .filter(u => u.hrs > 0)
-                        .sort((a, b) => {
-                            // Prioritize recency, then hours
-                            const timeA = a.time ? new Date(a.time).getTime() : 0;
-                            const timeB = b.time ? new Date(b.time).getTime() : 0;
-                            return timeB - timeA || b.hrs - a.hrs;
-                        });
-                    return mapped.slice(0, 5);
+                    .limit(5);
+                if (data) {
+                    const mapped = data.map(u => ({
+                        id: u.name + (u.history?.last_updated || Math.random()),
+                        name: u.name,
+                        district: u.district,
+                        hrs: (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0,
+                        time: u.history?.last_updated,
+                    })).filter(u => u.hrs > 0);
+                    setFeeds(mapped);
                 }
-                return [];
             };
 
             useEffect(() => {
-                const updateFeed = async () => {
-                    const realOnes = await fetchReal();
-                    setFeeds(realOnes);
-                };
-                updateFeed();
+                fetchInitial();
 
-                const channel = sb.channel('feed-realtime')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
-                        updateFeed();
-                    })
-                    .subscribe();
+                const channel = sb.channel('global-study-broadcast', {
+                    config: { broadcast: { self: true } }
+                })
+                .on('broadcast', { event: 'study_update' }, ({ payload }) => {
+                    console.log("Broadcast received:", payload);
+                    setFeeds(prev => {
+                        const newFeed = {
+                            id: payload.name + Date.now(),
+                            name: payload.name,
+                            district: payload.district,
+                            hrs: payload.hrs,
+                            time: payload.timestamp,
+                            isNew: true
+                        };
+                        // Keep only unique latest updates per user
+                        const filtered = prev.filter(f => f.name !== payload.name);
+                        return [newFeed, ...filtered].slice(0, 5);
+                    });
+                })
+                .subscribe();
 
-                const interval = setInterval(updateFeed, 5000);
-                return () => {
-                    clearInterval(interval);
-                    sb.removeChannel(channel);
-                };
+                return () => sb.removeChannel(channel);
             }, []);
 
             return ( 
-                <div className="feed-container">
+                <div className="feed-container" ref={feedRef}>
                     {feeds.map(f => ( 
-                        <div key={f.id} className="feed-item" style={{ borderLeftColor: '#10B981', background: 'rgba(16, 185, 129, 0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                        <div key={f.id} className={`feed-item ${f.isNew ? 'new-event' : ''}`} 
+                             style={{ 
+                                borderLeft: '3px solid #10B981', 
+                                background: 'rgba(16, 185, 129, 0.05)', 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center', 
+                                gap: '10px',
+                                animation: f.isNew ? 'slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none'
+                             }}>
                             <span style={{ flex: 1 }}>
-                                <span style={{ fontWeight: '700' }}>{f.name}</span>
+                                <span style={{ fontWeight: '700', color: 'var(--text-main)' }}>{f.name}</span>
                                 {f.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.5rem', background: 'var(--primary)', color: 'white', padding: '2px 4px', borderRadius: '4px', marginLeft: '5px', verticalAlign: 'middle' }}>OWNER</span>}
-                                <span style={{ color: 'var(--text-dim)' }}> from {f.district} marked </span>
-                                <span style={{ fontWeight: '700', color: '#10B981' }}>{f.hrs} hours! 🎯</span>
+                                <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}> from {f.district} marked </span>
+                                <span style={{ fontWeight: '800', color: '#10B981' }}>{f.hrs}h 🎯</span>
                             </span>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', fontWeight: '700' }}>{timeAgo(f.time)}</span>
+                            <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)', whiteSpace: 'nowrap', fontWeight: '800', opacity: 0.8 }}>{timeAgo(f.time)}</span>
                         </div> 
                     ))}
-                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem', textAlign: 'center' }}>No student activity recorded yet today. ⏳</div>}
+                    {feeds.length === 0 && <div style={{ color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem', textAlign: 'center' }}>Waiting for student activity... ⏳</div>}
+                    <style>{`
+                        @keyframes slideInRight {
+                            from { opacity: 0; transform: translateX(30px); filter: blur(10px); }
+                            to { opacity: 1; transform: translateX(0); filter: blur(0); }
+                        }
+                        .new-event {
+                            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+                            border-color: #10B981 !important;
+                        }
+                    `}</style>
                 </div> 
             );
         };
@@ -1422,7 +1436,27 @@
             const weekHrs = [...Array(7)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const monthHrs = [...Array(30)].reduce((a,_,i)=>{ const d=new Date(); d.setDate(d.getDate()-i); const k=getLocalISODate(d); return a+(Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); },0);
             const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
-            const toggleH = (i) => { const h = [...(history[viewDate] || new Array(24).fill(false))]; h[i] = !h[i]; setHistory({ ...history, [viewDate]: h }); };
+            const toggleH = (i) => { 
+                const h = [...(history[viewDate] || new Array(24).fill(false))]; 
+                h[i] = !h[i]; 
+                const newHistory = { ...history, [viewDate]: h };
+                setHistory(newHistory); 
+                
+                // Real-time Broadcast
+                if (viewDate === getLocalISODate()) {
+                    const markedCount = h.filter(Boolean).length;
+                    sb.channel('global-study-broadcast').send({
+                        type: 'broadcast',
+                        event: 'study_update',
+                        payload: { 
+                            name: profile.name, 
+                            district: profile.district, 
+                            hrs: markedCount,
+                            timestamp: new Date().toISOString()
+                        }
+                    });
+                }
+            };
             
             let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
             let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
@@ -1551,6 +1585,34 @@
                             </div>
                         </Reveal>
                     </div>
+                    
+                    <Reveal delay={0.4}>
+                        <div className="asymmetric-grid">
+                            <div style={{ gridColumn: 'span 7' }}>
+                                <div className="glass card" style={{ padding: '2rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                                        <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                            ⚡ Real-time Study Feed
+                                        </div>
+                                        <div className="live-indicator" style={{ margin: 0, padding: '4px 10px' }}>
+                                            <div className="live-dot"></div>
+                                            <span style={{ fontSize: '0.65rem' }}>LIVE</span>
+                                        </div>
+                                    </div>
+                                    <ActivityFeed profile={profile} />
+                                </div>
+                            </div>
+                            <div style={{ gridColumn: 'span 5' }}>
+                                <div className="glass card" style={{ padding: '2rem' }}>
+                                    <div style={{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--primary)', marginBottom: '1.5rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                        🏆 District Rankings
+                                    </div>
+                                    <DistrictLeaderboard />
+                                </div>
+                            </div>
+                        </div>
+                    </Reveal>
+
                     <div className="marks-grid">
                         <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Weekly Overview</div><ProgressChart history={history} /></div></Reveal>
                         <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem' }}><div className="chart-title">Activity Trend</div><TrendChart history={history} /></div></Reveal>
