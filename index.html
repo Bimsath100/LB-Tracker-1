@@ -2923,23 +2923,6 @@
                             
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 
-                                {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && currentPage !== 'dashboard' && (
-                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', background: 'var(--input-bg)', padding: '4px', borderRadius: '14px', border: '1px solid var(--border)' }}>
-                                        <button onClick={() => setAdminView('notice')} style={{ background: 'var(--primary)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '10px', fontSize: '0.65rem', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                                            📢 <span className="d-none-mobile">NOTICE</span>
-                                        </button>
-                                        <div style={{ display: 'flex', gap: '4px', padding: '0 4px' }}>
-                                            <div className="live-indicator" onClick={() => setAdminView('live')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', margin: 0, padding: '4px' }}>
-                                                <div className="live-dot" style={{ width: '5px', height: '5px' }}></div>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{liveUsers}</span>
-                                            </div>
-                                            <div className="live-indicator" onClick={() => setAdminView('marked')} style={{ cursor: 'pointer', background: 'transparent', border: 'none', color: 'var(--primary)', margin: 0, padding: '4px' }}>
-                                                <div className="live-dot" style={{ width: '5px', height: '5px', background: 'var(--primary)', boxShadow: '0 0 8px var(--primary)' }}></div>
-                                                <span style={{ fontSize: '0.7rem', fontWeight: '800' }}>{markedToday}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
 
                                 <div className="live-indicator registered-badge d-none-mobile" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '6px 12px', borderRadius: '12px' }}>
                                     <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{totalRegistered} <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
