@@ -1836,15 +1836,7 @@
                     .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
                     .order('created_at', { ascending: false });
                 if (error) console.error("Fetch Error:", error);
-                if (data) {
-                    setPosts(prev => {
-                        // Only update if data actually changed (length or IDs)
-                        if (prev.length === data.length && prev[0]?.id === data[0]?.id && prev[prev.length-1]?.id === data[data.length-1]?.id) {
-                            return prev;
-                        }
-                        return data;
-                    });
-                }
+                if (data) setPosts(data);
             };
 
             const markAsViewed = async (postId, viewedBy = []) => {
@@ -2258,19 +2250,20 @@
                                 <button style={{ width: '100%', marginTop: '10px', height: '40px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer' }} onClick={async () => {
                                     if(!confirm('Delete all simulated booster posts? Genuine student posts will remain.')) return;
                                     
-                                    // Aggressive identification: Check for type or hidden markers
+                                    const botNames = ['Senura', 'Thineth', 'Akila', 'Yeshan', 'Oshada', 'Vinuka', 'Disal', 'Nethum', 'Kevin', 'Minuka', 'Pasindu', 'Saveen', 'Denuwan', 'Tharindu', 'Rusiru', 'Mahil', 'Thanuka', 'Sahela', 'Dewmika', 'Lakshitha', 'Sajitha', 'Dinuka', 'Ravindu', 'Methmika', 'Ishan', 'Senuri', 'Lihini', 'Methmi', 'Dinuli', 'Piyumi', 'Nethmi', 'Amaya', 'Denuwani', 'Sahasna', 'Vinu', 'Thanuli', 'Melani', 'Sayuri', 'Kavisha', 'Limaya', 'Pabasara', 'Dinethra', 'Thisari', 'Oshadhi', 'Minuli', 'Hiruni', 'Senali', 'Ruvindya', 'Kethmi', 'Nimesha'];
+                                    
                                     const { data: allPosts } = await sb.from('community_posts').select('id, user_name, type');
                                     if(allPosts) {
-                                        const ids = allPosts.filter(p => 
-                                            p.type === 'booster' || 
-                                            p.user_name.includes('\u200D') || 
-                                            p.user_name.includes('\u200B')
-                                        ).map(p => p.id);
+                                        const ids = allPosts.filter(p => {
+                                            const nameOnly = p.user_name.split(' (')[0];
+                                            return p.type === 'booster' || 
+                                                   p.user_name.includes('\u200D') || 
+                                                   p.user_name.includes('\u200B') ||
+                                                   botNames.includes(nameOnly);
+                                        }).map(p => p.id);
 
                                         if(ids.length > 0) {
-                                            // Bulk Broadcast delete
                                             sb.channel('community-hub').send({ type: 'broadcast', event: 'post_deleted', payload: { id: ids } });
-
                                             const { error } = await sb.from('community_posts').delete().in('id', ids);
                                             if(!error) alert(`Successfully purged ${ids.length} booster posts! 🧹`);
                                             else alert("Error: " + error.message);
