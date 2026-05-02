@@ -1826,7 +1826,13 @@
             }, [hiddenPosts]);
 
             useEffect(() => {
-                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                const container = chatEndRef.current?.parentNode;
+                if (container) {
+                    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+                    if (isAtBottom) {
+                        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
             }, [posts]);
 
             const fetchPosts = async () => {
@@ -1835,7 +1841,15 @@
                     .gt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
                     .order('created_at', { ascending: false });
                 if (error) console.error("Fetch Error:", error);
-                if (data) setPosts(data);
+                if (data) {
+                    setPosts(prev => {
+                        // Only update if data actually changed (length or IDs)
+                        if (prev.length === data.length && prev[0]?.id === data[0]?.id && prev[prev.length-1]?.id === data[data.length-1]?.id) {
+                            return prev;
+                        }
+                        return data;
+                    });
+                }
             };
 
             const markAsViewed = async (postId, viewedBy = []) => {
