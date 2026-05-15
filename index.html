@@ -4165,10 +4165,6 @@
                         setLoadingAll(false);
                     };
 
-                    fetchMarked();
-                    fetchTotalUsers();
-                    fetchAllStudents();
-
                     const fetchTotalUsers = async () => {
                         try {
                             const { count, error } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
@@ -4192,22 +4188,31 @@
                             }
                         } catch (e) { console.error("Fetch Total Error:", e); }
                     };
+
+                    fetchMarked();
                     fetchTotalUsers();
+                    fetchAllStudents();
 
                     const channel = sb.channel('global-realtime')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
                             fetchMarked();
                             fetchTotalUsers();
+                            if (currentPage === 'admin') fetchAllStudents();
                         })
                         .subscribe();
 
-                    const inv = setInterval(() => { fetchMarked(); fetchTotalUsers(); }, 10000);
+                    const inv = setInterval(() => { 
+                        fetchMarked(); 
+                        fetchTotalUsers(); 
+                        if (currentPage === 'admin') fetchAllStudents();
+                    }, 15000);
+
                     return () => {
                         clearInterval(inv);
                         sb.removeChannel(channel);
                     };
                 }
-            }, [user]);
+            }, [user, currentPage]);
 
             useEffect(() => {
                 if (currentPage === 'community') {
