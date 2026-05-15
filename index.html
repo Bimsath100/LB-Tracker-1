@@ -2133,6 +2133,27 @@
             return `${year}-${month}-${day}`;
         };
 
+        const calculateStreak = (history) => {
+            if (!history) return 0;
+            let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
+            let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
+            if (todayH === 0) {
+                curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD);
+                let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
+                if (yestH > 0) streak = 1;
+            } else streak = 1;
+            if (streak > 0) {
+                let safety = 0;
+                while (safety < 365) {
+                    safety++;
+                    curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
+                    let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
+                    if (hrs > 0) streak++; else break;
+                }
+            }
+            return streak;
+        };
+
         // Global variable to catch the prompt
         window.deferredPrompt = null;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -2873,25 +2894,7 @@
                 }
             };
 
-            let streak = 0; 
-            if (history) {
-                let curD = new Date(); let curK = getLocalISODate(curD);
-                let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                if (todayH === 0) {
-                    curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD);
-                    let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                    if (yestH > 0) streak = 1;
-                } else streak = 1;
-                if (streak > 0) {
-                    let safety = 0;
-                    while (safety < 365) {
-                        safety++;
-                        curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
-                        let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
-                        if (hrs > 0) streak++; else break;
-                    }
-                }
-            }
+            const streak = calculateStreak(history);
             const isEvening = new Date().getHours() >= 17;
             const showReminder = todayCount === 0 && isEvening && viewDate === getLocalISODate();
             const dismissAnnounce = () => { localStorage.setItem('lastSeenAnnounce', announcement); setShowAnnounceModal(false); };
@@ -4522,10 +4525,11 @@
 
                     <div className={`sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}></div>
                     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-show' : ''}`}>
-                        <div className="sidebar-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', padding: '10px 0' }}>
-                            <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', width: '50px', height: '50px' }}>
+                        <div className="sidebar-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer' }}>
+                            <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
                                 <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
                             </div>
+                            <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900', fontSize: '0.85rem' }}>LB Tracker</span>
                         </div>
                         <button className="sidebar-toggle" onClick={() => setSidebarCollapsed(c => !c)} title={sidebarCollapsed ? 'Expand' : 'Collapse'}>
                             {sidebarCollapsed ? '▶' : '◀'}
@@ -4561,18 +4565,13 @@
                     <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                         <header className="top-header">
                             <button className="mobile-menu-btn" onClick={() => setIsMobileSidebarOpen(true)}>☰</button>
-                            <div className="mobile-only-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                                <div className="sidebar-logo" style={{ width: '45px', height: '45px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
+                            <div className="mobile-only-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
                                     <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
                                 </div>
                             </div>
 
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-
-
-                                <div className="live-indicator registered-badge d-none-mobile" style={{ cursor: 'default', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#F59E0B', margin: 0, padding: '6px 12px', borderRadius: '12px' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>{totalRegistered} <span style={{ fontSize: '0.6rem', opacity: 0.7 }}>REG</span></span>
-                                </div>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -4622,39 +4621,9 @@
                             {currentPage === 'dashboard' ? (
                                 <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} onEditProfile={() => setIsEditMode(true)} />
                             ) : currentPage === 'workspace' ? (
-                                <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} streak={(() => {
-                                    let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
-                                    let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                                    if (todayH === 0) {
-                                        curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD);
-                                        let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                                        if (yestH > 0) streak = 1;
-                                    } else streak = 1;
-                                    if (streak > 0) {
-                                        while (true) {
-                                            curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
-                                            let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
-                                            if (hrs > 0) streak++; else break;
-                                        }
-                                    } return streak;
-                                })()} profile={profile} timerProps={timerProps} />
+                                    <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} streak={calculateStreak(history)} profile={profile} timerProps={timerProps} />
                             ) : currentPage === 'community' ? (
-                                <CommunityView profile={profile} history={history} marks={marks} globalLeaders={globalLeaders} streak={(() => {
-                                    let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
-                                    let todayH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                                    if (todayH === 0) {
-                                        curD.setDate(curD.getDate() - 1); curK = getLocalISODate(curD);
-                                        let yestH = Array.isArray(history[curK]) ? history[curK].filter(Boolean).length : 0;
-                                        if (yestH > 0) streak = 1;
-                                    } else streak = 1;
-                                    if (streak > 0) {
-                                        while (true) {
-                                            curD.setDate(curD.getDate() - 1); let dateStr = getLocalISODate(curD);
-                                            let hrs = Array.isArray(history[dateStr]) ? history[dateStr].filter(Boolean).length : 0;
-                                            if (hrs > 0) streak++; else break;
-                                        }
-                                    } return streak;
-                                })()} liveUsers={liveUsers} />
+                                <CommunityView profile={profile} history={history} marks={marks} globalLeaders={globalLeaders} streak={calculateStreak(history)} liveUsers={liveUsers} />
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'admin' ? (
