@@ -2827,12 +2827,14 @@
                         const distMap = {};
                         let bestP = { name: '', hrs: 0, time: 0 };
                         data.forEach(u => {
-                            const hrs = (u.history && Array.isArray(u.history[today])) ? u.history[today].filter(Boolean).length : 0;
-                            const time = u.history?.last_updated ? new Date(u.history.last_updated).getTime() : 0;
-                            if (hrs > 0) {
-                                distMap[u.district] = (distMap[u.district] || 0) + hrs;
-                                if (hrs > bestP.hrs || (hrs === bestP.hrs && time > bestP.time)) {
-                                    bestP = { name: u.name, hrs, time };
+                            if (u.history) {
+                                const hrs = Array.isArray(u.history[today]) ? u.history[today].filter(Boolean).length : 0;
+                                const time = u.history.last_updated ? new Date(u.history.last_updated).getTime() : 0;
+                                if (hrs > 0 && u.district) {
+                                    distMap[u.district] = (distMap[u.district] || 0) + hrs;
+                                    if (hrs > bestP.hrs || (hrs === bestP.hrs && time > bestP.time)) {
+                                        bestP = { name: u.name, hrs, time };
+                                    }
                                 }
                             }
                         });
@@ -2984,7 +2986,7 @@
                                     </div>
                                     <div className="hour-grid">
                                         {Array.from({ length: 24 }).map((_, i) => (
-                                            <div key={i} className={`hour-btn ${history[viewDate]?.[i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>
+                                            <div key={i} className={`hour-btn ${history && history[viewDate] && history[viewDate][i] ? 'active' : ''}`} onClick={() => toggleH(i)}>{i + 1}</div>
                                         ))}
                                     </div>
                                 </div>
@@ -2998,12 +3000,12 @@
                                         📜 My Activity History
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
-                                        {(history.logs || []).length > 0 ? (
+                                        {(history && Array.isArray(history.logs) ? history.logs : []).length > 0 ? (
                                             history.logs.map(log => (
-                                                <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: log.action.includes('Marked') ? '3px solid #10B981' : '3px solid #EF4444' }}>
+                                                <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: log.action && log.action.includes('Marked') ? '3px solid #10B981' : '3px solid #EF4444' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                         <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
-                                                        <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>{new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                        <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>{log.time ? new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}</div>
                                                     </div>
                                                     <div style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginTop: '2px' }}>{log.date}</div>
                                                 </div>
@@ -4525,7 +4527,7 @@
 
                     <div className={`sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}></div>
                     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-show' : ''}`}>
-                        <div className="sidebar-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer' }}>
+                        <div className="sidebar-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
                                 <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
                             </div>
@@ -4565,12 +4567,7 @@
                     <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                         <header className="top-header">
                             <button className="mobile-menu-btn" onClick={() => setIsMobileSidebarOpen(true)}>☰</button>
-                            <div className="mobile-only-brand" onClick={() => { setCurrentPage('dashboard'); setIsMobileSidebarOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div className="sidebar-logo" style={{ width: '36px', height: '36px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white' }}>
-                                    <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
-                                </div>
-                            </div>
-
+                            
                             <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             </div>
 
