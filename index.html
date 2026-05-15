@@ -46,34 +46,34 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary: #7b4cd2;
-            --primary-glow: rgba(123, 76, 210, 0.25);
-            --secondary: #aa96d0;
-            --bg: #100d16;
-            --navbar-bg: #16131c;
-            --card-bg: #1c1926;
-            --text-main: #e5e2ea;
+            --primary: #8a70f1;
+            --primary-glow: rgba(138, 112, 241, 0.25);
+            --secondary: #6b52c1;
+            --bg: #0e0d12;
+            --navbar-bg: #14131a;
+            --card-bg: #1c1b26;
+            --text-main: #e5e1ea;
             --text-dim: #9ba1b1;
-            --border: rgba(255, 255, 255, 0.08);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --input-bg: rgba(255, 255, 255, 0.03);
-            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            --border: rgba(138, 112, 241, 0.1);
+            --glass-border: 1px solid rgba(138, 112, 241, 0.15);
+            --input-bg: rgba(138, 112, 241, 0.05);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             --success: #10B981;
         }
 
         body.light-mode {
-            --primary: #7b4cd2;
-            --primary-glow: rgba(123, 76, 210, 0.15);
-            --secondary: #442977;
+            --primary: #6b52c1;
+            --primary-glow: rgba(107, 82, 193, 0.15);
+            --secondary: #aa96d0;
             --bg: #e5e2ea;
             --navbar-bg: #f0edf5;
             --card-bg: #ffffff;
             --text-main: #100d16;
             --text-dim: #4a4a68;
-            --border: rgba(123, 76, 210, 0.1);
-            --glass-border: 1px solid rgba(123, 76, 210, 0.15);
-            --input-bg: rgba(123, 76, 210, 0.05);
-            --card-shadow: 0 10px 40px rgba(123, 76, 210, 0.05);
+            --border: rgba(107, 82, 193, 0.1);
+            --glass-border: 1px solid rgba(107, 82, 193, 0.15);
+            --input-bg: rgba(107, 82, 193, 0.05);
+            --card-shadow: 0 10px 40px rgba(107, 82, 193, 0.05);
             color-scheme: light;
         }
 
@@ -3489,18 +3489,24 @@
             );
         };
 
-        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile }) => {
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll }) => {
             const [searchTerm, setSearchTerm] = useState('');
             const [selectedStudent, setSelectedStudent] = useState(null);
             const [studentFullData, setStudentFullData] = useState(null);
             const [loadingProfile, setLoadingProfile] = useState(false);
+            const [activeTab, setActiveTab] = useState('all'); // 'today' or 'all'
 
-            const filteredStudents = markedDetails
+            const displayList = activeTab === 'today' ? markedDetails : allStudents;
+
+            const filteredStudents = displayList
                 .filter(s => 
-                    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    s.district.toLowerCase().includes(searchTerm.toLowerCase())
+                    s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    s.district?.toLowerCase().includes(searchTerm.toLowerCase())
                 )
-                .sort((a, b) => (b.hours || 0) - (a.hours || 0));
+                .sort((a, b) => {
+                    if (activeTab === 'today') return (b.hours || 0) - (a.hours || 0);
+                    return a.name?.localeCompare(b.name);
+                });
 
             const viewStudentProfile = async (s) => {
                 setSelectedStudent(s);
@@ -3509,7 +3515,6 @@
                 try {
                     const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', s.user_id).single();
                     if (data) {
-                        // Calculate total hours across all history
                         let totalAllTime = 0;
                         if (data.history) {
                             Object.keys(data.history).forEach(k => {
@@ -3525,16 +3530,15 @@
             };
 
             return (
-                <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1200px', margin: '0 auto' }}>
+                <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1400px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'left', marginBottom: '2.5rem' }}>
-                        <h1 style={{ fontFamily: 'Outfit', fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.2rem' }}>Admin Dashboard</h1>
-                        <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', fontWeight: '500' }}>Welcome back, Bimsath. Here's what's happening today.</p>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.2rem' }}>Admin Center</h1>
+                        <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', fontWeight: '500' }}>Manage students and oversee platform activity.</p>
                     </div>
 
-                    {/* Metrics Grid */}
                     <div className="admin-metrics-grid">
                         <div className="admin-stat-card">
-                            <div className="admin-stat-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--primary)' }}>👥</div>
+                            <div className="admin-stat-icon" style={{ background: 'rgba(123, 76, 210, 0.1)', color: 'var(--primary)' }}>👥</div>
                             <div className="admin-stat-info">
                                 <div className="val">{totalRegistered || 0}</div>
                                 <div className="lbl">Total Registered</div>
@@ -3554,54 +3558,54 @@
                                 <div className="lbl">Marked Today</div>
                             </div>
                         </div>
-                        <div className="admin-stat-card">
-                            <div className="admin-stat-icon" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}>🏆</div>
-                            <div className="admin-stat-info">
-                                <div className="val">{markedDetails.length > 0 ? Math.max(...markedDetails.map(d => d.hours || 0)) : 0}h</div>
-                                <div className="lbl">Top Performer</div>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="admin-main-grid">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {/* Student Management Section */}
-                            <div className="glass card" style={{ padding: '1.5rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                                    <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.2rem' }}>Student Records</h3>
-                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                        <div className="admin-search-bar" style={{ marginBottom: 0 }}>
-                                            <span>🔍</span>
-                                            <input type="text" placeholder="Search students..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                                        </div>
+                            <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '15px' }}>
+                                        <button onClick={() => setActiveTab('all')} style={{ padding: '8px 20px', borderRadius: '12px', border: 'none', background: activeTab === 'all' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'all' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>All Students ({allStudents.length})</button>
+                                        <button onClick={() => setActiveTab('today')} style={{ padding: '8px 20px', borderRadius: '12px', border: 'none', background: activeTab === 'today' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'today' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>Active Today ({markedDetails.length})</button>
+                                    </div>
+                                    <div className="admin-search-bar" style={{ marginBottom: 0, width: 'min(100%, 300px)' }}>
+                                        <span>🔍</span>
+                                        <input type="text" placeholder="Search by name or district..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                                     </div>
                                 </div>
 
-                                <div className="admin-table-container">
+                                <div className="admin-table-container" style={{ border: 'none', padding: 0 }}>
                                     <table className="admin-table">
                                         <thead>
                                             <tr>
                                                 <th>Student</th>
-                                                <th>District</th>
-                                                <th>Today</th>
+                                                <th>Location</th>
+                                                <th>{activeTab === 'today' ? 'Today' : 'Year'}</th>
                                                 <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filteredStudents.length > 0 ? filteredStudents.map((s, i) => {
+                                            {loadingAll ? (
+                                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Loading data...</td></tr>
+                                            ) : filteredStudents.length > 0 ? filteredStudents.map((s, i) => {
                                                 const isLive = liveDetails.some(l => l.name === s.name);
                                                 return (
                                                     <tr key={i}>
                                                         <td>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                                <div className="student-avatar">{s.name.charAt(0)}</div>
-                                                                <div style={{ fontWeight: '700' }}>{s.name}</div>
+                                                                <div className="student-avatar" style={{ background: 'var(--primary-glow)', color: 'var(--primary)', border: 'none' }}>{s.name?.charAt(0)}</div>
+                                                                <div>
+                                                                    <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{s.name}</div>
+                                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{s.subjects?.slice(0, 2).join(', ')}</div>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td style={{ color: 'var(--text-dim)', fontWeight: '600' }}>{s.district}</td>
                                                         <td>
-                                                            <div style={{ fontWeight: '800', color: 'var(--primary)' }}>{s.hours}h</div>
+                                                            <div style={{ fontWeight: '800', color: activeTab === 'today' ? 'var(--primary)' : 'var(--text-main)' }}>
+                                                                {activeTab === 'today' ? `${s.hours}h` : s.exam_year}
+                                                            </div>
                                                         </td>
                                                         <td>
                                                             <span className={`status-badge ${isLive ? 'live' : 'offline'}`}>
@@ -3609,14 +3613,14 @@
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <button className="quick-action-btn" onClick={() => viewStudentProfile(s)}>View Details</button>
+                                                            <button className="quick-action-btn" onClick={() => viewStudentProfile(s)}>Profile</button>
                                                         </td>
                                                     </tr>
                                                 );
                                             }) : (
                                                 <tr>
                                                     <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>
-                                                        No student activity records found for today.
+                                                        No records found.
                                                     </td>
                                                 </tr>
                                             )}
@@ -3627,127 +3631,98 @@
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            {/* Broadcast Section */}
-                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                            <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
                                 <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span>📢</span> Broadcast
+                                    <span>📢</span> Broadcast Notice
                                 </h3>
-                                <textarea 
-                                    className="admin-textarea" 
-                                    value={announcementInput} 
-                                    onChange={e => setAnnouncementInput(e.target.value)} 
-                                    placeholder="Message all students..." 
-                                />
-                                <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '45px', fontSize: '0.85rem' }}>Update Notice</button>
+                                <textarea className="admin-textarea" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message for all students..." style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '14px', color: 'white', padding: '12px', width: '100%', height: '100px', resize: 'none', marginBottom: '10px' }} />
+                                <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '45px', fontSize: '0.85rem', width: '100%' }}>Push Notice</button>
                             </div>
 
-                            {/* Live Now Summary */}
-                            <div className="glass card" style={{ padding: '1.5rem' }}>
+                            <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
                                 <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span>👥</span> Online Now
+                                    <span>⚡</span> Active Sessions
                                 </h3>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '250px', overflowY: 'auto' }}>
-                                    {liveDetails.map((u, i) => (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {liveDetails.slice(0, 5).map((u, i) => (
                                         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--input-bg)', padding: '10px', borderRadius: '12px' }}>
-                                            <div className="live-dot"></div>
+                                            <div className="live-dot" style={{ background: '#10B981' }}></div>
                                             <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>{u.name}</div>
                                         </div>
                                     ))}
-                                    {liveDetails.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', textAlign: 'center' }}>No one online.</div>}
+                                    {liveDetails.length > 5 && <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'center' }}>+ {liveDetails.length - 5} more active</div>}
+                                    {liveDetails.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', textAlign: 'center' }}>No active sessions.</div>}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Student Detail Modal (Expanded with Marks & History) */}
                     {selectedStudent && (
                         <div className="admin-modal-overlay" onClick={() => setSelectedStudent(null)}>
-                            <div className="admin-modal glass" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px', width: '95%' }}>
+                            <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px', width: '95%', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '28px', padding: '2rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Academic Profile</h2>
-                                    <button onClick={() => setSelectedStudent(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-dim)' }}>✕</button>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Details</h2>
+                                    <button onClick={() => setSelectedStudent(null)} style={{ background: 'var(--input-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                                 </div>
                                 
                                 {loadingProfile ? (
-                                    <div style={{ textAlign: 'center', padding: '3rem' }}>
-                                        <div className="live-dot" style={{ margin: '0 auto 15px auto', width: '20px', height: '20px' }}></div>
-                                        <div style={{ fontWeight: '700', color: 'var(--text-dim)' }}>Fetching profile data...</div>
-                                    </div>
+                                    <div style={{ textAlign: 'center', padding: '3rem' }}>Loading profile...</div>
                                 ) : studentFullData ? (
-                                    <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-                                        <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                                            <div style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: 'white', fontWeight: '900', boxShadow: '0 10px 25px var(--primary-glow)' }}>
-                                                {studentFullData.name.charAt(0)}
+                                    <div>
+                                        <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center' }}>
+                                            <div style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: 'white', fontWeight: '900' }}>
+                                                {studentFullData.name?.charAt(0)}
                                             </div>
                                             <div>
-                                                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--text-main)' }}>{studentFullData.name}</div>
-                                                <div style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '1.1rem' }}>📍 {studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_month}</div>
-                                                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                                                    {studentFullData.subjects?.map((sub, i) => (
-                                                        <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '800', border: '1px solid var(--primary)' }}>{sub}</span>
-                                                    ))}
-                                                </div>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)' }}>{studentFullData.name}</div>
+                                                <div style={{ color: 'var(--primary)', fontWeight: '700' }}>{studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_level}</div>
                                             </div>
                                         </div>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '2rem' }}>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '22px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px' }}>Today's Study</div>
-                                                <div style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--primary)' }}>{selectedStudent.hours}h</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '2rem' }}>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>All-Time</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary)' }}>{studentFullData.totalAllTime}h</div>
                                             </div>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '22px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px' }}>Total All Time</div>
-                                                <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#10B981' }}>{studentFullData.totalAllTime}h</div>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Papers</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10B981' }}>{studentFullData.marks?.length || 0}</div>
                                             </div>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '22px', border: '1px solid var(--border)', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase', marginBottom: '8px' }}>Papers Done</div>
-                                                <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#F59E0B' }}>{studentFullData.marks?.length || 0}</div>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Subjects</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#F59E0B' }}>{studentFullData.subjects?.length || 0}</div>
                                             </div>
                                         </div>
 
-                                        {/* Marks Section */}
-                                        <div style={{ marginTop: '2rem' }}>
-                                            <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.2rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                📊 Recent Paper Marks
-                                            </h3>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '300px', overflowY: 'auto', paddingRight: '5px' }}>
-                                                {(studentFullData.marks && studentFullData.marks.length > 0) ? studentFullData.marks.map((m, i) => (
-                                                    <div key={i} style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '18px', border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', alignItems: 'center', gap: '15px' }}>
-                                                        <div>
-                                                            <div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.subject}</div>
-                                                            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{m.date}</div>
-                                                        </div>
-                                                        <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>MCQ</div>
-                                                            <div style={{ fontWeight: '800', color: '#10B981' }}>{m.mcq}%</div>
-                                                        </div>
-                                                        <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>STR</div>
-                                                            <div style={{ fontWeight: '800', color: '#3B82F6' }}>{m.structured}%</div>
-                                                        </div>
-                                                        <div style={{ textAlign: 'center' }}>
-                                                            <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', fontWeight: '800' }}>ESSAY</div>
-                                                            <div style={{ fontWeight: '800', color: '#8B5CF6' }}>{m.essay}%</div>
-                                                        </div>
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Enrolled Subjects</h4>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                {studentFullData.subjects?.map((s, i) => <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '700' }}>{s}</span>)}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Recent Results</h4>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                {studentFullData.marks?.slice(-3).map((m, i) => (
+                                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--input-bg)', padding: '12px 18px', borderRadius: '15px' }}>
+                                                        <span style={{ fontWeight: '700' }}>{m.subject}</span>
+                                                        <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{m.mcq}% | {m.structured}% | {m.essay}%</span>
                                                     </div>
-                                                )) : (
-                                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)', background: 'var(--input-bg)', borderRadius: '18px' }}>
-                                                        No paper marks recorded by this student yet.
-                                                    </div>
-                                                )}
+                                                ))}
+                                                {(!studentFullData.marks || studentFullData.marks.length === 0) && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No results recorded.</div>}
                                             </div>
                                         </div>
-
-                                        <button className="btn-primary" style={{ marginTop: '2.5rem' }} onClick={() => setSelectedStudent(null)}>Done Viewing</button>
                                     </div>
                                 ) : (
-                                    <div style={{ textAlign: 'center', padding: '3rem', color: '#EF4444' }}>
-                                        Error loading student profile. Please try again.
-                                    </div>
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: '#EF4444' }}>Profile not found.</div>
                                 )}
                             </div>
                         </div>
                     )}
+                </div>
+            );
+        };
                 </div>
             );
         };
@@ -3962,6 +3937,8 @@
             const [globalLeaders, setGlobalLeaders] = useState([]);
             const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
             const [unreadPosts, setUnreadPosts] = useState(0);
+            const [allStudents, setAllStudents] = useState([]);
+            const [loadingAll, setLoadingAll] = useState(false);
             const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
             // Global Timer State
@@ -4177,7 +4154,23 @@
                             console.error("Fetch Marked Error:", e);
                         }
                     };
+                    const fetchAllStudents = async () => {
+                        if (currentPage !== 'admin') return;
+                        setLoadingAll(true);
+                        try {
+                            const { data, error } = await sb.from('study_tracker_v2')
+                                .select('user_id, name, district, exam_year, exam_month, subjects')
+                                .order('name', { ascending: true });
+                            if (!error && data) {
+                                setAllStudents(data);
+                            }
+                        } catch (e) { console.error(e); }
+                        setLoadingAll(false);
+                    };
+
                     fetchMarked();
+                    fetchTotalUsers();
+                    fetchAllStudents();
 
                     const fetchTotalUsers = async () => {
                         try {
@@ -4488,7 +4481,7 @@
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'admin' ? (
-                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} />
+                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} allStudents={allStudents} loadingAll={loadingAll} />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
