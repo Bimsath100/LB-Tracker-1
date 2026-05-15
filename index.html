@@ -2808,6 +2808,9 @@
         };
 
 
+        const getAvatarUrl = (seed) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+        const getStudentID = (uid) => `LB-${uid?.substring(0, 5).toUpperCase() || 'TEMP'}`;
+
         const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
@@ -2913,19 +2916,21 @@
                     {showReminder && (<div className="reminder-banner" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '1rem 1.5rem', borderRadius: '20px', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '12px' }}><div style={{ fontSize: '1.5rem' }}>⏰</div><div><div style={{ fontWeight: '800', color: '#F59E0B', fontSize: '0.9rem' }}>අද පාඩම් කරේ නැද්ද? (Daily Reminder)</div><div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>ඔයා අද පාඩම් කරපු පැය ගාන තවම mark කරලා නැහැ නේද? ඔයාගෙ progress එක update කරන්න අමතක කරන්න එපා.</div></div></div>)}
                     <Reveal>
                         <div className="hero-section" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)', padding: 'clamp(1.5rem, 5vw, 2.5rem)', borderRadius: '24px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
-                            <div style={{ textAlign: 'left' }}>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-                                    {streak > 0 && <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '4px 12px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.75rem' }}>🔥 {streak} Day Streak</div>}
-                                    <div style={{ background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px', color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '700', border: '1px solid var(--border)' }}>{profile.examYear} {profile.examMonth} {profile.examLevel}</div>
-                                    <div style={{ background: 'var(--input-bg)', padding: '4px 12px', borderRadius: '100px', color: 'var(--text-dim)', fontSize: '0.75rem', fontWeight: '700', border: '1px solid var(--border)' }}>📍 {profile.district}</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '25px', marginBottom: '2rem' }}>
+                                <img src={getAvatarUrl(profile?.name || 'Guest')} style={{ width: '90px', height: '90px', borderRadius: '28px', background: 'var(--primary-glow)', border: '2px solid var(--primary)', boxShadow: '0 10px 25px var(--primary-glow)' }} alt="Avatar" />
+                                <div style={{ textAlign: 'left' }}>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                        {streak > 0 && <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '4px 12px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.75rem' }}>🔥 {streak} Day Streak</div>}
+                                        <div style={{ background: 'var(--primary-glow)', padding: '4px 12px', borderRadius: '100px', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '800' }}>{getStudentID(profile?.id)}</div>
+                                    </div>
+                                    <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: '800', marginBottom: '4px', color: 'var(--text-main)', letterSpacing: '-1px' }}>
+                                        Hello, <span style={{ color: 'var(--primary)' }}>{profile.name}</span>!
+                                        {profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '6px', verticalAlign: 'middle', marginLeft: '10px', fontWeight: '800', letterSpacing: '1px' }}>OWNER</span>}
+                                    </h1>
+                                    <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', fontWeight: '500' }}>
+                                        {profile.examYear} {profile.examMonth} {profile.examLevel} • {profile.district}
+                                    </p>
                                 </div>
-                                <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: '800', marginBottom: '0.5rem', color: 'var(--text-main)', letterSpacing: '-1px' }}>
-                                    Hello, <span style={{ color: 'var(--primary)' }}>{profile.name}</span>!
-                                    {profile.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '6px', verticalAlign: 'middle', marginLeft: '10px', fontWeight: '800', letterSpacing: '1px' }}>OWNER</span>}
-                                </h1>
-                                <p style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1rem)', color: 'var(--text-dim)', lineHeight: '1.6', maxWidth: '500px', fontWeight: '500', margin: 0 }}>
-                                    Welcome to your premium study dashboard. Plan your day, track your progress, and stay ahead of the curve.
-                                </p>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--card-bg)', padding: '2rem 1.5rem', borderRadius: '24px', border: '1px solid var(--border)', boxShadow: '0 12px 40px rgba(0,0,0,0.15)', minWidth: '280px' }}>
                                 <div style={{ textAlign: 'center', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: '900', letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '15px', opacity: 0.8 }}>Exam Countdown</div>
@@ -3672,10 +3677,10 @@
                                                     <tr key={i}>
                                                         <td>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                                <div className="student-avatar" style={{ background: 'var(--primary-glow)', color: 'var(--primary)', border: 'none' }}>{s.name?.charAt(0)}</div>
+                                                                <img src={getAvatarUrl(s.name)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)' }} alt="Avatar" />
                                                                 <div>
                                                                     <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{s.name}</div>
-                                                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{s.subjects?.slice(0, 2).join(', ')}</div>
+                                                                    <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>{getStudentID(s.user_id)}</div>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -3753,13 +3758,14 @@
                                 ) : studentFullData ? (
                                     <div>
                                         <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center' }}>
-                                            <div style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: 'white', fontWeight: '900' }}>
-                                                {studentFullData.name?.charAt(0)}
-                                            </div>
+                                            <img src={getAvatarUrl(studentFullData.name)} style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--input-bg)', border: '2px solid var(--primary-glow)' }} alt="Avatar" />
                                             <div>
                                                 <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)' }}>{studentFullData.name}</div>
-                                                <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '4px' }}>{studentFullData.email || 'No email provided'}</div>
-                                                <div style={{ color: 'var(--primary)', fontWeight: '700' }}>{studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_level}</div>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '900', background: 'var(--primary-glow)', color: 'var(--primary)', padding: '3px 10px', borderRadius: '6px' }}>{getStudentID(studentFullData.user_id)}</span>
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{studentFullData.email || 'No email provided'}</span>
+                                                </div>
+                                                <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_level}</div>
                                             </div>
                                         </div>
 
