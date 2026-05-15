@@ -3545,13 +3545,9 @@
             );
         };
 
-        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll, fetchAllStudents }) => {
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll, fetchAllStudents, onViewProfile, onToggleBan }) => {
             const [searchTerm, setSearchTerm] = useState('');
-            const [selectedStudent, setSelectedStudent] = useState(null);
-            const [studentFullData, setStudentFullData] = useState(null);
-            const [loadingProfile, setLoadingProfile] = useState(false);
             const [activeTab, setActiveTab] = useState('all'); // 'today' or 'all'
-            const [confirmAction, setConfirmAction] = useState(null); // { title, msg, onConfirm, type }
 
             const displayList = activeTab === 'today' ? markedDetails : allStudents;
 
@@ -3564,52 +3560,6 @@
                     if (activeTab === 'today') return (b.hours || 0) - (a.hours || 0);
                     return a.name?.localeCompare(b.name);
                 });
-
-            const viewStudentProfile = async (s) => {
-                setSelectedStudent(s);
-                setLoadingProfile(true);
-                setStudentFullData(null);
-                try {
-                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', s.user_id).single();
-                    if (data) {
-                        let totalAllTime = 0;
-                        if (data.history) {
-                            Object.keys(data.history).forEach(k => {
-                                if (k.includes('-') && Array.isArray(data.history[k])) {
-                                    totalAllTime += data.history[k].filter(Boolean).length;
-                                }
-                            });
-                        }
-                        setStudentFullData({ ...data, totalAllTime });
-                    }
-                } catch (e) { console.error(e); }
-                setLoadingProfile(false);
-            };
-
-            const toggleBan = async (s) => {
-                const newStatus = !s.is_banned;
-                setConfirmAction({
-                    title: newStatus ? 'Ban Student?' : 'Unban Student?',
-                    msg: `Are you sure you want to ${newStatus ? 'BAN' : 'UNBAN'} ${s.name}? This will change their access immediately.`,
-                    type: newStatus ? 'danger' : 'success',
-                    onConfirm: async () => {
-                        try {
-                            const { error } = await sb.from('study_tracker_v2')
-                                .update({ is_banned: newStatus })
-                                .eq('user_id', s.user_id);
-                            
-                            if (!error) {
-                                // Fallback success toast or refresh list
-                            } else {
-                                await sb.from('study_tracker_v2')
-                                    .upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
-                            }
-                            fetchAllStudents();
-                            setConfirmAction(null);
-                        } catch (e) { alert("Error: " + e.message); setConfirmAction(null); }
-                    }
-                });
-            };
 
             return (
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1400px', margin: '0 auto' }}>
@@ -3697,8 +3647,8 @@
                                                         </td>
                                                         <td>
                                                             <div style={{ display: 'flex', gap: '8px' }}>
-                                                                <button className="quick-action-btn" onClick={() => viewStudentProfile(s)}>Profile</button>
-                                                                <button onClick={() => toggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
+                                                                <button className="quick-action-btn" onClick={() => onViewProfile(s)}>Profile</button>
+                                                                <button onClick={() => onToggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
                                                                     {s?.is_banned ? 'Unban' : 'Ban'}
                                                                 </button>
                                                             </div>
@@ -3744,82 +3694,6 @@
                             </div>
                         </div>
                     </div>
-
-                    {selectedStudent && (
-                        <div className="admin-modal-overlay" onClick={() => setSelectedStudent(null)}>
-                            <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Details</h2>
-                                    <button onClick={() => setSelectedStudent(null)} style={{ background: 'var(--input-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-                                </div>
-                                
-                                {loadingProfile ? (
-                                    <div style={{ textAlign: 'center', padding: '3rem' }}>Loading profile...</div>
-                                ) : studentFullData ? (
-                                    <div>
-                                        <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center' }}>
-                                            <img src={getAvatarUrl(studentFullData.name)} style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--input-bg)', border: '2px solid var(--primary-glow)' }} alt="Avatar" />
-                                            <div>
-                                                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)' }}>{studentFullData.name}</div>
-                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                                    <span style={{ fontSize: '0.75rem', fontWeight: '900', background: 'var(--primary-glow)', color: 'var(--primary)', padding: '3px 10px', borderRadius: '6px' }}>{getStudentID(studentFullData.user_id)}</span>
-                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{studentFullData.email || 'No email provided'}</span>
-                                                </div>
-                                                <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_level}</div>
-                                            </div>
-                                        </div>
-
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '2rem' }}>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>All-Time</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary)' }}>{studentFullData.totalAllTime}h</div>
-                                            </div>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Papers</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10B981' }}>{studentFullData.marks?.length || 0}</div>
-                                            </div>
-                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Subjects</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#F59E0B' }}>{studentFullData.subjects?.length || 0}</div>
-                                            </div>
-                                        </div>
-
-                                        <div style={{ marginBottom: '2rem' }}>
-                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Enrolled Subjects</h4>
-                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                {studentFullData.subjects?.map((s, i) => <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '700' }}>{s}</span>)}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Recent Results</h4>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                {studentFullData.marks?.slice(-3).map((m, i) => (
-                                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--input-bg)', padding: '12px 18px', borderRadius: '15px' }}>
-                                                        <span style={{ fontWeight: '700' }}>{m.subject}</span>
-                                                        <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{m.mcq}% | {m.structured}% | {m.essay}%</span>
-                                                    </div>
-                                                ))}
-                                                {(!studentFullData.marks || studentFullData.marks.length === 0) && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No results recorded.</div>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div style={{ textAlign: 'center', padding: '2rem', color: '#EF4444' }}>Profile not found.</div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    {confirmAction && (
-                        <div className="admin-modal-overlay">
-                            <div className="admin-modal" style={{ maxWidth: '450px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{confirmAction.type === 'danger' ? '🚫' : '✅'}</div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.5rem' }}>{confirmAction.title}</h2>
-                                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: '1.5' }}>{confirmAction.msg}</p>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setConfirmAction(null)}>Cancel</button>
-                                    <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981' }} onClick={confirmAction.onConfirm}>Confirm</button>
-                                </div>
                             </div>
                         </div>
                     )}
@@ -4040,6 +3914,10 @@
             const [allStudents, setAllStudents] = useState([]);
             const [loadingAll, setLoadingAll] = useState(false);
             const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+            const [selectedStudent, setSelectedStudent] = useState(null);
+            const [studentFullData, setStudentFullData] = useState(null);
+            const [loadingProfile, setLoadingProfile] = useState(false);
+            const [confirmAction, setConfirmAction] = useState(null);
 
             // Global Timer State
             const [timerFocus, setTimerFocus] = useState(() => parseInt(localStorage.getItem('timer_focus')) || 25);
@@ -4223,6 +4101,44 @@
                     };
                 }
             }, [user]);
+
+            const toggleBan = async (s) => {
+                const newStatus = !s.is_banned;
+                setConfirmAction({
+                    title: newStatus ? 'Ban Student?' : 'Unban Student?',
+                    msg: `Are you sure you want to ${newStatus ? 'BAN' : 'UNBAN'} ${s.name}? This will change their access immediately.`,
+                    type: newStatus ? 'danger' : 'success',
+                    onConfirm: async () => {
+                        try {
+                            const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).eq('user_id', s.user_id);
+                            if (error) await sb.from('study_tracker_v2').upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
+                            fetchAllStudents();
+                            setConfirmAction(null);
+                        } catch (e) { alert("Error: " + e.message); setConfirmAction(null); }
+                    }
+                });
+            };
+
+            const viewStudentProfile = async (s) => {
+                setSelectedStudent(s);
+                setLoadingProfile(true);
+                setStudentFullData(null);
+                try {
+                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', s.user_id).single();
+                    if (data) {
+                        let totalAllTime = 0;
+                        if (data.history) {
+                            Object.keys(data.history).forEach(k => {
+                                if (k.includes('-') && Array.isArray(data.history[k])) {
+                                    totalAllTime += data.history[k].filter(Boolean).length;
+                                }
+                            });
+                        }
+                        setStudentFullData({ ...data, totalAllTime });
+                    }
+                } catch (e) { console.error(e); }
+                setLoadingProfile(false);
+            };
 
             const fetchMarked = async () => {
                 if (!user) return;
@@ -4562,7 +4478,21 @@
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'admin' ? (
-                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} allStudents={allStudents} loadingAll={loadingAll} fetchAllStudents={fetchAllStudents} />
+                                <AdminView 
+                                    announcement={announcement} 
+                                    announcementInput={announcementInput} 
+                                    setAnnouncementInput={setAnnouncementInput} 
+                                    updateAnnouncement={updateAnnouncement} 
+                                    liveDetails={liveDetails} 
+                                    markedDetails={markedDetails} 
+                                    totalRegistered={totalRegistered} 
+                                    profile={profile} 
+                                    allStudents={allStudents} 
+                                    loadingAll={loadingAll} 
+                                    fetchAllStudents={fetchAllStudents} 
+                                    viewStudentProfile={viewStudentProfile}
+                                    toggleBan={toggleBan}
+                                />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
@@ -4581,6 +4511,85 @@
                         isVisible={(timerIsActive || timerTimeLeft < (timerMode === 'focus' ? timerFocus : timerBreak) * 60) && currentPage !== 'workspace'}
                     />
 
+                    {selectedStudent && (
+                        <div className="admin-modal-overlay" onClick={() => setSelectedStudent(null)}>
+                            <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '750px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Details</h2>
+                                    <button onClick={() => setSelectedStudent(null)} style={{ background: 'var(--input-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                                </div>
+                                
+                                {loadingProfile ? (
+                                    <div style={{ textAlign: 'center', padding: '3rem' }}>Loading profile...</div>
+                                ) : studentFullData ? (
+                                    <div>
+                                        <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center' }}>
+                                            <img src={getAvatarUrl(studentFullData.name)} style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--input-bg)', border: '2px solid var(--primary-glow)' }} alt="Avatar" />
+                                            <div>
+                                                <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)' }}>{studentFullData.name}</div>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                                                    <span style={{ fontSize: '0.75rem', fontWeight: '900', background: 'var(--primary-glow)', color: 'var(--primary)', padding: '3px 10px', borderRadius: '6px' }}>{getStudentID(studentFullData.user_id)}</span>
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{studentFullData.email || 'No email provided'}</span>
+                                                </div>
+                                                <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>{studentFullData.district} • {studentFullData.exam_year} {studentFullData.exam_level}</div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '2rem' }}>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>All-Time</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--primary)' }}>{studentFullData.totalAllTime}h</div>
+                                            </div>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Papers</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10B981' }}>{studentFullData.marks?.length || 0}</div>
+                                            </div>
+                                            <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Subjects</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#F59E0B' }}>{studentFullData.subjects?.length || 0}</div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Enrolled Subjects</h4>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                {studentFullData.subjects?.map((s, i) => <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '700' }}>{s}</span>)}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Recent Results</h4>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                {studentFullData.marks?.slice(-3).map((m, i) => (
+                                                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--input-bg)', padding: '12px 18px', borderRadius: '15px' }}>
+                                                        <span style={{ fontWeight: '700' }}>{m.subject}</span>
+                                                        <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{m.mcq}% | {m.structured}% | {m.essay}%</span>
+                                                    </div>
+                                                ))}
+                                                {(!studentFullData.marks || studentFullData.marks.length === 0) && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No results recorded.</div>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: '#EF4444' }}>Profile not found.</div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {confirmAction && (
+                        <div className="admin-modal-overlay">
+                            <div className="admin-modal" style={{ maxWidth: '450px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{confirmAction.type === 'danger' ? '🚫' : '✅'}</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.5rem' }}>{confirmAction.title}</h2>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: '1.5' }}>{confirmAction.msg}</p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setConfirmAction(null)}>Cancel</button>
+                                    <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981' }} onClick={confirmAction.onConfirm}>Confirm</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
