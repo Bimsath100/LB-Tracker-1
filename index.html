@@ -3843,7 +3843,7 @@
                         .from('assets')
                         .upload(filePath, file);
 
-                    if (uploadError) throw uploadError;
+                    if (uploadError) throw new Error(uploadError.message || "Upload failed");
 
                     const { data: { publicUrl } } = sb.storage
                         .from('assets')
@@ -3851,8 +3851,8 @@
 
                     setForm(f => ({ ...f, avatarUrl: publicUrl }));
                 } catch (error) {
-                    console.error('Error uploading image:', error.message);
-                    alert('Error uploading image. Make sure you have a stable connection.');
+                    console.error('Error uploading image:', error);
+                    alert('Upload Error: ' + (error.message || 'Check your connection and storage settings'));
                 } finally {
                     setIsUploading(false);
                 }
@@ -4310,18 +4310,24 @@
 
             const updateAnnouncement = async () => {
                 if (!user) return;
-                const { error } = await sb.from('study_tracker_v2').upsert({
+                const payload = {
                     user_id: user.id,
                     name: profile?.name || 'Bimsath Walpola',
                     district: profile?.district || 'Colombo',
                     email: user.email,
-                    history: { ...history, msg: announcementInput },
+                    history: { ...history, msg: announcementInput, avatarUrl: profile?.avatarUrl || '' },
                     subjects: profile?.subjects || [],
                     exam_year: profile?.examYear || 2026,
                     exam_month: profile?.examMonth || 'August',
-                    exam_level: profile?.examLevel || 'A/L',
-                    avatar_url: profile?.avatarUrl || ''
-                });
+                    exam_level: profile?.examLevel || 'A/L'
+                };
+                
+                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: profile?.avatarUrl || '' });
+                if (error && error.message.includes('avatar_url')) {
+                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                    error = res.error;
+                }
+
                 if (!error) {
                     setAnnouncement(announcementInput);
                     alert('Broadcast updated successfully! ✅');
@@ -4342,7 +4348,7 @@
                             examYear: data.exam_year,
                             examMonth: data.exam_month,
                             examLevel: data.exam_level || 'A/L',
-                            avatarUrl: data.avatar_url || '',
+                            avatarUrl: data.avatar_url || data.history?.avatarUrl || '',
                             is_banned: data.is_banned
                         });
                         setHistory(data.history || {});
@@ -4365,12 +4371,17 @@
                     exam_year: p.examYear,
                     exam_month: p.examMonth,
                     exam_level: p.examLevel,
-                    avatar_url: p.avatarUrl || '',
                     email: user.email,
-                    history: { ...history, last_updated: new Date().toISOString() },
+                    history: { ...history, last_updated: new Date().toISOString(), avatarUrl: p.avatarUrl || '' },
                     marks: marks
                 };
-                const { error } = await sb.from('study_tracker_v2').upsert(payload);
+                
+                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: p.avatarUrl || '' });
+                if (error && error.message.includes('avatar_url')) {
+                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                    error = res.error;
+                }
+
                 if (error) { console.error("Save Error:", error); alert("Error saving profile: " + error.message); }
                 else { setProfile({ ...p, id: user.id }); setIsEditMode(false); setCurrentPage('dashboard'); }
                 setLoading(false);
@@ -4378,15 +4389,20 @@
 
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
-                const historyWithTimestamp = { ...h, last_updated: new Date().toISOString() };
-                console.log("Pushing data to Supabase...", historyWithTimestamp);
-                const { error } = await sb.from('study_tracker_v2').upsert({
+                const historyWithTimestamp = { ...h, last_updated: new Date().toISOString(), avatarUrl: profile.avatarUrl || '' };
+                const payload = {
                     user_id: user.id,
                     name: profile.name, district: profile.district, subjects: profile.subjects,
                     exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel,
-                    avatar_url: profile.avatarUrl || '',
                     history: historyWithTimestamp, marks: m
-                });
+                };
+
+                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: profile.avatarUrl || '' });
+                if (error && error.message.includes('avatar_url')) {
+                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                    error = res.error;
+                }
+
                 if (error) console.error("Push Error:", error);
                 else console.log("Data pushed successfully! ✅");
             };
@@ -4572,8 +4588,8 @@
                                     allStudents={allStudents} 
                                     loadingAll={loadingAll} 
                                     fetchAllStudents={fetchAllStudents} 
-                                    viewStudentProfile={viewStudentProfile}
-                                    toggleBan={toggleBan}
+                                    onViewProfile={viewStudentProfile}
+                                    onToggleBan={toggleBan}
                                 />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
