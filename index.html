@@ -495,6 +495,36 @@
             }
         }
 
+        /* Admin Modals */
+        .admin-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(3, 0, 20, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000 !important;
+            animation: fadeIn 0.3s ease-out;
+            padding: 20px;
+        }
+        .admin-modal {
+            background: #09090b !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 32px !important;
+            width: min(100%, 650px);
+            padding: 2.5rem !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            position: relative;
+            animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #f8fafc !important;
+        }
+        @keyframes modalPop {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+
         .mobile-menu-btn {
             display: none;
             align-items: center;
@@ -3712,7 +3742,7 @@
 
                     {selectedStudent && (
                         <div className="admin-modal-overlay" onClick={() => setSelectedStudent(null)}>
-                            <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px', width: '95%', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '28px', padding: '2rem' }}>
+                            <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                                     <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Details</h2>
                                     <button onClick={() => setSelectedStudent(null)} style={{ background: 'var(--input-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -3775,8 +3805,8 @@
                         </div>
                     )}
                     {confirmAction && (
-                        <div className="admin-modal-overlay" style={{ zIndex: 4000 }}>
-                            <div className="admin-modal" style={{ maxWidth: '400px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', textAlign: 'center' }}>
+                        <div className="admin-modal-overlay">
+                            <div className="admin-modal" style={{ maxWidth: '450px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{confirmAction.type === 'danger' ? '🚫' : '✅'}</div>
                                 <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.5rem' }}>{confirmAction.title}</h2>
                                 <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: '1.5' }}>{confirmAction.msg}</p>
@@ -4211,8 +4241,9 @@
                 try {
                     let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email, is_banned').order('name', { ascending: true });
                     if (error) {
-                        let res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email').order('name', { ascending: true });
-                        if (res.error) res = await sb.from('study_tracker_v2').select('user_id, name, district, subjects').order('name', { ascending: true });
+                        console.warn("Primary fetch failed, trying fallbacks...", error.message);
+                        let res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email, is_banned').order('name', { ascending: true });
+                        if (res.error) res = await sb.from('study_tracker_v2').select('user_id, name, district, subjects, email, is_banned').order('name', { ascending: true });
                         if (res.error) res = await sb.from('study_tracker_v2').select('*').order('name', { ascending: true });
                         data = res.data;
                     }
