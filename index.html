@@ -4188,131 +4188,70 @@
                 }
             }, [user]);
 
+            const fetchMarked = async () => {
+                if (!user) return;
+                try {
+                    const today = getLocalISODate();
+                    let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, history').not(`history->${today}`, 'is', null).order('history->last_updated', { ascending: false }).limit(100);
+                    if (error) { const { data: d2 } = await sb.from('study_tracker_v2').select('user_id, name, district, history').limit(100); data = d2; }
+                    if (data) {
+                        const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
+                        setMarkedToday(actualMarked.length);
+                        if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                            const details = actualMarked.map(d => ({ user_id: d.user_id, name: d.name || 'Unknown', district: d.district || 'N/A', history: d.history, hours: d.history[today].filter(Boolean).length })).sort((a, b) => b.hours - a.hours);
+                            setMarkedDetails(details);
+                        }
+                    }
+                } catch (e) { console.error("Fetch Marked Error:", e); }
+            };
+
+            const fetchAllStudents = async () => {
+                if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) return;
+                setLoadingAll(true);
+                try {
+                    let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email, is_banned').order('name', { ascending: true });
+                    if (error) {
+                        let res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email').order('name', { ascending: true });
+                        if (res.error) res = await sb.from('study_tracker_v2').select('user_id, name, district, subjects').order('name', { ascending: true });
+                        if (res.error) res = await sb.from('study_tracker_v2').select('*').order('name', { ascending: true });
+                        data = res.data;
+                    }
+                    if (data) setAllStudents(data);
+                } catch (e) { console.error("Fetch All Final Error:", e); }
+                setLoadingAll(false);
+            };
+
+            const fetchTotalUsers = async () => {
+                try {
+                    const { count, error } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
+                    if (!error && count !== null) setTotalRegistered(count);
+                    const { data: leadData } = await sb.from('study_tracker_v2').select('name, district, history').limit(1000);
+                    if (leadData) {
+                        const scored = leadData.map(u => {
+                            let hrs = 0;
+                            if (u.history) { Object.keys(u.history).forEach(k => { if (k.includes('-') && Array.isArray(u.history[k])) hrs += u.history[k].filter(Boolean).length; }); }
+                            return { name: u.name, district: u.district, hrs };
+                        }).filter(u => u.hrs > 0).sort((a, b) => b.hrs - a.hrs).slice(0, 10);
+                        setGlobalLeaders(scored);
+                    }
+                } catch (e) { console.error("Fetch Total Error:", e); }
+            };
+
             useEffect(() => {
                 if (user) {
-                    const fetchMarked = async () => {
-                        try {
-                            const today = getLocalISODate();
-                            // Progressive fallback for marked users
-                            let { data, error } = await sb.from('study_tracker_v2')
-                                .select('user_id, name, district, history')
-                                .not(`history->${today}`, 'is', null)
-                                .order('history->last_updated', { ascending: false })
-                                .limit(100);
-                            
-                            if (error) {
-                                // Try even simpler if JSON path fails
-                                const { data: d2 } = await sb.from('study_tracker_v2').select('user_id, name, district, history').limit(100);
-                                data = d2;
-                            }
-
-                            if (data) {
-                                const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
-                                setMarkedToday(actualMarked.length);
-
-                                if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                                    const details = actualMarked.map(d => ({
-                                        user_id: d.user_id,
-                                        name: d.name || 'Unknown',
-                                        district: d.district || 'N/A',
-                                        history: d.history,
-                                        hours: d.history[today].filter(Boolean).length
-                                    })).sort((a, b) => b.hours - a.hours);
-                                    setMarkedDetails(details);
-                                }
-                            }
-                        } catch (e) { console.error("Fetch Marked Error:", e); }
-                    };
-
-                    const fetchAllStudents = async () => {
-                        // We check the latest currentPage from the component scope, not a stale closure
-                        setLoadingAll(true);
-                        try {
-                            // Try full select first
-                            let { data, error } = await sb.from('study_tracker_v2')
-                                .select('user_id, name, district, exam_year, exam_month, subjects, email, is_banned')
-                                .order('name', { ascending: true });
-                            
-                            if (error) {
-                                console.warn("Primary fetch failed, trying fallbacks...", error.message);
-                                let res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email').order('name', { ascending: true });
-                                if (res.error) res = await sb.from('study_tracker_v2').select('user_id, name, district, subjects').order('name', { ascending: true });
-                                if (res.error) res = await sb.from('study_tracker_v2').select('*').order('name', { ascending: true });
-                                data = res.data;
-                            }
-                            
-                            if (data) {
-                                console.log(`Fetched ${data.length} students.`);
-                                setAllStudents(data);
-                            }
-                        } catch (e) { console.error("Fetch All Final Error:", e); }
-                        setLoadingAll(false);
-                    };
-
-                    const fetchTotalUsers = async () => {
-                        try {
-                            const { count, error } = await sb.from('study_tracker_v2').select('*', { count: 'exact', head: true });
-                            if (!error && count !== null) setTotalRegistered(count);
-                            const { data: leadData } = await sb.from('study_tracker_v2').select('name, district, history').limit(1000);
-                            if (leadData) {
-                                const scored = leadData.map(u => {
-                                    let hrs = 0;
-                                    if (u.history) {
-                                        Object.keys(u.history).forEach(k => {
-                                            if (k.includes('-') && Array.isArray(u.history[k])) hrs += u.history[k].filter(Boolean).length;
-                                        });
-                                    }
-                                    return { name: u.name, district: u.district, hrs };
-                                }).filter(u => u.hrs > 0).sort((a, b) => b.hrs - a.hrs).slice(0, 10);
-                                setGlobalLeaders(scored);
-                            }
-                        } catch (e) { console.error("Fetch Total Error:", e); }
-                    };
-
-                    // Initial fetch
                     fetchMarked();
                     fetchTotalUsers();
                     if (currentPage === 'admin') fetchAllStudents();
-
-                    const channel = sb.channel('global-realtime')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
-                            fetchMarked();
-                            fetchTotalUsers();
-                        })
-                        .subscribe();
-
-                    const inv = setInterval(() => { 
-                        fetchMarked(); 
-                        fetchTotalUsers(); 
-                    }, 20000);
-
-                    return () => {
-                        clearInterval(inv);
-                        sb.removeChannel(channel);
-                    };
+                    const channel = sb.channel('global-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { fetchMarked(); fetchTotalUsers(); }).subscribe();
+                    const inv = setInterval(() => { fetchMarked(); fetchTotalUsers(); }, 20000);
+                    return () => { clearInterval(inv); sb.removeChannel(channel); };
                 }
             }, [user]);
 
-            // Separate effect for admin-only data to avoid stale closures in subscriptions
             useEffect(() => {
-                if (currentPage === 'admin' && user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                    // Logic to fetch all students is handled inside the function called here
-                    const fetch = async () => {
-                        setLoadingAll(true);
-                        try {
-                            let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email, is_banned').order('name', { ascending: true });
-                            if (error) {
-                                let res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects, email').order('name', { ascending: true });
-                                if (res.error) res = await sb.from('study_tracker_v2').select('user_id, name, district, exam_year, exam_month, subjects').order('name', { ascending: true });
-                                data = res.data;
-                            }
-                            if (data) setAllStudents(data);
-                        } catch (e) {}
-                        setLoadingAll(false);
-                    };
-                    fetch();
-                }
+                if (currentPage === 'admin') fetchAllStudents();
             }, [currentPage, user]);
+
 
             useEffect(() => {
                 if (currentPage === 'community') {
