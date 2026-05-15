@@ -25,7 +25,7 @@
     <meta property="og:description"
         content="Track your study hours, manage paper marks, and achieve your A/L goals with cloud-synced progress.">
     <meta property="og:image"
-        content="https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/assets/og-image.png">
+        content="https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/community_assets/og-image.png">
 
     <link rel="icon" type="image/png" sizes="192x192" href="lb-icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="lb-icon-512.png">
@@ -3840,13 +3840,13 @@
                     const filePath = `avatars/${fileName}`;
 
                     const { error: uploadError } = await sb.storage
-                        .from('assets')
+                        .from('community_assets')
                         .upload(filePath, file);
 
                     if (uploadError) throw new Error(uploadError.message || "Upload failed");
 
                     const { data: { publicUrl } } = sb.storage
-                        .from('assets')
+                        .from('community_assets')
                         .getPublicUrl(filePath);
 
                     setForm(f => ({ ...f, avatarUrl: publicUrl }));
