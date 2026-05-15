@@ -1242,7 +1242,7 @@
         .admin-table td { padding: 15px; background: var(--input-bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .admin-table td:first-child { border-left: 1px solid var(--border); border-radius: 16px 0 0 16px; }
         .admin-table td:last-child { border-right: 1px solid var(--border); border-radius: 0 16px 16px 0; }
-        .status-badge { padding: 4px 10px; borderRadius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .status-badge.live { background: rgba(16, 185, 129, 0.1); color: #10B981; }
         .status-badge.offline { background: rgba(156, 163, 175, 0.1); color: #9CA3AF; }
         .quick-action-btn { background: var(--primary-glow); color: var(--primary); border: none; padding: 6px 12px; border-radius: 10px; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
@@ -3656,7 +3656,7 @@
                                 <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span>📢</span> Broadcast Notice
                                 </h3>
-                                <textarea className="admin-textarea" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message for all students..." style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '14px', color: 'white', padding: '12px', width: '100%', height: '100px', resize: 'none', marginBottom: '10px' }} />
+                                <textarea className="admin-textarea" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message for all students..." style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', padding: '12px', width: '100%', height: '100px', resize: 'none', marginBottom: '10px' }} />
                                 <button className="btn-primary" onClick={updateAnnouncement} style={{ height: '45px', fontSize: '0.85rem', width: '100%' }}>Push Notice</button>
                             </div>
 
@@ -3677,9 +3677,6 @@
                             </div>
                         </div>
                     </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
             );
         };
@@ -4017,18 +4014,28 @@
                 console.log("Setting up real-time subscription for user:", user.id);
                 const sub = sb.channel(`user-sync-${user.id}`)
                     .on('postgres_changes', {
-                        event: 'UPDATE',
+                        event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
                         schema: 'public',
                         table: 'study_tracker_v2',
                         filter: `user_id=eq.${user.id}`
                     }, (payload) => {
-                        console.log("Live Sync: Update received!", payload.new);
-                        if (payload.new.history) setHistory(payload.new.history);
-                        if (payload.new.marks) setMarks(payload.new.marks);
-
-                        // Show a subtle toast if the change wasn't from this tab
-                        // (We can't easily detect tab ID here without extra work, 
-                        // but Supabase usually sends updates back to the sender too)
+                        console.log("Live Sync: Data changed!", payload.new);
+                        if (payload.new) {
+                            if (payload.new.history) setHistory(payload.new.history);
+                            if (payload.new.marks) setMarks(payload.new.marks);
+                            // Also update profile if it changed on another device
+                            setProfile(prev => ({
+                                ...prev,
+                                name: payload.new.name,
+                                district: payload.new.district,
+                                subjects: payload.new.subjects,
+                                examYear: payload.new.exam_year,
+                                examMonth: payload.new.exam_month,
+                                examLevel: payload.new.exam_level || 'A/L',
+                                avatarUrl: payload.new.avatar_url || '',
+                                is_banned: payload.new.is_banned
+                            }));
+                        }
                     })
                     .subscribe();
                 return () => sb.removeChannel(sub);
@@ -4085,13 +4092,14 @@
                             await channel.track({
                                 name: profile?.name || 'Guest',
                                 email: user?.email,
+                                avatar: profile?.avatarUrl || '',
                                 online_at: new Date().toISOString()
                             });
                         }
                     });
 
                 return () => { channel.unsubscribe(); };
-            }, [user, profile?.name]);
+            }, [user, profile?.name, profile?.avatarUrl]);
 
             useEffect(() => {
                 const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
@@ -4209,15 +4217,27 @@
                     fetchMarked();
                     fetchTotalUsers();
                     if (currentPage === 'admin') fetchAllStudents();
-                    const channel = sb.channel('global-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { fetchMarked(); fetchTotalUsers(); }).subscribe();
-                    const inv = setInterval(() => { fetchMarked(); fetchTotalUsers(); }, 20000);
-                    return () => { clearInterval(inv); sb.removeChannel(channel); };
+                    
+                    const channel = sb.channel('global-realtime')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { 
+                            fetchMarked(); 
+                            fetchTotalUsers(); 
+                            if (currentPage === 'admin') fetchAllStudents();
+                        })
+                        .subscribe();
+                        
+                    const inv = setInterval(() => { 
+                        fetchMarked(); 
+                        fetchTotalUsers(); 
+                        if (currentPage === 'admin') fetchAllStudents();
+                    }, 20000);
+                    
+                    return () => { 
+                        clearInterval(inv); 
+                        sb.removeChannel(channel); 
+                    };
                 }
-            }, [user]);
-
-            useEffect(() => {
-                if (currentPage === 'admin') fetchAllStudents();
-            }, [currentPage, user]);
+            }, [user, currentPage]);
 
 
             useEffect(() => {
@@ -4255,7 +4275,9 @@
                     history: { ...history, msg: announcementInput },
                     subjects: profile?.subjects || [],
                     exam_year: profile?.examYear || 2026,
-                    exam_month: profile?.examMonth || 'August'
+                    exam_month: profile?.examMonth || 'August',
+                    exam_level: profile?.examLevel || 'A/L',
+                    avatar_url: profile?.avatarUrl || ''
                 });
                 if (!error) {
                     setAnnouncement(announcementInput);
