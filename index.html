@@ -4537,12 +4537,14 @@
 
                     <div className={`sidebar-overlay ${isMobileSidebarOpen ? 'show' : ''}`} onClick={() => setIsMobileSidebarOpen(false)}></div>
                     <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-show' : ''}`}>
-                        <div className="sidebar-brand" onClick={() => { 
+                        <div className="sidebar-brand" onClick={(e) => { 
+                            e.stopPropagation();
                             setCurrentPage('dashboard'); 
-                            setIsMobileSidebarOpen(false); 
+                            setIsMobileSidebarOpen(false);
+                            window.scrollTo(0, 0);
                         }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div className="sidebar-logo" style={{ overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', pointerEvents: 'none' }}>
-                                <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Logo" />
+                                <img src="logo.png" style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} alt="Logo" />
                             </div>
                             <span style={{ color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900', fontSize: '0.85rem', pointerEvents: 'none' }}>LB Study Tracker</span>
                         </div>
@@ -4552,9 +4554,11 @@
 
                         <div className="sidebar-label"><span>Main Menu</span></div>
                         <div className="nav-links">
-                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={() => { 
+                            <div className={`nav-link ${currentPage === 'dashboard' ? 'active' : ''}`} onClick={(e) => { 
+                                e.stopPropagation();
                                 setCurrentPage('dashboard'); 
-                                setIsMobileSidebarOpen(false); 
+                                setIsMobileSidebarOpen(false);
+                                window.scrollTo(0, 0);
                             }}>🏠 <span>Dashboard</span></div>
                             <div className={`nav-link ${currentPage === 'workspace' ? 'active' : ''}`} onClick={() => { setCurrentPage('workspace'); setIsMobileSidebarOpen(false); }}>💻 <span>Workspace</span></div>
                             <div className={`nav-link ${currentPage === 'community' ? 'active' : ''}`} onClick={() => { setCurrentPage('community'); setIsMobileSidebarOpen(false); }} style={{ position: 'relative' }}>
@@ -4584,7 +4588,7 @@
                         <header className="top-header">
                             <button className="mobile-menu-btn" onClick={() => setIsMobileSidebarOpen(true)}>☰</button>
                             
-                            <div className="mobile-only-brand" onClick={() => setCurrentPage('dashboard')} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                            <div className="mobile-only-brand" onClick={(e) => { e.stopPropagation(); setCurrentPage('dashboard'); window.scrollTo(0, 0); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                 <img src="logo.png" style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '8px', background: 'white' }} alt="Logo" />
                                 <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', letterSpacing: '1px' }}>LB TRACKER</span>
                             </div>
