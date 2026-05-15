@@ -2786,7 +2786,8 @@
 
 
         const getAvatarUrl = (profile) => {
-            if (profile?.avatarUrl && profile.avatarUrl.startsWith('http')) return profile.avatarUrl;
+            const url = profile?.avatarUrl || profile?.avatar_url || profile?.history?._avatar_url || profile?.history?.avatarUrl;
+            if (url && url.startsWith('http')) return url;
             return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile?.name || 'Guest')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
         };
         const getStudentID = (uid) => `LB-${uid?.substring(0, 5).toUpperCase() || 'TEMP'}`;
@@ -3620,7 +3621,7 @@
                                                         <td style={{ color: 'var(--text-dim)', fontWeight: '600' }}>{s.district}</td>
                                                         <td>
                                                             <div style={{ fontWeight: '800', color: activeTab === 'today' ? 'var(--primary)' : 'var(--text-main)' }}>
-                                                                {activeTab === 'today' ? `${s.hours}h` : s.exam_year}
+                                                                {activeTab === 'today' ? `${s.hours}h` : (s.exam_year || s.history?._exam_year || '...')}
                                                             </div>
                                                         </td>
                                                         <td>
@@ -4310,21 +4311,40 @@
 
             const updateAnnouncement = async () => {
                 if (!user) return;
+                const historyData = { 
+                    ...history, 
+                    msg: announcementInput, 
+                    _email: user.email,
+                    _avatar_url: profile?.avatarUrl || '',
+                    _exam_year: profile?.examYear || 2026,
+                    _exam_month: profile?.examMonth || 'August',
+                    _exam_level: profile?.examLevel || 'A/L'
+                };
+                
                 const payload = {
                     user_id: user.id,
                     name: profile?.name || 'Bimsath Walpola',
                     district: profile?.district || 'Colombo',
                     email: user.email,
-                    history: { ...history, msg: announcementInput, avatarUrl: profile?.avatarUrl || '' },
+                    history: historyData,
                     subjects: profile?.subjects || [],
                     exam_year: profile?.examYear || 2026,
                     exam_month: profile?.examMonth || 'August',
-                    exam_level: profile?.examLevel || 'A/L'
+                    exam_level: profile?.examLevel || 'A/L',
+                    avatar_url: profile?.avatarUrl || ''
                 };
                 
-                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: profile?.avatarUrl || '' });
-                if (error && error.message.includes('avatar_url')) {
-                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                let { error } = await sb.from('study_tracker_v2').upsert(payload);
+                if (error && (error.message.includes('column') || error.message.includes('schema cache'))) {
+                    console.warn("Retrying announcement with minimal columns...");
+                    const minimalPayload = {
+                        user_id: user.id,
+                        name: payload.name,
+                        district: payload.district,
+                        history: historyData,
+                        subjects: payload.subjects
+                    };
+                    const res = await sb.from('study_tracker_v2').upsert(minimalPayload);
                     error = res.error;
                 }
 
@@ -4340,19 +4360,21 @@
                 try {
                     const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
                     if (data) {
+                        const h = data.history || {};
                         setProfile({
-                            id: uid, // Include the ID here
+                            id: uid,
                             name: data.name,
                             district: data.district,
-                            subjects: data.subjects,
-                            examYear: data.exam_year,
-                            examMonth: data.exam_month,
-                            examLevel: data.exam_level || 'A/L',
-                            avatarUrl: data.avatar_url || data.history?.avatarUrl || '',
+                            subjects: data.subjects || h._subjects || [],
+                            examYear: data.exam_year || h._exam_year || 2026,
+                            examMonth: data.exam_month || h._exam_month || 'August',
+                            examLevel: data.exam_level || h._exam_level || 'A/L',
+                            avatarUrl: data.avatar_url || h._avatar_url || h.avatarUrl || '',
+                            email: data.email || h._email || '',
                             is_banned: data.is_banned
                         });
-                        setHistory(data.history || {});
-                        setMarks(data.marks || []);
+                        setHistory(h);
+                        setMarks(data.marks || h._marks || []);
                     }
                 } catch (e) { console.error("Fetch Error:", e); }
                 setLoading(false);
@@ -4363,6 +4385,18 @@
 
             const saveProfile = async (p) => {
                 setLoading(true);
+                const historyData = { 
+                    ...history, 
+                    last_updated: new Date().toISOString(),
+                    _email: user.email,
+                    _avatar_url: p.avatarUrl || '',
+                    _exam_year: p.examYear,
+                    _exam_month: p.examMonth,
+                    _exam_level: p.examLevel,
+                    _subjects: p.subjects,
+                    _marks: marks
+                };
+                
                 const payload = {
                     user_id: user.id,
                     name: p.name,
@@ -4372,13 +4406,21 @@
                     exam_month: p.examMonth,
                     exam_level: p.examLevel,
                     email: user.email,
-                    history: { ...history, last_updated: new Date().toISOString(), avatarUrl: p.avatarUrl || '' },
+                    avatar_url: p.avatarUrl || '',
+                    history: historyData,
                     marks: marks
                 };
                 
-                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: p.avatarUrl || '' });
-                if (error && error.message.includes('avatar_url')) {
-                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                let { error } = await sb.from('study_tracker_v2').upsert(payload);
+                if (error && (error.message.includes('column') || error.message.includes('schema cache'))) {
+                    console.warn("Retrying profile save with minimal columns...");
+                    const minimalPayload = {
+                        user_id: user.id,
+                        name: payload.name,
+                        district: payload.district,
+                        history: historyData
+                    };
+                    const res = await sb.from('study_tracker_v2').upsert(minimalPayload);
                     error = res.error;
                 }
 
@@ -4389,17 +4431,40 @@
 
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
-                const historyWithTimestamp = { ...h, last_updated: new Date().toISOString(), avatarUrl: profile.avatarUrl || '' };
+                const historyData = { 
+                    ...h, 
+                    last_updated: new Date().toISOString(),
+                    _email: user.email,
+                    _avatar_url: profile.avatarUrl || '',
+                    _exam_year: profile.examYear,
+                    _exam_month: profile.examMonth,
+                    _exam_level: profile.examLevel,
+                    _subjects: profile.subjects,
+                    _marks: m
+                };
+                
                 const payload = {
                     user_id: user.id,
-                    name: profile.name, district: profile.district, subjects: profile.subjects,
-                    exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel,
-                    history: historyWithTimestamp, marks: m
+                    name: profile.name, 
+                    district: profile.district, 
+                    subjects: profile.subjects,
+                    exam_year: profile.examYear, 
+                    exam_month: profile.examMonth, 
+                    exam_level: profile.examLevel,
+                    avatar_url: profile.avatarUrl || '',
+                    history: historyData, 
+                    marks: m
                 };
 
-                let { error } = await sb.from('study_tracker_v2').upsert({ ...payload, avatar_url: profile.avatarUrl || '' });
-                if (error && error.message.includes('avatar_url')) {
-                    const res = await sb.from('study_tracker_v2').upsert(payload);
+                let { error } = await sb.from('study_tracker_v2').upsert(payload);
+                if (error && (error.message.includes('column') || error.message.includes('schema cache'))) {
+                    const minimalPayload = {
+                        user_id: user.id,
+                        name: payload.name,
+                        district: payload.district,
+                        history: historyData
+                    };
+                    const res = await sb.from('study_tracker_v2').upsert(minimalPayload);
                     error = res.error;
                 }
 
@@ -4640,31 +4705,31 @@
                                             </div>
                                             <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
                                                 <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Papers</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10B981' }}>{studentFullData.marks?.length || 0}</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#10B981' }}>{(studentFullData.marks || studentFullData.history?._marks)?.length || 0}</div>
                                             </div>
                                             <div style={{ background: 'var(--input-bg)', padding: '1.5rem', borderRadius: '20px', textAlign: 'center' }}>
                                                 <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)', textTransform: 'uppercase' }}>Subjects</div>
-                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#F59E0B' }}>{studentFullData.subjects?.length || 0}</div>
+                                                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#F59E0B' }}>{(studentFullData.subjects || studentFullData.history?._subjects)?.length || 0}</div>
                                             </div>
                                         </div>
 
                                         <div style={{ marginBottom: '2rem' }}>
                                             <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Enrolled Subjects</h4>
                                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                {studentFullData.subjects?.map((s, i) => <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '700' }}>{s}</span>)}
+                                                {(studentFullData.subjects || studentFullData.history?._subjects)?.map((s, i) => <span key={i} style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '5px 12px', borderRadius: '10px', fontSize: '0.75rem', fontWeight: '700' }}>{s}</span>)}
                                             </div>
                                         </div>
 
                                         <div>
                                             <h4 style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '10px' }}>Recent Results</h4>
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                                {studentFullData.marks?.slice(-3).map((m, i) => (
+                                                {(studentFullData.marks || studentFullData.history?._marks)?.slice(-3).map((m, i) => (
                                                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--input-bg)', padding: '12px 18px', borderRadius: '15px' }}>
                                                         <span style={{ fontWeight: '700' }}>{m.subject}</span>
                                                         <span style={{ color: 'var(--primary)', fontWeight: '800' }}>{m.mcq}% | {m.structured}% | {m.essay}%</span>
                                                     </div>
                                                 ))}
-                                                {(!studentFullData.marks || studentFullData.marks.length === 0) && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No results recorded.</div>}
+                                                {(!(studentFullData.marks || studentFullData.history?._marks) || (studentFullData.marks || studentFullData.history?._marks).length === 0) && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem' }}>No results recorded.</div>}
                                             </div>
                                         </div>
                                     </div>
