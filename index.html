@@ -4325,6 +4325,7 @@
             useEffect(() => {
                 if (currentPage === 'admin' && user) {
                     fetchAllStudents();
+                    fetchMarked();
                 }
             }, [currentPage, user]);
 
