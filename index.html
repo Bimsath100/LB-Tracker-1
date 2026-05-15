@@ -3558,7 +3558,7 @@
 
                     <div className="admin-metrics-grid">
                         <div className="admin-stat-card">
-                            <div className="admin-stat-icon" style={{ background: 'rgba(123, 76, 210, 0.1)', color: 'var(--primary)' }}>👥</div>
+                            <div className="admin-stat-icon" style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}>👥</div>
                             <div className="admin-stat-info">
                                 <div className="val">{totalRegistered || 0}</div>
                                 <div className="lbl">Total Registered</div>
@@ -3635,8 +3635,8 @@
                                                         <td>
                                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                                 <button className="quick-action-btn" onClick={() => viewStudentProfile(s)}>Profile</button>
-                                                                <button onClick={() => toggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s.is_banned ? '#ef4444' : 'transparent', color: s.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer' }}>
-                                                                    {s.is_banned ? 'Unban' : 'Ban'}
+                                                                <button onClick={() => toggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
+                                                                    {s?.is_banned ? 'Unban' : 'Ban'}
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -4186,6 +4186,13 @@
                                 .order('name', { ascending: true });
                             if (!error && data) {
                                 setAllStudents(data);
+                            } else if (error) {
+                                console.error("Fetch All Error:", error);
+                                // If column is missing, try fetching without it
+                                const { data: retryData } = await sb.from('study_tracker_v2')
+                                    .select('user_id, name, district, exam_year, exam_month, subjects, email')
+                                    .order('name', { ascending: true });
+                                if (retryData) setAllStudents(retryData);
                             }
                         } catch (e) { console.error(e); }
                         setLoadingAll(false);
