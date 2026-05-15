@@ -2808,10 +2808,13 @@
         };
 
 
-        const getAvatarUrl = (seed) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+        const getAvatarUrl = (profile) => {
+            if (profile?.avatarUrl && profile.avatarUrl.startsWith('http')) return profile.avatarUrl;
+            return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile?.name || 'Guest')}&backgroundColor=b6e3f4,c0aede,d1d4f9`;
+        };
         const getStudentID = (uid) => `LB-${uid?.substring(0, 5).toUpperCase() || 'TEMP'}`;
 
-        const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal }) => {
+        const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal, onEditProfile }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
 
             useEffect(() => {
@@ -2917,7 +2920,10 @@
                     <Reveal>
                         <div className="hero-section" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)', padding: 'clamp(1.5rem, 5vw, 2.5rem)', borderRadius: '24px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '25px', marginBottom: '2rem' }}>
-                                <img src={getAvatarUrl(profile?.name || 'Guest')} style={{ width: '90px', height: '90px', borderRadius: '28px', background: 'var(--primary-glow)', border: '2px solid var(--primary)', boxShadow: '0 10px 25px var(--primary-glow)' }} alt="Avatar" />
+                                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={onEditProfile} title="Change Profile Picture">
+                                    <img src={getAvatarUrl(profile)} style={{ width: '90px', height: '90px', borderRadius: '28px', background: 'var(--primary-glow)', border: '2px solid var(--primary)', boxShadow: '0 10px 25px var(--primary-glow)', objectFit: 'cover' }} alt="Avatar" />
+                                    <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', background: 'var(--primary)', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', border: '2px solid var(--bg)' }}>✏️</div>
+                                </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                                         {streak > 0 && <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '4px 12px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.75rem' }}>🔥 {streak} Day Streak</div>}
@@ -3627,7 +3633,7 @@
                                                     <tr key={i}>
                                                         <td>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                                <img src={getAvatarUrl(s.name)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)' }} alt="Avatar" />
+                                                                <img src={getAvatarUrl(s)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Avatar" />
                                                                 <div>
                                                                     <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{s.name}</div>
                                                                     <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>{getStudentID(s.user_id)}</div>
@@ -3836,7 +3842,11 @@
 
         const SetupWizard = ({ onComplete, initialData, onCancel }) => {
             const [step, setStep] = useState(1);
-            const [form, setForm] = useState(initialData ? { ...initialData, examLevel: initialData.examLevel || 'A/L' } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L' });
+            const [form, setForm] = useState(initialData ? {
+                ...initialData,
+                examLevel: initialData.examLevel || 'A/L',
+                avatarUrl: initialData.avatarUrl || ''
+            } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L', avatarUrl: '' });
             const [customSub, setCustomSub] = useState('');
             const limit = form.examLevel === 'A/L' ? 3 : 9;
             const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < limit ? [...f.subjects, s] : f.subjects) }));
@@ -3851,7 +3861,34 @@
                             <path d="M2 12L12 17L22 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </div>
-                    {step === 1 && (<div><h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2><p className="setup-subtitle">Let's set up your profile.</p><input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /><div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}><div onClick={() => setForm({ ...form, examLevel: 'A/L', subjects: [] })} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>A/L</div></div><div onClick={() => setForm({ ...form, examLevel: 'O/L', subjects: [] })} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}><div style={{ fontWeight: '800' }}>O/L</div></div></div><select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select><button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>{initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}</div>)}
+                                        {step === 1 && (
+                        <div>
+                            <h2 className="setup-title">{initialData ? 'Edit Profile' : 'Welcome! 👋'}</h2>
+                            <p className="setup-subtitle">Personalize your study profile.</p>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px', gap: '15px' }}>
+                                <img src={form.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(form.name || 'Guest')}&backgroundColor=b6e3f4,c0aede,d1d4f9`} style={{ width: '90px', height: '90px', borderRadius: '24px', border: '3px solid var(--primary)', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Preview" />
+                                <div style={{ width: '100%' }}>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '5px', display: 'block', fontWeight: '800' }}>PROFILE PICTURE URL (OPTIONAL)</label>
+                                    <input type="text" placeholder="Paste image link here..." value={form.avatarUrl} onChange={e => setForm({ ...form, avatarUrl: e.target.value })} style={{ marginBottom: '8px' }} />
+                                    <button onClick={() => setForm({ ...form, avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}&backgroundColor=b6e3f4,c0aede,d1d4f9` })} style={{ width: '100%', padding: '8px', borderRadius: '10px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: '700' }}>🎲 Randomize Avatar</button>
+                                </div>
+                            </div>
+
+                            <input type="text" placeholder="Your Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                                <div onClick={() => setForm({ ...form, examLevel: 'A/L', subjects: [] })} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'A/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'A/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
+                                    <div style={{ fontWeight: '800' }}>A/L</div>
+                                </div>
+                                <div onClick={() => setForm({ ...form, examLevel: 'O/L', subjects: [] })} style={{ flex: 1, padding: '12px', textAlign: 'center', borderRadius: '12px', cursor: 'pointer', border: form.examLevel === 'O/L' ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.examLevel === 'O/L' ? 'var(--primary-glow)' : 'var(--input-bg)' }}>
+                                    <div style={{ fontWeight: '800' }}>O/L</div>
+                                </div>
+                            </div>
+                            <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}>{DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}</select>
+                            <button className="btn-primary" onClick={() => form.name && setStep(2)}>Next Step ➡️</button>
+                            {initialData && <button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={onCancel}>Cancel</button>}
+                        </div>
+                    )}
                     {step === 2 && (<div><h2 className="setup-title">Target Exam 🎯</h2><p className="setup-subtitle">විභාග විස්තර තෝරන්න.</p><div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', marginBottom: '1rem' }}><select value={form.examMonth} onChange={e => setForm({ ...form, examMonth: e.target.value })} style={{ marginBottom: 0 }}>{MONTHS.map(m => <option key={m} value={m}>{m}</option>)}</select><input type="number" min="2024" max="2100" placeholder="Year" value={form.examYear} onChange={e => setForm({ ...form, examYear: e.target.value ? parseInt(e.target.value) : '' })} style={{ marginBottom: 0 }} /></div><button className="btn-primary" disabled={!form.examYear} onClick={() => setStep(3)}>Next Step ➡️</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(1)}>⬅️ Back</button></div>)}
                     {step === 3 && (<div><h2 className="setup-title">Subjects 📚</h2><p className="setup-subtitle">Choose exactly {limit} subjects.</p><div className="chip-container">{form.subjects.map(s => (<div key={s} className="subject-chip">{s} <span className="chip-remove" onClick={() => removeS(s)}>✕</span></div>))}{form.subjects.length === 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>No subjects selected yet.</div>}</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', maxHeight: '150px', overflowY: 'auto', marginBottom: '1rem', padding: '5px' }}>{(form.examLevel === 'A/L' ? AL_SUBJECTS : OL_SUBJECTS).map(s => (<div key={s} onClick={() => toggleS(s)} style={{ padding: '10px', borderRadius: '12px', border: form.subjects.includes(s) ? '2px solid var(--primary)' : '1px solid var(--border)', background: form.subjects.includes(s) ? 'var(--primary-glow)' : 'var(--input-bg)', cursor: 'pointer', textAlign: 'center', opacity: !form.subjects.includes(s) && form.subjects.length >= limit ? 0.5 : 1 }}><div style={{ fontSize: '0.8rem', fontWeight: '700' }}>{s}</div>{form.examLevel === 'O/L' && SINHALA_NAMES[s] && <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{SINHALA_NAMES[s]}</div>}</div>))}</div><div style={{ display: 'flex', gap: '8px', marginBottom: '1rem' }}><input type="text" placeholder="Add Other..." value={customSub} onChange={e => setCustomSub(e.target.value)} style={{ marginBottom: 0 }} onKeyPress={e => e.key === 'Enter' && addCustom()} /><button className="btn-primary" style={{ width: 'auto', marginTop: 0, padding: '0 15px' }} onClick={addCustom} disabled={form.subjects.length >= limit}>+</button></div><button className="btn-primary" disabled={form.subjects.length !== limit} onClick={() => onComplete(form)}>{initialData ? 'Save Changes ✅' : 'Start Tracking 🚀'}</button><button className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-main)', marginTop: '10px' }} onClick={() => setStep(2)}>⬅️ Back</button></div>)}
                 </div></div>
@@ -4263,6 +4300,7 @@
                             examYear: data.exam_year,
                             examMonth: data.exam_month,
                             examLevel: data.exam_level || 'A/L',
+                            avatarUrl: data.avatar_url || '',
                             is_banned: data.is_banned
                         });
                         setHistory(data.history || {});
@@ -4285,6 +4323,7 @@
                     exam_year: p.examYear,
                     exam_month: p.examMonth,
                     exam_level: p.examLevel,
+                    avatar_url: p.avatarUrl || '',
                     email: user.email,
                     history: { ...history, last_updated: new Date().toISOString() },
                     marks: marks
@@ -4303,6 +4342,7 @@
                     user_id: user.id,
                     name: profile.name, district: profile.district, subjects: profile.subjects,
                     exam_year: profile.examYear, exam_month: profile.examMonth, exam_level: profile.examLevel,
+                    avatar_url: profile.avatarUrl || '',
                     history: historyWithTimestamp, marks: m
                 });
                 if (error) console.error("Push Error:", error);
@@ -4440,7 +4480,7 @@
 
                         <div className="container" id="mainContainer" style={{ marginTop: '2rem' }}>
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} />
+                                <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} onEditProfile={() => setIsEditMode(true)} />
                             ) : currentPage === 'workspace' ? (
                                 <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} streak={(() => {
                                     let streak = 0; let curD = new Date(); let curK = getLocalISODate(curD);
@@ -4524,7 +4564,7 @@
                                 ) : studentFullData ? (
                                     <div>
                                         <div style={{ display: 'flex', gap: '25px', marginBottom: '2.5rem', alignItems: 'center' }}>
-                                            <img src={getAvatarUrl(studentFullData.name)} style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--input-bg)', border: '2px solid var(--primary-glow)' }} alt="Avatar" />
+                                            <img src={getAvatarUrl(studentFullData)} style={{ width: '100px', height: '100px', borderRadius: '28px', background: 'var(--input-bg)', border: '2px solid var(--primary-glow)', objectFit: 'cover' }} alt="Avatar" />
                                             <div>
                                                 <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-main)' }}>{studentFullData.name}</div>
                                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
