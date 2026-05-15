@@ -3510,12 +3510,13 @@
             );
         };
 
-        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll }) => {
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll, fetchAllStudents }) => {
             const [searchTerm, setSearchTerm] = useState('');
             const [selectedStudent, setSelectedStudent] = useState(null);
             const [studentFullData, setStudentFullData] = useState(null);
             const [loadingProfile, setLoadingProfile] = useState(false);
             const [activeTab, setActiveTab] = useState('all'); // 'today' or 'all'
+            const [confirmAction, setConfirmAction] = useState(null); // { title, msg, onConfirm, type }
 
             const displayList = activeTab === 'today' ? markedDetails : allStudents;
 
@@ -3552,22 +3553,27 @@
 
             const toggleBan = async (s) => {
                 const newStatus = !s.is_banned;
-                if (!confirm(`Are you sure you want to ${newStatus ? 'BAN' : 'UNBAN'} ${s.name}?`)) return;
-                
-                try {
-                    const { error } = await sb.from('study_tracker_v2')
-                        .update({ is_banned: newStatus })
-                        .eq('user_id', s.user_id);
-                    
-                    if (!error) {
-                        alert(`Student ${newStatus ? 'Banned' : 'Unbanned'} successfully!`);
-                    } else {
-                        // Fallback: try upserting if update fails due to schema constraints (using history as backup)
-                        await sb.from('study_tracker_v2')
-                            .upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
-                        alert(`Status updated.`);
+                setConfirmAction({
+                    title: newStatus ? 'Ban Student?' : 'Unban Student?',
+                    msg: `Are you sure you want to ${newStatus ? 'BAN' : 'UNBAN'} ${s.name}? This will change their access immediately.`,
+                    type: newStatus ? 'danger' : 'success',
+                    onConfirm: async () => {
+                        try {
+                            const { error } = await sb.from('study_tracker_v2')
+                                .update({ is_banned: newStatus })
+                                .eq('user_id', s.user_id);
+                            
+                            if (!error) {
+                                // Fallback success toast or refresh list
+                            } else {
+                                await sb.from('study_tracker_v2')
+                                    .upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
+                            }
+                            fetchAllStudents();
+                            setConfirmAction(null);
+                        } catch (e) { alert("Error: " + e.message); setConfirmAction(null); }
                     }
-                } catch (e) { alert("Error updating status: " + e.message); }
+                });
             };
 
             return (
@@ -3764,6 +3770,19 @@
                                 ) : (
                                     <div style={{ textAlign: 'center', padding: '2rem', color: '#EF4444' }}>Profile not found.</div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+                    {confirmAction && (
+                        <div className="admin-modal-overlay" style={{ zIndex: 4000 }}>
+                            <div className="admin-modal" style={{ maxWidth: '400px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px', padding: '2rem', textAlign: 'center' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{confirmAction.type === 'danger' ? '🚫' : '✅'}</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.5rem' }}>{confirmAction.title}</h2>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: '1.5' }}>{confirmAction.msg}</p>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setConfirmAction(null)}>Cancel</button>
+                                    <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981' }} onClick={confirmAction.onConfirm}>Confirm</button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -4571,7 +4590,7 @@
                             ) : currentPage === 'subjects' ? (
                                 <SubjectsGridView subjects={profile.subjects} onSelect={s => setCurrentPage(s)} marks={marks} />
                             ) : currentPage === 'admin' ? (
-                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} allStudents={allStudents} loadingAll={loadingAll} />
+                                <AdminView announcement={announcement} announcementInput={announcementInput} setAnnouncementInput={setAnnouncementInput} updateAnnouncement={updateAnnouncement} liveDetails={liveDetails} markedDetails={markedDetails} totalRegistered={totalRegistered} profile={profile} allStudents={allStudents} loadingAll={loadingAll} fetchAllStudents={fetchAllStudents} />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
                             ) : currentPage === 'tutorial' ? (
