@@ -2406,7 +2406,7 @@
             const items = [
                 { icon: '🚀', val: dynamicStats.online, lbl: 'Students Online Now' },
                 { icon: '⚔️', val: topDistrict || '...', lbl: 'is Leading District Battle' },
-                { icon: '✨', val: dynamicStats.marked, lbl: 'Students Marked Today' },
+                { icon: '✨', val: dynamicStats.marked, lbl: dynamicStats.marked === 1 ? 'Student Marked Today' : 'Students Marked Today' },
                 { icon: '👑', val: topPerformer || '...', lbl: "is Today's Peak Performer" }
             ];
             return (
@@ -2885,20 +2885,7 @@
                 const newHistory = { ...history, [viewDate]: h, last_updated: new Date().toISOString(), logs: updatedLogs };
                 setHistory(newHistory);
 
-                // Real-time Broadcast
-                if (viewDate === getLocalISODate()) {
-                    const markedCount = h.filter(Boolean).length;
-                    sb.channel('global-study-broadcast').send({
-                        type: 'broadcast',
-                        event: 'study_update',
-                        payload: {
-                            name: profile.name,
-                            district: profile.district,
-                            hrs: markedCount,
-                            timestamp: new Date().toISOString()
-                        }
-                    });
-                }
+
             };
 
             const streak = calculateStreak(history);
