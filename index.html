@@ -4222,13 +4222,13 @@
                 if (!user) return;
                 try {
                     const today = getLocalISODate();
-                    let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, history').not(`history->${today}`, 'is', null).order('history->last_updated', { ascending: false }).limit(100);
-                    if (error) { const { data: d2 } = await sb.from('study_tracker_v2').select('user_id, name, district, history').limit(100); data = d2; }
+                    let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, history, is_banned').not(`history->${today}`, 'is', null).order('history->last_updated', { ascending: false }).limit(100);
+                    if (error) { const { data: d2 } = await sb.from('study_tracker_v2').select('user_id, name, district, history, is_banned').limit(100); data = d2; }
                     if (data) {
                         const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
                         setMarkedToday(actualMarked.length);
                         if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-                            const details = actualMarked.map(d => ({ user_id: d.user_id, name: d.name || 'Unknown', district: d.district || 'N/A', history: d.history, hours: d.history[today].filter(Boolean).length })).sort((a, b) => b.hours - a.hours);
+                            const details = actualMarked.map(d => ({ user_id: d.user_id, name: d.name || 'Unknown', district: d.district || 'N/A', history: d.history, is_banned: d.is_banned, hours: d.history[today].filter(Boolean).length })).sort((a, b) => b.hours - a.hours);
                             setMarkedDetails(details);
                         }
                     }
