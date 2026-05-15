@@ -4213,7 +4213,7 @@
                     let { data, error } = await sb.from('study_tracker_v2').select('user_id, name, district, history, is_banned').not(`history->${today}`, 'is', null).order('history->last_updated', { ascending: false }).limit(100);
                     if (error) { const { data: d2 } = await sb.from('study_tracker_v2').select('user_id, name, district, history, is_banned').limit(100); data = d2; }
                     if (data) {
-                        const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].some(h => h === true)));
+                        const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].filter(Boolean).length > 0));
                         setMarkedToday(actualMarked.length);
                         if (user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
                             const details = actualMarked.map(d => ({ user_id: d.user_id, name: d.name || 'Unknown', district: d.district || 'N/A', history: d.history, is_banned: d.is_banned, hours: d.history[today].filter(Boolean).length })).sort((a, b) => b.hours - a.hours);
@@ -4262,11 +4262,18 @@
                     fetchTotalUsers();
                     if (currentPage === 'admin') fetchAllStudents();
                     
-                    const channel = sb.channel('global-realtime')
+                    const channel = sb.channel('global-study-broadcast', {
+                        config: { broadcast: { self: true } }
+                    })
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { 
                             fetchMarked(); 
                             fetchTotalUsers(); 
                             if (currentPage === 'admin') fetchAllStudents();
+                        })
+                        .on('broadcast', { event: 'study_update' }, () => {
+                            // Immediate refresh when someone broadcasts an update
+                            fetchMarked();
+                            fetchTotalUsers();
                         })
                         .subscribe();
                         
@@ -4469,7 +4476,24 @@
                 }
 
                 if (error) console.error("Push Error:", error);
-                else console.log("Data pushed successfully! ✅");
+                else {
+                    console.log("Data pushed successfully! ✅");
+                    // Broadcast the update for real-time synchronization
+                    const today = getLocalISODate();
+                    const hrsCount = (h && Array.isArray(h[today])) ? h[today].filter(Boolean).length : 0;
+                    
+                    sb.channel('global-study-broadcast').send({
+                        type: 'broadcast',
+                        event: 'study_update',
+                        payload: {
+                            user_id: user.id,
+                            name: profile.name,
+                            district: profile.district,
+                            hrs: hrsCount,
+                            timestamp: new Date().toISOString()
+                        }
+                    });
+                }
             };
 
             useEffect(() => {
