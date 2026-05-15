@@ -3814,13 +3814,50 @@
             </div>
         );
 
-        const SetupWizard = ({ onComplete, initialData, onCancel }) => {
+        const SetupWizard = ({ onComplete, initialData, onCancel, user }) => {
             const [step, setStep] = useState(1);
             const [form, setForm] = useState(initialData ? {
                 ...initialData,
                 examLevel: initialData.examLevel || 'A/L',
                 avatarUrl: initialData.avatarUrl || ''
             } : { name: '', district: 'Colombo', subjects: [], examYear: 2026, examMonth: 'August', examLevel: 'A/L', avatarUrl: '' });
+            const [isUploading, setIsUploading] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const handleImageUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    alert("Image size should be less than 2MB.");
+                    return;
+                }
+
+                setIsUploading(true);
+                try {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${user.id}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const filePath = `avatars/${fileName}`;
+
+                    const { error: uploadError } = await sb.storage
+                        .from('assets')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    const { data: { publicUrl } } = sb.storage
+                        .from('assets')
+                        .getPublicUrl(filePath);
+
+                    setForm(f => ({ ...f, avatarUrl: publicUrl }));
+                } catch (error) {
+                    console.error('Error uploading image:', error.message);
+                    alert('Error uploading image. Make sure you have a stable connection.');
+                } finally {
+                    setIsUploading(false);
+                }
+            };
+
             const [customSub, setCustomSub] = useState('');
             const limit = form.examLevel === 'A/L' ? 3 : 9;
             const toggleS = (s) => setForm(f => ({ ...f, subjects: f.subjects.includes(s) ? f.subjects.filter(x => x !== s) : (f.subjects.length < limit ? [...f.subjects, s] : f.subjects) }));
@@ -3843,9 +3880,15 @@
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px', gap: '15px' }}>
                                 <img src={form.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(form.name || 'Guest')}&backgroundColor=b6e3f4,c0aede,d1d4f9`} style={{ width: '90px', height: '90px', borderRadius: '24px', border: '3px solid var(--primary)', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Preview" />
                                 <div style={{ width: '100%' }}>
-                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '5px', display: 'block', fontWeight: '800' }}>PROFILE PICTURE URL (OPTIONAL)</label>
-                                    <input type="text" placeholder="Paste image link here..." value={form.avatarUrl} onChange={e => setForm({ ...form, avatarUrl: e.target.value })} style={{ marginBottom: '8px' }} />
-                                    <button onClick={() => setForm({ ...form, avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}&backgroundColor=b6e3f4,c0aede,d1d4f9` })} style={{ width: '100%', padding: '8px', borderRadius: '10px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '0.7rem', cursor: 'pointer', fontWeight: '700' }}>🎲 Randomize Avatar</button>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '5px', display: 'block', fontWeight: '800' }}>PROFILE PICTURE</label>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                        <button onClick={() => fileInputRef.current.click()} disabled={isUploading} style={{ flex: 1, padding: '10px', borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', fontSize: '0.8rem', cursor: 'pointer', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                            {isUploading ? '⌛ Uploading...' : '📁 Upload Image'}
+                                        </button>
+                                        <button onClick={() => setForm({ ...form, avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}&backgroundColor=b6e3f4,c0aede,d1d4f9` })} style={{ padding: '10px', borderRadius: '12px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-dim)', fontSize: '1rem', cursor: 'pointer' }} title="Randomize Avatar">🎲</button>
+                                    </div>
+                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" style={{ display: 'none' }} />
+                                    <input type="text" placeholder="Or paste image link here..." value={form.avatarUrl} onChange={e => setForm({ ...form, avatarUrl: e.target.value })} style={{ marginBottom: '0', fontSize: '0.8rem' }} />
                                 </div>
                             </div>
 
@@ -4362,7 +4405,7 @@
 
             if (loading) return <LoadingScreen />;
             if (!user) return <LandingPage onLogin={handleLogin} deferredPrompt={deferredPrompt} onInstall={handleInstallApp} />;
-            if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} />;
+            if (!profile || isEditMode) return <SetupWizard onComplete={saveProfile} initialData={profile} onCancel={() => setIsEditMode(false)} user={user} />;
 
             return (
                 <div className="app-layout">
