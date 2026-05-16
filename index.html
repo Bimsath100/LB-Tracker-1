@@ -3604,12 +3604,12 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {loadingAll ? (
+                                            {loadingAll && filteredStudents.length === 0 ? (
                                                 <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Loading data...</td></tr>
-                                            ) : filteredStudents.length > 0 ? filteredStudents.map((s, i) => {
+                                            ) : filteredStudents.length > 0 ? filteredStudents.map((s) => {
                                                 const isLive = liveDetails.some(l => l.name === s.name);
                                                 return (
-                                                    <tr key={i}>
+                                                    <tr key={s.user_id || s.email}>
                                                         <td>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                                 <img src={getAvatarUrl(s)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Avatar" />
@@ -3667,8 +3667,8 @@
                                     <span>⚡</span> Active Sessions
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                    {liveDetails.slice(0, 5).map((u, i) => (
-                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--input-bg)', padding: '10px', borderRadius: '12px' }}>
+                                    {liveDetails.slice(0, 5).map((u) => (
+                                        <div key={u.email || u.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--input-bg)', padding: '10px', borderRadius: '12px' }}>
                                             <div className="live-dot" style={{ background: '#10B981' }}></div>
                                             <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>{u.name}</div>
                                         </div>
@@ -4291,17 +4291,18 @@
                     // Use a dedicated channel for database changes to avoid conflict with shared broadcast channels
                     const dbChannel = sb.channel('app-db-sync-' + user.id)
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { 
+                            // Only update global counts in real-time
                             fetchMarked(); 
                             fetchTotalUsers(); 
-                            if (currentPageRef.current === 'admin') fetchAllStudents();
+                            // Removed fetchAllStudents() from here to prevent the list from jumping
                         })
                         .subscribe();
                         
+                    // Only refresh counts on interval, not the full student list
                     const inv = setInterval(() => { 
                         fetchMarked(); 
                         fetchTotalUsers(); 
-                        if (currentPageRef.current === 'admin') fetchAllStudents();
-                    }, 20000);
+                    }, 60000); // Increased to 60 seconds
                     
                     return () => { 
                         clearInterval(inv); 
