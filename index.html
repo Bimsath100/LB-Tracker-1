@@ -3595,16 +3595,24 @@
                     <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', position: 'relative' }}>
                         {errorMsg && <div className="error-toast">⚠️ {errorMsg}</div>}
                         {successMsg && <div className="success-toast">✅ {successMsg}</div>}
-                        <form onSubmit={submitFeedback}><div className="star-rating">{[1, 2, 3, 4, 5].map(star => (<span key={star} className={`star ${star <= (hover || rating) ? 'active' : ''}`} onClick={() => setRating(star)} onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}>★</span>))}</div><textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Type your feedback here..." style={{ width: '100%', height: '120px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '15px', borderRadius: '12px', outline: 'none', resize: 'none', marginBottom: '15px', fontSize: '1rem', fontFamily: 'inherit' }}></textarea><button type="submit" className="btn-primary" disabled={status === 'Sending...'}>{status || 'Submit Feedback 🚀'}</button></form>
+                        <form onSubmit={submitFeedback}>
+                            <div className="star-rating">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <span key={star} className={`star ${star <= (hover || rating) ? 'active' : ''}`} onClick={() => setRating(star)} onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}>★</span>
+                                ))}
+                            </div>
+                            <textarea value={msg} onChange={e => setMsg(e.target.value)} placeholder="Type your feedback here..." style={{ width: '100%', height: '120px', background: 'var(--input-bg)', border: '1px solid var(--border)', color: 'var(--text-main)', padding: '15px', borderRadius: '12px', outline: 'none', resize: 'none', marginBottom: '15px', fontSize: '1rem', fontFamily: 'inherit' }}></textarea>
+                            <button type="submit" className="btn-primary" disabled={status === 'Sending...'}>{status || 'Submit Feedback 🚀'}</button>
+                        </form>
                     </div>
                     <FeedbackSlider feedbacks={feedbacks} />
                 </div>
             );
         };
 
-        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll, fetchAllStudents, onViewProfile, onToggleBan }) => {
+        const AdminView = ({ announcement, announcementInput, setAnnouncementInput, updateAnnouncement, liveDetails, markedDetails, totalRegistered, profile, allStudents, loadingAll, fetchAllStudents, onViewProfile, onToggleBan, onDeleteStudent }) => {
             const [searchTerm, setSearchTerm] = useState('');
-            const [activeTab, setActiveTab] = useState('all'); // 'today' or 'all'
+            const [activeTab, setActiveTab] = useState('all');
 
             const displayList = activeTab === 'today' ? markedDetails : allStudents;
 
@@ -3628,96 +3636,73 @@
                     <div className="admin-metrics-grid">
                         <div className="admin-stat-card">
                             <div className="admin-stat-icon" style={{ background: 'var(--primary-glow)', color: 'var(--primary)' }}>👥</div>
-                            <div className="admin-stat-info">
-                                <div className="val">{totalRegistered || 0}</div>
-                                <div className="lbl">Total Registered</div>
-                            </div>
+                            <div className="admin-stat-info"><div className="val">{totalRegistered || 0}</div><div className="lbl">Registered</div></div>
                         </div>
                         <div className="admin-stat-card">
                             <div className="admin-stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981' }}>⚡</div>
-                            <div className="admin-stat-info">
-                                <div className="val">{liveDetails.length}</div>
-                                <div className="lbl">Active Now</div>
-                            </div>
+                            <div className="admin-stat-info"><div className="val">{liveDetails.length}</div><div className="lbl">Active Now</div></div>
                         </div>
                         <div className="admin-stat-card">
                             <div className="admin-stat-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>✍️</div>
-                            <div className="admin-stat-info">
-                                <div className="val">{markedDetails.length}</div>
-                                <div className="lbl">Marked Today</div>
-                            </div>
+                            <div className="admin-stat-info"><div className="val">{markedDetails.length}</div><div className="lbl">Today</div></div>
                         </div>
                     </div>
 
                     <div className="admin-main-grid">
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                                        <button onClick={() => setActiveTab('all')} style={{ padding: '8px 20px', borderRadius: '12px', border: 'none', background: activeTab === 'all' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'all' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>All Students ({allStudents.length})</button>
-                                        <button onClick={() => setActiveTab('today')} style={{ padding: '8px 20px', borderRadius: '12px', border: 'none', background: activeTab === 'today' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'today' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', transition: '0.3s' }}>Active Today ({markedDetails.length})</button>
-                                        <button onClick={fetchAllStudents} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)', padding: '8px 12px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.8rem' }}>🔄 Refresh</button>
+                            <div className="card" style={{ padding: '1rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        <button onClick={() => setActiveTab('all')} style={{ padding: '8px 15px', borderRadius: '10px', border: 'none', background: activeTab === 'all' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'all' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', fontSize: '0.8rem' }}>All</button>
+                                        <button onClick={() => setActiveTab('today')} style={{ padding: '8px 15px', borderRadius: '10px', border: 'none', background: activeTab === 'today' ? 'var(--primary)' : 'var(--input-bg)', color: activeTab === 'today' ? 'white' : 'var(--text-dim)', fontWeight: '700', cursor: 'pointer', fontSize: '0.8rem' }}>Today</button>
+                                        <button onClick={fetchAllStudents} style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)', padding: '8px 12px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.8rem' }}>🔄</button>
                                     </div>
-                                    <div className="admin-search-bar" style={{ marginBottom: 0, width: 'min(100%, 300px)' }}>
+                                    <div className="admin-search-bar" style={{ marginBottom: 0, width: '100%' }}>
                                         <span>🔍</span>
-                                        <input type="text" placeholder="Search by name or district..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                                        <input type="text" placeholder="Search students..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
                                     </div>
                                 </div>
 
                                 <div className="admin-table-container" style={{ border: 'none', padding: 0 }}>
-                                    <table className="admin-table">
+                                    <table className="admin-table" style={{ minWidth: '100%' }}>
                                         <thead>
                                             <tr>
-                                                <th>Student</th>
-                                                <th>Location</th>
-                                                <th>{activeTab === 'today' ? 'Today' : 'Year'}</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
+                                                <th style={{ padding: '10px' }}>Student</th>
+                                                <th style={{ padding: '10px' }}>Info</th>
+                                                <th style={{ padding: '10px', textAlign: 'center' }}>Manage</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {loadingAll && filteredStudents.length === 0 ? (
-                                                <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Loading data...</td></tr>
+                                                <tr><td colSpan="3" style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td></tr>
                                             ) : filteredStudents.length > 0 ? filteredStudents.map((s) => {
                                                 const isLive = liveDetails.some(l => l.name === s.name);
                                                 return (
                                                     <tr key={s.user_id || s.email}>
-                                                        <td data-label="Student">
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                                <img src={getAvatarUrl(s)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Avatar" />
-                                                                <div>
-                                                                    <div style={{ fontWeight: '700', color: 'var(--text-main)' }}>{s.name}</div>
-                                                                    <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>{getStudentID(s.user_id)}</div>
+                                                        <td style={{ padding: '8px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                <img src={getAvatarUrl(s)} style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} alt="Avatar" />
+                                                                <div style={{ minWidth: 0 }}>
+                                                                    <div style={{ fontWeight: '700', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
+                                                                    <div style={{ fontSize: '0.6rem', color: isLive ? '#10B981' : 'var(--text-dim)', fontWeight: '800' }}>{isLive ? '● ONLINE' : 'OFFLINE'}</div>
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td data-label="Location" style={{ color: 'var(--text-dim)', fontWeight: '600' }}>{s.district}</td>
-                                                        <td data-label={activeTab === 'today' ? 'Today' : 'Year'}>
-                                                            <div style={{ fontWeight: '800', color: activeTab === 'today' ? 'var(--primary)' : 'var(--text-main)' }}>
-                                                                {activeTab === 'today' ? `${s.hours}h` : (s.exam_year || s.history?._exam_year || '...')}
-                                                            </div>
+                                                        <td style={{ padding: '8px' }}>
+                                                            <div style={{ fontSize: '0.7rem', fontWeight: '700' }}>{s.district}</div>
+                                                            <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>{activeTab === 'today' ? `${s.hours}h` : (s.exam_year || '...') }</div>
                                                         </td>
-                                                        <td data-label="Status">
-                                                            <span className={`status-badge ${isLive ? 'live' : 'offline'}`}>
-                                                                {isLive ? 'Live' : 'Offline'}
-                                                            </span>
-                                                        </td>
-                                                        <td data-label="Actions">
-                                                            <div style={{ display: 'flex', gap: '8px' }}>
-                                                                <button className="quick-action-btn" onClick={() => onViewProfile(s)}>Profile</button>
-                                                                <button onClick={() => onToggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
-                                                                    {s?.is_banned ? 'Unban' : 'Ban'}
-                                                                </button>
+                                                        <td style={{ padding: '8px' }}>
+                                                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                                                                <button onClick={() => onViewProfile(s)} style={{ padding: '6px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border)', cursor: 'pointer' }} title="Profile">👤</button>
+                                                                <button onClick={() => onToggleBan(s)} style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', cursor: 'pointer' }} title={s?.is_banned ? 'Unban' : 'Ban'}>🚫</button>
+                                                                <button onClick={() => onDeleteStudent(s)} style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer' }} title="Delete">🗑️</button>
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 );
                                             }) : (
-                                                <tr>
-                                                    <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-dim)' }}>
-                                                        No records found.
-                                                    </td>
-                                                </tr>
+                                                <tr><td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)' }}>No students found.</td></tr>
                                             )}
                                         </tbody>
                                     </table>
@@ -4267,6 +4252,26 @@
                 });
             };
 
+            const deleteStudent = async (s) => {
+                setConfirmAction({
+                    title: 'Delete Student Profile? ⚠️',
+                    msg: `WARNING: This will permanently DELETE ${s.name}'s entire profile and history. This action CANNOT be undone.`,
+                    type: 'danger',
+                    onConfirm: async () => {
+                        try {
+                            const { error } = await sb.from('study_tracker_v2').delete().eq('user_id', s.user_id);
+                            if (error) throw error;
+                            fetchAllStudents();
+                            alert("Student profile deleted successfully.");
+                            setConfirmAction(null);
+                        } catch (e) { 
+                            alert("Error: " + e.message); 
+                            setConfirmAction(null); 
+                        }
+                    }
+                });
+            };
+
             const viewStudentProfile = async (s) => {
                 setSelectedStudent(s);
                 setLoadingProfile(true);
@@ -4792,6 +4797,7 @@
                                     fetchAllStudents={fetchAllStudents} 
                                     onViewProfile={viewStudentProfile}
                                     onToggleBan={toggleBan}
+                                    onDeleteStudent={deleteStudent}
                                 />
                             ) : currentPage === 'feedback' ? (
                                 <FeedbackView profile={profile} />
