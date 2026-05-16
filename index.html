@@ -4225,6 +4225,13 @@
                         .select('user_id, name, district, history, is_banned')
                         .limit(1000);
                     
+                    if (error) {
+                        const fallback = await sb.from('study_tracker_v2')
+                            .select('user_id, name, district, history')
+                            .limit(1000);
+                        data = fallback.data;
+                    }
+                    
                     if (data) {
                         const actualMarked = data.filter(d => (d.history && Array.isArray(d.history[today]) && d.history[today].filter(Boolean).length > 0));
                         setMarkedToday(actualMarked.length);
