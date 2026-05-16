@@ -945,18 +945,20 @@
                 font-size: 0.8rem;
             }
 
-            .mobile-only-brand {
-                display: none !important;
-            }
-
-            .sidebar-brand {
+        /* Hide branding on Desktop but show on Mobile */
+        @media (min-width: 769px) {
+            .mobile-only-brand, .sidebar-brand {
                 display: none !important;
             }
         }
 
-        /* Hide branding everywhere as requested */
-        .mobile-only-brand, .sidebar-brand {
-            display: none !important;
+        @media (max-width: 768px) {
+            .mobile-only-brand {
+                display: flex !important;
+            }
+            .sidebar-brand {
+                display: flex !important;
+            }
         }
 
         .chart-box {
