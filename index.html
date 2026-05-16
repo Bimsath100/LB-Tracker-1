@@ -3700,7 +3700,9 @@
                                                         <td style={{ padding: '8px' }}>
                                                             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
                                                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onViewProfile(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--input-bg)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title="Profile">👤</button>
-                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleBan(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title={s?.is_banned ? 'Unban' : 'Ban'}>🚫</button>
+                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleBan(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', border: s?.is_banned ? '1px solid #10B981' : '1px solid #ef4444', background: s?.is_banned ? '#10B981' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }} title={s?.is_banned ? 'Unban Student' : 'Ban Student'}>
+                                                                    {s?.is_banned ? '🔓' : '🚫'}
+                                                                </button>
                                                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteStudent(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title="Delete">🗑️</button>
                                                             </div>
                                                         </td>
@@ -4045,6 +4047,11 @@
             const [studentFullData, setStudentFullData] = useState(null);
             const [loadingProfile, setLoadingProfile] = useState(false);
             const [confirmAction, setConfirmAction] = useState(null);
+            const [globalSuccess, setGlobalSuccess] = useState('');
+            const [globalError, setGlobalError] = useState('');
+
+            const showSuccess = (msg) => { setGlobalSuccess(msg); setTimeout(() => setGlobalSuccess(''), 3000); };
+            const showError = (msg) => { setGlobalError(msg); setTimeout(() => setGlobalError(''), 3000); };
 
             // Global Timer State
             const [timerFocus, setTimerFocus] = useState(() => parseInt(localStorage.getItem('timer_focus')) || 25);
@@ -4250,9 +4257,15 @@
                         try {
                             const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).eq('user_id', s.user_id);
                             if (error) await sb.from('study_tracker_v2').upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
+                            
+                            // Update local state instantly
+                            setAllStudents(prev => prev.map(item => item.user_id === s.user_id ? { ...item, is_banned: newStatus } : item));
+                            setMarkedDetails(prev => prev.map(item => item.user_id === s.user_id ? { ...item, is_banned: newStatus } : item));
+                            
+                            showSuccess(`Student ${newStatus ? 'Banned' : 'Unbanned'} successfully!`);
                             fetchAllStudents();
                             setConfirmAction(null);
-                        } catch (e) { alert("Error: " + e.message); setConfirmAction(null); }
+                        } catch (e) { showError("Error: " + e.message); setConfirmAction(null); }
                     }
                 });
             };
@@ -4266,11 +4279,16 @@
                         try {
                             const { error } = await sb.from('study_tracker_v2').delete().eq('user_id', s.user_id);
                             if (error) throw error;
+                            
+                            // Remove from local state instantly
+                            setAllStudents(prev => prev.filter(item => item.user_id !== s.user_id));
+                            setMarkedDetails(prev => prev.filter(item => item.user_id !== s.user_id));
+                            
+                            showSuccess("Student profile deleted permanently!");
                             fetchAllStudents();
-                            alert("Student profile deleted successfully.");
                             setConfirmAction(null);
                         } catch (e) { 
-                            alert("Error: " + e.message); 
+                            showError("Error: " + e.message); 
                             setConfirmAction(null); 
                         }
                     }
@@ -4888,13 +4906,16 @@
                         </div>
                     )}
 
+                    {globalSuccess && <div className="success-toast">✅ {globalSuccess}</div>}
+                    {globalError && <div className="error-toast">⚠️ {globalError}</div>}
+
                     {confirmAction && (
                         <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
                             <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem', animation: 'popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
                                 <div style={{ fontSize: '3.5rem', marginBottom: '1.2rem' }}>{confirmAction.type === 'danger' ? '⚠️' : '🔔'}</div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem' }}>{confirmAction.title}</h2>
-                                <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: '1.6', fontWeight: '500' }}>{confirmAction.msg}</p>
-                                <div style={{ display: 'flex', gap: '12px' }}>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem', textAlign: 'center' }}>{confirmAction.title}</h2>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: '1.6', fontWeight: '500', textAlign: 'center' }}>{confirmAction.msg}</p>
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                                     <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', height: '50px' }} onClick={() => setConfirmAction(null)}>Cancel</button>
                                     <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981', boxShadow: confirmAction.type === 'danger' ? '0 8px 20px rgba(239, 68, 68, 0.3)' : '0 8px 20px rgba(16, 185, 129, 0.3)', height: '50px' }} onClick={confirmAction.onConfirm}>Confirm</button>
                                 </div>
