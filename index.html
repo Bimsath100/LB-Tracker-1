@@ -4256,23 +4256,36 @@
                     type: newStatus ? 'danger' : 'success',
                     onConfirm: async () => {
                         try {
-                            const identifier = s.user_id ? { user_id: s.user_id } : { email: s.email };
+                            // Find the best possible identifier
+                            const uid = s.user_id || s.id;
+                            const email = s.email;
+                            
+                            let identifier = null;
+                            if (uid) identifier = { user_id: uid };
+                            else if (email) identifier = { email: email };
+                            
+                            if (!identifier) throw new Error("Could not identify this student.");
+
                             const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).match(identifier);
                             
                             if (error) {
-                                await sb.from('study_tracker_v2').upsert({ ...identifier, is_banned: newStatus }, { onConflict: s.user_id ? 'user_id' : 'email' });
+                                await sb.from('study_tracker_v2').upsert({ ...identifier, is_banned: newStatus }, { onConflict: uid ? 'user_id' : 'email' });
                             }
                             
-                            // Update local state instantly
-                            setAllStudents(prev => prev.map(item => (item.user_id === s.user_id || item.email === s.email) ? { ...item, is_banned: newStatus } : item));
-                            setMarkedDetails(prev => prev.map(item => (item.user_id === s.user_id || item.email === s.email) ? { ...item, is_banned: newStatus } : item));
+                            // Update local state instantly with RELIABLE matching
+                            const matchFn = (item) => {
+                                if (uid && (item.user_id === uid || item.id === uid)) return true;
+                                if (email && item.email === email) return true;
+                                return false;
+                            };
+
+                            setAllStudents(prev => prev.map(item => matchFn(item) ? { ...item, is_banned: newStatus } : item));
+                            setMarkedDetails(prev => prev.map(item => matchFn(item) ? { ...item, is_banned: newStatus } : item));
                             
                             showSuccess(`Student ${newStatus ? 'Banned' : 'Unbanned'} successfully!`);
                             setConfirmAction(null);
-                            
-                            // Give DB a moment to propagate before global refresh
-                            setTimeout(fetchAllStudents, 1000);
-                        } catch (e) { showError("Error: " + e.message); setConfirmAction(null); }
+                            setTimeout(fetchAllStudents, 1500);
+                        } catch (e) { showError("Action failed: " + e.message); setConfirmAction(null); }
                     }
                 });
             };
@@ -4289,22 +4302,29 @@
                         setMarkedDetails(filterOut);
                         
                         try {
-                            // Try to delete using both ID and Email to be 100% sure
-                            const { error } = await sb.from('study_tracker_v2')
-                                .delete()
-                                .or(`user_id.eq.${s.user_id},email.eq.${s.email}`);
+                            const uid = s.user_id || s.id;
+                            const email = s.email;
                             
+                            let query = sb.from('study_tracker_v2').delete();
+                            if (uid && email) {
+                                query = query.or(`user_id.eq.${uid},email.eq.${email}`);
+                            } else if (uid) {
+                                query = query.eq('user_id', uid);
+                            } else if (email) {
+                                query = query.eq('email', email);
+                            } else {
+                                throw new Error("No identifier to delete.");
+                            }
+
+                            const { error } = await query;
                             if (error) throw error;
                             
                             showSuccess("Student profile deleted permanently!");
                             setConfirmAction(null);
-                            
-                            // Give DB 3 seconds to fully propagate
-                            setTimeout(fetchAllStudents, 3000);
+                            setTimeout(fetchAllStudents, 2000);
                         } catch (e) { 
                             showError("Delete failed: " + e.message); 
                             setConfirmAction(null); 
-                            // Re-fetch if it failed to restore the UI
                             fetchAllStudents();
                         }
                     }
