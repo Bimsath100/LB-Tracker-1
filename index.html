@@ -945,8 +945,8 @@
                 font-size: 0.8rem;
             }
 
-            .mobile-only-brand span {
-                font-size: 1rem !important;
+            .mobile-only-brand {
+                display: none !important;
             }
         }
 
@@ -2857,8 +2857,9 @@
         };
         const getStudentID = (uid) => `LB-${uid?.substring(0, 5).toUpperCase() || 'TEMP'}`;
 
-        const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal, onEditProfile }) => {
+        const DashboardView = ({ profile, history, marks, setHistory, viewDate, setViewDate, timeLeft, liveUsers, markedToday, announcement, showAnnounceModal, setShowAnnounceModal, onEditProfile, onAvatarUpload }) => {
             const [leaderStats, setLeaderStats] = useState({ district: '', performer: '' });
+            const fileInputRef = useRef(null);
 
             useEffect(() => {
                 const fetchLeaders = async () => {
@@ -2937,9 +2938,19 @@
                     <Reveal>
                         <div className="hero-section" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)', padding: 'clamp(1.5rem, 5vw, 2.5rem)', borderRadius: '24px', border: '1px solid var(--glass-border)', marginBottom: '2rem' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '25px', marginBottom: '2rem' }}>
-                                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={onEditProfile} title="Change Profile Picture">
+                                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current.click()} title="Change Profile Picture">
                                     <img src={getAvatarUrl(profile)} style={{ width: '90px', height: '90px', borderRadius: '28px', background: 'var(--primary-glow)', border: '2px solid var(--primary)', boxShadow: '0 10px 25px var(--primary-glow)', objectFit: 'cover' }} alt="Avatar" />
                                     <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', background: 'var(--primary)', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', border: '2px solid var(--bg)' }}>✏️</div>
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) onAvatarUpload(file);
+                                        }} 
+                                        accept="image/*" 
+                                        style={{ display: 'none' }} 
+                                    />
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
@@ -4562,6 +4573,53 @@
                 }
             };
 
+            const handleAvatarUpload = async (file) => {
+                if (!file || !user || !profile) return;
+                
+                // File size check (2MB limit)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert("Image too large! Please choose a photo smaller than 2MB.");
+                    return;
+                }
+
+                try {
+                    setLoading(true);
+                    console.log("Starting upload for:", file.name);
+                    
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${user.id}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+                    const filePath = `avatars/${fileName}`;
+
+                    // Attempt upload to 'community_assets'
+                    const { error: uploadError } = await sb.storage
+                        .from('community_assets')
+                        .upload(filePath, file);
+
+                    if (uploadError) {
+                        console.error("Storage Error:", uploadError);
+                        throw new Error("Could not upload to server. Your Supabase storage might not be configured. Error: " + uploadError.message);
+                    }
+
+                    const { data: { publicUrl } } = sb.storage
+                        .from('community_assets')
+                        .getPublicUrl(filePath);
+
+                    console.log("Upload successful! Public URL:", publicUrl);
+
+                    // Update local state and save to DB
+                    const updatedProfile = { ...profile, avatarUrl: publicUrl };
+                    setProfile(updatedProfile);
+                    await saveProfile(updatedProfile);
+                    
+                    alert("Profile picture updated successfully! 📸✅");
+                } catch (error) {
+                    console.error('Final Upload Error:', error);
+                    alert('Upload failed: ' + error.message + "\n\nYou can still use an image link in 'Edit Profile' if this continues.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+
             useEffect(() => {
                 if (!profile) return;
                 const monthIdx = MONTHS.indexOf(profile.examMonth);
@@ -4689,7 +4747,7 @@
 
                         <div className="container" id="mainContainer" style={{ marginTop: '2rem' }}>
                             {currentPage === 'dashboard' ? (
-                                <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} onEditProfile={() => setIsEditMode(true)} />
+                                <DashboardView profile={profile} history={history} marks={marks} setHistory={h => { setHistory(h); pushData(h, marks); }} viewDate={viewDate} setViewDate={setViewDate} timeLeft={timeLeft} liveUsers={liveUsers} markedToday={markedToday} announcement={announcement} showAnnounceModal={showAnnounceModal} setShowAnnounceModal={setShowAnnounceModal} onEditProfile={() => setIsEditMode(true)} onAvatarUpload={handleAvatarUpload} />
                             ) : currentPage === 'workspace' ? (
                                     <WorkspaceView viewDate={viewDate} history={history} setHistory={h => { setHistory(h); pushData(h, marks); }} streak={calculateStreak(history)} profile={profile} timerProps={timerProps} />
                             ) : currentPage === 'community' ? (
