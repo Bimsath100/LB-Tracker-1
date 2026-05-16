@@ -1252,6 +1252,44 @@
         .admin-table td { padding: 15px; background: var(--input-bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .admin-table td:first-child { border-left: 1px solid var(--border); border-radius: 16px 0 0 16px; }
         .admin-table td:last-child { border-right: 1px solid var(--border); border-radius: 0 16px 16px 0; }
+
+        /* Mobile Admin Table to Cards */
+        @media (max-width: 768px) {
+            .admin-table, .admin-table thead, .admin-table tbody, .admin-table th, .admin-table td, .admin-table tr {
+                display: block;
+            }
+            .admin-table thead { display: none; }
+            .admin-table tr {
+                margin-bottom: 15px;
+                background: var(--input-bg);
+                border: 1px solid var(--border);
+                border-radius: 20px !important;
+                padding: 15px;
+            }
+            .admin-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none !important;
+                padding: 8px 0 !important;
+                background: transparent !important;
+            }
+            .admin-table td::before {
+                content: attr(data-label);
+                font-size: 0.7rem;
+                font-weight: 800;
+                color: var(--text-dim);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .admin-table td:first-child {
+                border-bottom: 1px solid var(--border) !important;
+                padding-bottom: 12px !important;
+                margin-bottom: 10px;
+            }
+            .admin-table td:first-child::before { display: none; }
+        }
+        
         .status-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
         .status-badge.live { background: rgba(16, 185, 129, 0.1); color: #10B981; }
         .status-badge.offline { background: rgba(156, 163, 175, 0.1); color: #9CA3AF; }
@@ -3610,7 +3648,7 @@
                                                 const isLive = liveDetails.some(l => l.name === s.name);
                                                 return (
                                                     <tr key={s.user_id || s.email}>
-                                                        <td>
+                                                        <td data-label="Student">
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                                 <img src={getAvatarUrl(s)} style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--input-bg)', objectFit: 'cover' }} alt="Avatar" />
                                                                 <div>
@@ -3619,18 +3657,18 @@
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td style={{ color: 'var(--text-dim)', fontWeight: '600' }}>{s.district}</td>
-                                                        <td>
+                                                        <td data-label="Location" style={{ color: 'var(--text-dim)', fontWeight: '600' }}>{s.district}</td>
+                                                        <td data-label={activeTab === 'today' ? 'Today' : 'Year'}>
                                                             <div style={{ fontWeight: '800', color: activeTab === 'today' ? 'var(--primary)' : 'var(--text-main)' }}>
                                                                 {activeTab === 'today' ? `${s.hours}h` : (s.exam_year || s.history?._exam_year || '...')}
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td data-label="Status">
                                                             <span className={`status-badge ${isLive ? 'live' : 'offline'}`}>
                                                                 {isLive ? 'Live' : 'Offline'}
                                                             </span>
                                                         </td>
-                                                        <td>
+                                                        <td data-label="Actions">
                                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                                 <button className="quick-action-btn" onClick={() => onViewProfile(s)}>Profile</button>
                                                                 <button onClick={() => onToggleBan(s)} style={{ padding: '6px 12px', borderRadius: '10px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', fontSize: '0.7rem', fontWeight: '800', cursor: 'pointer', transition: '0.3s' }}>
