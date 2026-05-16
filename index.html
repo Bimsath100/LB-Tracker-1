@@ -4050,6 +4050,7 @@
             const [confirmAction, setConfirmAction] = useState(null);
             const [globalSuccess, setGlobalSuccess] = useState('');
             const [globalError, setGlobalError] = useState('');
+            const isPerformingAction = useRef(false);
 
             const showSuccess = (msg) => { setGlobalSuccess(msg); setTimeout(() => setGlobalSuccess(''), 3000); };
             const showError = (msg) => { setGlobalError(msg); setTimeout(() => setGlobalError(''), 3000); };
@@ -4255,8 +4256,8 @@
                     msg: `Are you sure you want to ${newStatus ? 'BAN' : 'UNBAN'} ${s.name}? This will change their access immediately.`,
                     type: newStatus ? 'danger' : 'success',
                     onConfirm: async () => {
+                        isPerformingAction.current = true;
                         try {
-                            // Find the best possible identifier
                             const uid = s.user_id || s.id;
                             const email = s.email;
                             
@@ -4272,7 +4273,6 @@
                                 await sb.from('study_tracker_v2').upsert({ ...identifier, is_banned: newStatus }, { onConflict: uid ? 'user_id' : 'email' });
                             }
                             
-                            // Update local state instantly with RELIABLE matching
                             const matchFn = (item) => {
                                 if (uid && (item.user_id === uid || item.id === uid)) return true;
                                 if (email && item.email === email) return true;
@@ -4284,8 +4284,12 @@
                             
                             showSuccess(`Student ${newStatus ? 'Banned' : 'Unbanned'} successfully!`);
                             setConfirmAction(null);
-                            setTimeout(fetchAllStudents, 1500);
-                        } catch (e) { showError("Action failed: " + e.message); setConfirmAction(null); }
+                            setTimeout(() => { isPerformingAction.current = false; fetchAllStudents(); }, 3000);
+                        } catch (e) { 
+                            isPerformingAction.current = false;
+                            showError("Action failed: " + e.message); 
+                            setConfirmAction(null); 
+                        }
                     }
                 });
             };
@@ -4296,7 +4300,7 @@
                     msg: `WARNING: This will permanently DELETE ${s.name}'s entire profile and history. This action CANNOT be undone.`,
                     type: 'danger',
                     onConfirm: async () => {
-                        // Remove from local state INSTANTLY before even calling DB
+                        isPerformingAction.current = true;
                         const filterOut = (prev) => prev.filter(item => (item.user_id !== s.user_id && item.email !== s.email));
                         setAllStudents(filterOut);
                         setMarkedDetails(filterOut);
@@ -4321,8 +4325,9 @@
                             
                             showSuccess("Student profile deleted permanently!");
                             setConfirmAction(null);
-                            setTimeout(fetchAllStudents, 2000);
+                            setTimeout(() => { isPerformingAction.current = false; fetchAllStudents(); }, 3000);
                         } catch (e) { 
+                            isPerformingAction.current = false;
                             showError("Delete failed: " + e.message); 
                             setConfirmAction(null); 
                             fetchAllStudents();
@@ -4353,7 +4358,7 @@
             };
 
             const fetchMarked = async () => {
-                if (!user) return;
+                if (!user || isPerformingAction.current) return;
                 try {
                     const today = getLocalISODate();
                     // Fetch latest 300 students to ensure we don't miss anyone in the "marked today" count
