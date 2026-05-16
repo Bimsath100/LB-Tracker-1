@@ -953,6 +953,11 @@
             }
         }
 
+            .admin-action-btn:active { transform: scale(0.9); }
+            @media (max-width: 768px) {
+                .admin-table th:nth-child(2), .admin-table td:nth-child(2) { display: table-cell; }
+                .admin-table { font-size: 0.85rem; }
+            }
         @media (max-width: 768px) {
             .mobile-only-brand {
                 display: flex !important;
@@ -3664,12 +3669,12 @@
                                 </div>
 
                                 <div className="admin-table-container" style={{ border: 'none', padding: 0 }}>
-                                    <table className="admin-table" style={{ minWidth: '100%' }}>
+                                    <table className="admin-table" style={{ minWidth: '100%', tableLayout: 'fixed' }}>
                                         <thead>
                                             <tr>
-                                                <th style={{ padding: '10px' }}>Student</th>
-                                                <th style={{ padding: '10px' }}>Info</th>
-                                                <th style={{ padding: '10px', textAlign: 'center' }}>Manage</th>
+                                                <th style={{ padding: '10px', width: '45%' }}>Student</th>
+                                                <th style={{ padding: '10px', width: '25%' }}>Info</th>
+                                                <th style={{ padding: '10px', textAlign: 'center', width: '30%' }}>Manage</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -3681,22 +3686,22 @@
                                                     <tr key={s.user_id || s.email}>
                                                         <td style={{ padding: '8px' }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                <img src={getAvatarUrl(s)} style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover' }} alt="Avatar" />
-                                                                <div style={{ minWidth: 0 }}>
+                                                                <img src={getAvatarUrl(s)} style={{ width: '36px', height: '36px', borderRadius: '10px', objectFit: 'cover', flexShrink: 0 }} alt="Avatar" />
+                                                                <div style={{ minWidth: 0, overflow: 'hidden' }}>
                                                                     <div style={{ fontWeight: '700', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
                                                                     <div style={{ fontSize: '0.6rem', color: isLive ? '#10B981' : 'var(--text-dim)', fontWeight: '800' }}>{isLive ? '● ONLINE' : 'OFFLINE'}</div>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td style={{ padding: '8px' }}>
-                                                            <div style={{ fontSize: '0.7rem', fontWeight: '700' }}>{s.district}</div>
+                                                            <div style={{ fontSize: '0.7rem', fontWeight: '700', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.district}</div>
                                                             <div style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '800' }}>{activeTab === 'today' ? `${s.hours}h` : (s.exam_year || '...') }</div>
                                                         </td>
                                                         <td style={{ padding: '8px' }}>
-                                                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
-                                                                <button onClick={() => onViewProfile(s)} style={{ padding: '6px', borderRadius: '8px', background: 'var(--input-bg)', border: '1px solid var(--border)', cursor: 'pointer' }} title="Profile">👤</button>
-                                                                <button onClick={() => onToggleBan(s)} style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', cursor: 'pointer' }} title={s?.is_banned ? 'Unban' : 'Ban'}>🚫</button>
-                                                                <button onClick={() => onDeleteStudent(s)} style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer' }} title="Delete">🗑️</button>
+                                                            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
+                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onViewProfile(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'var(--input-bg)', border: '1px solid var(--border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title="Profile">👤</button>
+                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleBan(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', border: '1px solid #ef4444', background: s?.is_banned ? '#ef4444' : 'transparent', color: s?.is_banned ? 'white' : '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title={s?.is_banned ? 'Unban' : 'Ban'}>🚫</button>
+                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteStudent(s); }} className="admin-action-btn" style={{ width: '38px', height: '38px', borderRadius: '12px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', transition: 'transform 0.1s' }} title="Delete">🗑️</button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -4884,14 +4889,14 @@
                     )}
 
                     {confirmAction && (
-                        <div className="admin-modal-overlay">
-                            <div className="admin-modal" style={{ maxWidth: '450px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{confirmAction.type === 'danger' ? '🚫' : '✅'}</div>
-                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.5rem' }}>{confirmAction.title}</h2>
-                                <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: '1.5' }}>{confirmAction.msg}</p>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={() => setConfirmAction(null)}>Cancel</button>
-                                    <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981' }} onClick={confirmAction.onConfirm}>Confirm</button>
+                        <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
+                            <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem', animation: 'popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                                <div style={{ fontSize: '3.5rem', marginBottom: '1.2rem' }}>{confirmAction.type === 'danger' ? '⚠️' : '🔔'}</div>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem' }}>{confirmAction.title}</h2>
+                                <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: '1.6', fontWeight: '500' }}>{confirmAction.msg}</p>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', height: '50px' }} onClick={() => setConfirmAction(null)}>Cancel</button>
+                                    <button className="btn-primary" style={{ flex: 1, background: confirmAction.type === 'danger' ? '#ef4444' : '#10B981', boxShadow: confirmAction.type === 'danger' ? '0 8px 20px rgba(239, 68, 68, 0.3)' : '0 8px 20px rgba(16, 185, 129, 0.3)', height: '50px' }} onClick={confirmAction.onConfirm}>Confirm</button>
                                 </div>
                             </div>
                         </div>
