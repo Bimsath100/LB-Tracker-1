@@ -1218,15 +1218,13 @@
         }
 
         @keyframes popIn {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -20px) scale(0.9);
-            }
+            0% { opacity: 0; transform: translate(-50%, -20px) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
 
-            100% {
-                opacity: 1;
-                transform: translate(-50%, 0) scale(1);
-            }
+        @keyframes modalPopIn {
+            0% { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .delete-btn {
@@ -4255,16 +4253,22 @@
                     type: newStatus ? 'danger' : 'success',
                     onConfirm: async () => {
                         try {
-                            const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).eq('user_id', s.user_id);
-                            if (error) await sb.from('study_tracker_v2').upsert({ user_id: s.user_id, is_banned: newStatus }, { onConflict: 'user_id' });
+                            const identifier = s.user_id ? { user_id: s.user_id } : { email: s.email };
+                            const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).match(identifier);
+                            
+                            if (error) {
+                                await sb.from('study_tracker_v2').upsert({ ...identifier, is_banned: newStatus }, { onConflict: s.user_id ? 'user_id' : 'email' });
+                            }
                             
                             // Update local state instantly
-                            setAllStudents(prev => prev.map(item => item.user_id === s.user_id ? { ...item, is_banned: newStatus } : item));
-                            setMarkedDetails(prev => prev.map(item => item.user_id === s.user_id ? { ...item, is_banned: newStatus } : item));
+                            setAllStudents(prev => prev.map(item => (item.user_id === s.user_id || item.email === s.email) ? { ...item, is_banned: newStatus } : item));
+                            setMarkedDetails(prev => prev.map(item => (item.user_id === s.user_id || item.email === s.email) ? { ...item, is_banned: newStatus } : item));
                             
                             showSuccess(`Student ${newStatus ? 'Banned' : 'Unbanned'} successfully!`);
-                            fetchAllStudents();
                             setConfirmAction(null);
+                            
+                            // Give DB a moment to propagate before global refresh
+                            setTimeout(fetchAllStudents, 1000);
                         } catch (e) { showError("Error: " + e.message); setConfirmAction(null); }
                     }
                 });
@@ -4276,20 +4280,29 @@
                     msg: `WARNING: This will permanently DELETE ${s.name}'s entire profile and history. This action CANNOT be undone.`,
                     type: 'danger',
                     onConfirm: async () => {
+                        // Remove from local state INSTANTLY before even calling DB
+                        const filterOut = (prev) => prev.filter(item => (item.user_id !== s.user_id && item.email !== s.email));
+                        setAllStudents(filterOut);
+                        setMarkedDetails(filterOut);
+                        
                         try {
-                            const { error } = await sb.from('study_tracker_v2').delete().eq('user_id', s.user_id);
+                            // Try to delete using both ID and Email to be 100% sure
+                            const { error } = await sb.from('study_tracker_v2')
+                                .delete()
+                                .or(`user_id.eq.${s.user_id},email.eq.${s.email}`);
+                            
                             if (error) throw error;
                             
-                            // Remove from local state instantly
-                            setAllStudents(prev => prev.filter(item => item.user_id !== s.user_id));
-                            setMarkedDetails(prev => prev.filter(item => item.user_id !== s.user_id));
-                            
                             showSuccess("Student profile deleted permanently!");
-                            fetchAllStudents();
                             setConfirmAction(null);
+                            
+                            // Give DB 3 seconds to fully propagate
+                            setTimeout(fetchAllStudents, 3000);
                         } catch (e) { 
-                            showError("Error: " + e.message); 
+                            showError("Delete failed: " + e.message); 
                             setConfirmAction(null); 
+                            // Re-fetch if it failed to restore the UI
+                            fetchAllStudents();
                         }
                     }
                 });
@@ -4911,7 +4924,7 @@
 
                     {confirmAction && (
                         <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
-                            <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem', animation: 'popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+                            <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem', animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
                                 <div style={{ fontSize: '3.5rem', marginBottom: '1.2rem' }}>{confirmAction.type === 'danger' ? '⚠️' : '🔔'}</div>
                                 <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem', textAlign: 'center' }}>{confirmAction.title}</h2>
                                 <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: '1.6', fontWeight: '500', textAlign: 'center' }}>{confirmAction.msg}</p>
