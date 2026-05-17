@@ -19,7 +19,6 @@ const IMMUTABLE_ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       // Pre-cache core assets for instant loading
