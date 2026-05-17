@@ -51,18 +51,18 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --primary: #7c3aed;
-            --primary-glow: rgba(124, 58, 237, 0.2);
-            --secondary: #4f46e5;
-            --bg: #030014;
-            --navbar-bg: #05040a;
-            --card-bg: #09090b;
+            --primary: #9d5cff;
+            --primary-glow: rgba(157, 92, 255, 0.15);
+            --secondary: #6366f1;
+            --bg: #070514;
+            --navbar-bg: #0c0a22;
+            --card-bg: #14112c;
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.06);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.03);
-            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+            --border: rgba(157, 92, 255, 0.12);
+            --glass-border: 1px solid rgba(157, 92, 255, 0.2);
+            --input-bg: rgba(157, 92, 255, 0.04);
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(157, 92, 255, 0.03);
             --success: #10B981;
         }
 
@@ -682,6 +682,15 @@
             background: var(--card-bg);
             border: var(--glass-border);
             box-shadow: var(--card-shadow);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(157, 92, 255, 0.35);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(157, 92, 255, 0.08);
         }
 
         .card-title {
@@ -708,12 +717,15 @@
             border-radius: 28px;
             border: var(--glass-border);
             background: var(--card-bg);
-            transition: 0.3s;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-6px);
             border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--primary-glow);
         }
 
         .stat-val {

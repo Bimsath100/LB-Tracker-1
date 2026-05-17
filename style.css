@@ -4,13 +4,13 @@
 */
 
 :root {
-    --bg-dark: #050505;
-    --card-bg: rgba(20, 20, 20, 0.7);
-    --accent: #8B5CF6;
-    --accent-glow: rgba(139, 92, 246, 0.5);
+    --bg-dark: #070514;
+    --card-bg: #14112c;
+    --accent: #9d5cff;
+    --accent-glow: rgba(157, 92, 255, 0.4);
     --text-primary: #FFFFFF;
-    --text-secondary: #A1A1AA;
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-secondary: #94a3b8;
+    --glass-border: rgba(157, 92, 255, 0.2);
     --success: #10B981;
 }
 
