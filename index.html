@@ -962,6 +962,7 @@
                 .admin-table { font-size: 0.85rem; }
             }
         @media (max-width: 768px) {
+            .page-breadcrumb { display: none !important; }
             .mobile-only-brand {
                 display: flex !important;
             }
@@ -4799,7 +4800,14 @@
                                 <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', letterSpacing: '1px' }}>LB TRACKER</span>
                             </div>
 
-                            <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <div className="header-actions-group" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                                {/* Desktop Page Title */}
+                                <div className="page-breadcrumb" style={{ display: 'flex', flexDirection: 'column', animation: 'fadeInDown 0.5s ease-out' }}>
+                                    <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase' }}>LB Study Tracker</span>
+                                    <h1 style={{ fontFamily: 'Outfit', fontSize: '1.4rem', fontWeight: '800', margin: 0, textTransform: 'capitalize', color: 'var(--text-main)', lineHeight: '1.1' }}>
+                                        {currentPage === 'dashboard' ? 'My Dashboard' : currentPage}
+                                    </h1>
+                                </div>
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
