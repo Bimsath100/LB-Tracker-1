@@ -741,13 +741,13 @@
         .hour-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            gap: 12px;
             width: 100%;
-            max-width: 460px;
-            margin: 20px auto 0;
+            max-width: 380px;
+            margin: 15px auto 0;
             background: rgba(0,0,0,0.02);
-            padding: 24px;
-            border-radius: 28px;
+            padding: 18px;
+            border-radius: 24px;
             border: 1px solid var(--border);
         }
 
@@ -3030,11 +3030,11 @@
                     </Reveal>
                     <Reveal delay={0.1}><StudyRoadmap profile={profile} /></Reveal>
                     <div className="stats-grid"><StatBox val={todayCount} lbl="Today" sub="අද" /><StatBox val={weekHrs} lbl="Weekly" sub="සතිය" color="#8B5CF6" /><StatBox val={monthHrs} lbl="Monthly" sub="මාසය" color="#D946EF" /><StatBox val={totalHrs} lbl="Total" sub="මුළු" color="#10B981" /></div>
-                    <div className="asymmetric-grid" style={{ alignItems: 'start' }}>
-                        {/* Column 1 (Study Grid) - span 5 */}
-                        <div className="dashboard-col-left" style={{ gridColumn: 'span 5', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    <div className="asymmetric-grid" style={{ alignItems: 'stretch' }}>
+                        {/* Column 1 (Study Grid) - span 4 */}
+                        <div className="dashboard-col-left" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <Reveal>
-                                <div className="glass card" style={{ padding: '2rem', height: '100%' }}>
+                                <div className="glass card" style={{ padding: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                     <div className="card-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -3140,10 +3140,10 @@
                             </Reveal>
                         </div>
 
-                        {/* Column 3 (Daily Progress Gauge) - span 3 */}
-                        <div className="dashboard-col-right" style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <Reveal delay={0.3}>
-                                <div className="glass card" style={{ padding: '1.5rem', height: '100%', minHeight: '460px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Column 3 (Daily Progress Gauge) - span 4 */}
+                        <div className="dashboard-col-right" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                            <Reveal delay={0.3} style={{ height: '100%' }}>
+                                <div className="glass card" style={{ padding: '2rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
                                 </div>
                             </Reveal>
