@@ -2261,7 +2261,21 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(reg => {
                     console.log('SW Registered');
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                window.dispatchEvent(new CustomEvent('swUpdateAvailable', { detail: newWorker }));
+                            }
+                        });
+                    });
                 }).catch(err => console.log('SW registration failed:', err));
+                let refreshing;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    refreshing = true;
+                    window.location.reload();
+                });
             });
         }
 
@@ -4051,6 +4065,12 @@
 
         const App = () => {
             const [user, setUser] = useState(null);
+            const [swUpdateWorker, setSwUpdateWorker] = useState(null);
+            useEffect(() => {
+                const handleUpdate = (e) => setSwUpdateWorker(e.detail);
+                window.addEventListener('swUpdateAvailable', handleUpdate);
+                return () => window.removeEventListener('swUpdateAvailable', handleUpdate);
+            }, []);
             const [profile, setProfile] = useState(null);
             const [loading, setLoading] = useState(true);
             const [currentPage, setCurrentPage] = useState('dashboard');
@@ -4799,6 +4819,12 @@
 
             return (
                 <div className="app-layout">
+                    {swUpdateWorker && (
+                        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', background: 'linear-gradient(90deg, var(--primary), #D946EF)', color: 'white', padding: '12px', textAlign: 'center', zIndex: 10000, fontWeight: '700', boxShadow: '0 4px 20px rgba(157, 92, 255, 0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px' }}>
+                            🚀 අලුත් Version එකක් තියෙනවා! (Update Available)
+                            <button onClick={() => swUpdateWorker.postMessage({ type: 'SKIP_WAITING' })} style={{ background: 'white', color: 'var(--primary)', border: 'none', padding: '6px 16px', borderRadius: '20px', fontWeight: '800', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', transition: '0.2s' }}>Update Now</button>
+                        </div>
+                    )}
                     <div className="live-bg"><div className="blob blob-1"></div><div className="blob blob-2"></div></div>
                     <SubjectBackground subject={currentPage} />
 
