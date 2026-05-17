@@ -4267,10 +4267,14 @@
                             
                             if (!identifier) throw new Error("Could not identify this student.");
 
-                            const { error } = await sb.from('study_tracker_v2').update({ is_banned: newStatus }).match(identifier);
+                            const { data, error } = await sb.from('study_tracker_v2')
+                                .update({ is_banned: newStatus })
+                                .match(identifier)
+                                .select();
                             
-                            if (error) {
-                                await sb.from('study_tracker_v2').upsert({ ...identifier, is_banned: newStatus }, { onConflict: uid ? 'user_id' : 'email' });
+                            if (error) throw error;
+                            if (!data || data.length === 0) {
+                                throw new Error("Database rejected the change. This is likely due to Supabase Row Level Security (RLS) policies blocking Admins from modifying other users' rows.");
                             }
                             
                             const matchFn = (item) => {
@@ -4289,6 +4293,7 @@
                             isPerformingAction.current = false;
                             showError("Action failed: " + e.message); 
                             setConfirmAction(null); 
+                            fetchAllStudents();
                         }
                     }
                 });
@@ -4320,8 +4325,11 @@
                                 throw new Error("No identifier to delete.");
                             }
 
-                            const { error } = await query;
+                            const { data, error } = await query.select();
                             if (error) throw error;
+                            if (!data || data.length === 0) {
+                                throw new Error("Database rejected the deletion. Check your Supabase RLS policies (must allow Admin UPDATE/DELETE).");
+                            }
                             
                             showSuccess("Student profile deleted permanently!");
                             setConfirmAction(null);
