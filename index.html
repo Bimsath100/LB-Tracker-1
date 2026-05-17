@@ -3086,12 +3086,12 @@
                             </Reveal>
                         </div>
 
-                        {/* Column 2 (Notice Board + Activity History) - span 4 */}
+                        {/* Column 2 (Notice Board) - span 4 */}
                         <div className="dashboard-col-middle" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <Reveal delay={0.1}>
-                                <div className="glass card" style={{ padding: '1.5rem', height: '100%', minHeight: '180px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                            <Reveal delay={0.1} style={{ height: '100%' }}>
+                                <div className="glass card" style={{ padding: '2rem', height: '100%', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ position: 'absolute', top: '-50%', right: '-20%', width: '200px', height: '200px', background: 'radial-gradient(circle, var(--primary-glow) 0%, transparent 70%)', opacity: 0.3, filter: 'blur(30px)', animation: 'dnaPulse 8s infinite' }}></div>
-                                    <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                    <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.5rem' }}>
                                             <div style={{ width: '40px', height: '40px', background: 'var(--primary-glow)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', border: '1px solid var(--primary)', animation: 'livePulse 2s infinite' }}>📢</div>
                                             <div>
@@ -3099,52 +3099,57 @@
                                                 <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Official Notices</div>
                                             </div>
                                         </div>
-                                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.2rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '20px', padding: '2rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '220px' }}>
                                             {announcement ? (
-                                                <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.5', margin: 0, textAlign: 'center' }}>
+                                                <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6', margin: 0, textAlign: 'center', fontFamily: 'Outfit' }}>
                                                     {announcement}
                                                 </p>
                                             ) : (
                                                 <div style={{ opacity: 0.5, textAlign: 'center' }}>
-                                                    <p style={{ fontSize: '0.85rem', fontWeight: '700', margin: 0 }}>No new announcements.</p>
+                                                    <p style={{ fontSize: '0.95rem', fontWeight: '700', margin: 0 }}>No new announcements.</p>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                             </Reveal>
-
-                            <Reveal delay={0.2}>
-                                <div className="glass card" style={{ padding: '1.5rem', height: '100%', minHeight: '260px' }}>
-                                    <div style={{ fontWeight: '800', fontSize: '0.85rem', color: 'var(--primary)', marginBottom: '1rem', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                        📜 My Activity History
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '5px' }}>
-                                        {(() => {
-                                            const markedLogs = history && Array.isArray(history.logs) ? history.logs.filter(log => log.action && log.action.startsWith('Marked')).slice(0, 8) : [];
-                                            return markedLogs.length > 0 ? (
-                                                markedLogs.map(log => (
-                                                    <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '10px 12px', borderRadius: '12px', borderLeft: '3px solid #10B981' }}>
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                            <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
-                                                            <div style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--text-dim)' }}>{log.time ? new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}</div>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '1rem', gridColumn: '1 / -1' }}>No recent marks.</div>
-                                            );
-                                        })()}
-                                    </div>
-                                </div>
-                            </Reveal>
                         </div>
 
-                        {/* Column 3 (Daily Progress Gauge) - span 4 */}
+                        {/* Column 3 (Daily Progress & Activity History Combined) - span 4 */}
                         <div className="dashboard-col-right" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                             <Reveal delay={0.3} style={{ height: '100%' }}>
-                                <div className="glass card" style={{ padding: '2rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
+                                <div className="glass card" style={{ padding: '1.5rem 2rem 2rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem' }}>
+                                    {/* Top: Daily Progress */}
+                                    <div style={{ width: '100%' }}>
+                                        <DailyProgressGauge value={todayCount} max={dailyTarget} label="Daily Progress" />
+                                    </div>
+
+                                    {/* Divider Line */}
+                                    <div style={{ width: '100%', height: '1px', background: 'var(--border)', opacity: 0.4 }}></div>
+
+                                    {/* Bottom: Activity History */}
+                                    <div style={{ width: '100%' }}>
+                                        <div style={{ fontWeight: '800', fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', textAlign: 'center' }}>
+                                            📜 My Activity History
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '110px', overflowY: 'auto', paddingRight: '5px' }}>
+                                            {(() => {
+                                                const markedLogs = history && Array.isArray(history.logs) ? history.logs.filter(log => log.action && log.action.startsWith('Marked')).slice(0, 3) : [];
+                                                return markedLogs.length > 0 ? (
+                                                    markedLogs.map(log => (
+                                                        <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '8px 10px', borderRadius: '10px', borderLeft: '3px solid #10B981' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
+                                                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>{log.time ? new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.75rem', padding: '0.5rem' }}>No recent marks.</div>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
                                 </div>
                             </Reveal>
                         </div>
