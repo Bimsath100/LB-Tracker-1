@@ -23,7 +23,7 @@
     <meta name="apple-mobile-web-app-title" content="LB Tracker">
 
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://lb-tracker-1.vercel.app/">
+    <meta property="og:url" content="https://lbstudytracker.online/">
     <meta property="og:title" content="LB Study Tracker | The Elite Student Dashboard">
     <meta property="og:description"
         content="Track your study hours, manage paper marks, and achieve your A/L goals with cloud-synced progress.">
@@ -4605,7 +4605,7 @@
                 setLoading(false);
             };
 
-            const handleLogin = async () => { await sb.auth.signInWithOAuth({ provider: 'google' }); };
+            const handleLogin = async () => { await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } }); };
             const handleLogout = async () => { await sb.auth.signOut(); window.location.reload(); };
 
             const saveProfile = async (p) => {
