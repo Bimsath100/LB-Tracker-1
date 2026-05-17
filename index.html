@@ -3127,28 +3127,30 @@
                                     {/* Divider Line */}
                                     <div style={{ width: '100%', height: '1px', background: 'var(--border)', opacity: 0.4 }}></div>
 
-                                    {/* Bottom: Activity History */}
+                                    {/* Bottom: Activity History (Latest Single Log Status) */}
                                     <div style={{ width: '100%' }}>
                                         <div style={{ fontWeight: '800', fontSize: '0.8rem', color: 'var(--primary)', marginBottom: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', textAlign: 'center' }}>
-                                            📜 My Activity History
+                                            ⚡ Latest Activity
                                         </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '110px', overflowY: 'auto', paddingRight: '5px' }}>
-                                            {(() => {
-                                                const markedLogs = history && Array.isArray(history.logs) ? history.logs.filter(log => log.action && log.action.startsWith('Marked')).slice(0, 3) : [];
-                                                return markedLogs.length > 0 ? (
-                                                    markedLogs.map(log => (
-                                                        <div key={log.id} style={{ display: 'flex', flexDirection: 'column', background: 'var(--input-bg)', padding: '8px 10px', borderRadius: '10px', borderLeft: '3px solid #10B981' }}>
-                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-main)' }}>{log.action}</div>
-                                                                <div style={{ fontSize: '0.6rem', fontWeight: '800', color: 'var(--text-dim)' }}>{log.time ? new Date(log.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.75rem', padding: '0.5rem' }}>No recent marks.</div>
-                                                );
-                                            })()}
-                                        </div>
+                                        {(() => {
+                                            const markedLogs = history && Array.isArray(history.logs) ? history.logs.filter(log => log.action && log.action.startsWith('Marked')) : [];
+                                            const latestLog = markedLogs[0];
+                                            return latestLog ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--input-bg)', padding: '12px 16px', borderRadius: '14px', borderLeft: '4px solid #10B981', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.1)', animation: 'slideIn 0.3s ease-out' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div style={{ width: '8px', height: '8px', background: '#10B981', borderRadius: '50%', animation: 'livePulse 1.5s infinite' }}></div>
+                                                        <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-main)' }}>{latestLog.action}</div>
+                                                    </div>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)' }}>
+                                                        {latestLog.time ? new Date(latestLog.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', padding: '10px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed var(--border)' }}>
+                                                    No recent activity recorded today.
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
                             </Reveal>
@@ -4049,6 +4051,11 @@
             }, [currentPage]);
             const [viewDate, setViewDate] = useState(getLocalISODate());
             const [history, setHistory] = useState({});
+            const latestHistoryRef = useRef(history);
+            const pushDebounceRef = useRef(null);
+            useEffect(() => {
+                latestHistoryRef.current = history;
+            }, [history]);
             const [marks, setMarks] = useState([]);
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isEditMode, setIsEditMode] = useState(false);
@@ -4172,7 +4179,15 @@
                     }, (payload) => {
                         console.log("Live Sync: Data changed!", payload.new);
                         if (payload.new) {
-                            if (payload.new.history) setHistory(payload.new.history);
+                            if (payload.new.history) {
+                                const incomingUpdate = payload.new.history.last_updated;
+                                const currentUpdate = latestHistoryRef.current?.last_updated;
+                                if (!currentUpdate || !incomingUpdate || new Date(incomingUpdate) > new Date(currentUpdate)) {
+                                    setHistory(payload.new.history);
+                                } else {
+                                    console.log("Ignored stale real-time broadcast to prevent race conditions.");
+                                }
+                            }
                             if (payload.new.marks) setMarks(payload.new.marks);
                             // Also update profile if it changed on another device
                             setProfile(prev => ({
@@ -4641,62 +4656,72 @@
 
             const pushData = async (h, m) => {
                 if (!user || !profile) return;
-                const historyData = { 
-                    ...h, 
-                    last_updated: new Date().toISOString(),
-                    _email: user.email,
-                    _avatar_url: profile.avatarUrl || '',
-                    _exam_year: profile.examYear,
-                    _exam_month: profile.examMonth,
-                    _exam_level: profile.examLevel,
-                    _subjects: profile.subjects,
-                    _marks: m
-                };
-                
-                const payload = {
-                    user_id: user.id,
-                    name: profile.name, 
-                    district: profile.district, 
-                    subjects: profile.subjects,
-                    exam_year: profile.examYear, 
-                    exam_month: profile.examMonth, 
-                    exam_level: profile.examLevel,
-                    avatar_url: profile.avatarUrl || '',
-                    history: historyData, 
-                    marks: m
-                };
 
-                let { error } = await sb.from('study_tracker_v2').upsert(payload);
-                if (error && (error.message.includes('column') || error.message.includes('schema cache'))) {
-                    const minimalPayload = {
-                        user_id: user.id,
-                        name: payload.name,
-                        district: payload.district,
-                        history: historyData
+                // Clear any pending database write
+                if (pushDebounceRef.current) {
+                    clearTimeout(pushDebounceRef.current);
+                }
+
+                // Schedule the database write after 800ms of inactivity
+                pushDebounceRef.current = setTimeout(async () => {
+                    console.log("Saving track state to cloud... ☁️");
+                    const historyData = { 
+                        ...h, 
+                        last_updated: new Date().toISOString(),
+                        _email: user.email,
+                        _avatar_url: profile.avatarUrl || '',
+                        _exam_year: profile.examYear,
+                        _exam_month: profile.examMonth,
+                        _exam_level: profile.examLevel,
+                        _subjects: profile.subjects,
+                        _marks: m
                     };
-                    const res = await sb.from('study_tracker_v2').upsert(minimalPayload);
-                    error = res.error;
-                }
-
-                if (error) console.error("Push Error:", error);
-                else {
-                    console.log("Data pushed successfully! ✅");
-                    // Broadcast the update for real-time synchronization
-                    const today = getLocalISODate();
-                    const hrsCount = (h && Array.isArray(h[today])) ? h[today].filter(Boolean).length : 0;
                     
-                    sb.channel('global-study-broadcast').send({
-                        type: 'broadcast',
-                        event: 'study_update',
-                        payload: {
+                    const payload = {
+                        user_id: user.id,
+                        name: profile.name, 
+                        district: profile.district, 
+                        subjects: profile.subjects,
+                        exam_year: profile.examYear, 
+                        exam_month: profile.examMonth, 
+                        exam_level: profile.examLevel,
+                        avatar_url: profile.avatarUrl || '',
+                        history: historyData, 
+                        marks: m
+                    };
+
+                    let { error } = await sb.from('study_tracker_v2').upsert(payload);
+                    if (error && (error.message.includes('column') || error.message.includes('schema cache'))) {
+                        const minimalPayload = {
                             user_id: user.id,
-                            name: profile.name,
-                            district: profile.district,
-                            hrs: hrsCount,
-                            timestamp: new Date().toISOString()
-                        }
-                    });
-                }
+                            name: payload.name,
+                            district: payload.district,
+                            history: historyData
+                         };
+                         const res = await sb.from('study_tracker_v2').upsert(minimalPayload);
+                         error = res.error;
+                    }
+
+                    if (error) console.error("Push Error:", error);
+                    else {
+                        console.log("Data pushed successfully! ✅");
+                        // Broadcast the update for real-time synchronization
+                        const today = getLocalISODate();
+                        const hrsCount = (h && Array.isArray(h[today])) ? h[today].filter(Boolean).length : 0;
+                        
+                        sb.channel('global-study-broadcast').send({
+                            type: 'broadcast',
+                            event: 'study_update',
+                            payload: {
+                                user_id: user.id,
+                                name: profile.name,
+                                district: profile.district,
+                                hrs: hrsCount,
+                                timestamp: new Date().toISOString()
+                            }
+                         });
+                    }
+                }, 800);
             };
 
             const handleAvatarUpload = async (file) => {
