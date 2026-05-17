@@ -32,23 +32,18 @@
     <meta property="og:image"
         content="https://gemcglmmjbicgbvdhdee.supabase.co/storage/v1/object/public/community_assets/og-image.png">
 
-    <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="lb-icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="lb-icon-512.png">
+    <link rel="apple-touch-icon" href="lb-icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script defer src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script defer src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script defer src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #9d5cff;
@@ -4892,7 +4887,7 @@
                                 <button className="btn-primary" style={{ marginBottom: '10px', background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)' }} onClick={async () => {
                                     const permission = await Notification.requestPermission();
                                     if (permission === 'granted') {
-                                        new Notification("LB Tracker 🚀", { body: "Reminders enabled! We'll remind you to log your hours.", icon: "logo.png" });
+                                        new Notification("LB Tracker 🚀", { body: "Reminders enabled! We'll remind you to log your hours.", icon: "lb-icon-192.png" });
                                     } else {
                                         alert("Please enable notifications in your browser settings.");
                                     }
