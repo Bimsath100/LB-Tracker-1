@@ -4243,7 +4243,7 @@
                 sb.auth.getSession().then(({ data: { session } }) => {
                     if (session) {
                         setUser(session.user);
-                        fetchUserData(session.user.id);
+                        fetchUserData(session.user.id, session.user);
                     } else {
                         setLoading(false);
                     }
@@ -4255,7 +4255,7 @@
                 const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
                     if (session) {
                         setUser(session.user);
-                        fetchUserData(session.user.id);
+                        fetchUserData(session.user.id, session.user);
                     } else {
                         setUser(null);
                         setProfile(null);
@@ -4602,9 +4602,35 @@
                 }
             };
 
-            const fetchUserData = async (uid) => {
+            const fetchUserData = async (uid, currentUser = null) => {
                 try {
-                    const { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).single();
+                    let { data, error } = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).maybeSingle();
+                    
+                    const activeUser = currentUser || user;
+                    if (!data && activeUser && activeUser.email) {
+                        console.log("New user ID detected. Checking for migrated record under email:", activeUser.email);
+                        const { data: allRows } = await sb.from('study_tracker_v2').select('user_id, email, history');
+                        if (allRows) {
+                            const match = allRows.find(r => 
+                                (r.email && r.email.toLowerCase() === activeUser.email.toLowerCase()) || 
+                                (r.history && r.history._email && r.history._email.toLowerCase() === activeUser.email.toLowerCase())
+                            );
+                            if (match) {
+                                console.log("Migrated record found! Updating user_id from", match.user_id, "to", uid);
+                                const { error: updateErr } = await sb.from('study_tracker_v2')
+                                    .update({ user_id: uid, email: activeUser.email })
+                                    .eq('user_id', match.user_id);
+                                
+                                if (!updateErr) {
+                                    const refetched = await sb.from('study_tracker_v2').select('*').eq('user_id', uid).maybeSingle();
+                                    data = refetched.data;
+                                } else {
+                                    console.error("Migration update error:", updateErr);
+                                }
+                            }
+                        }
+                    }
+
                     if (data) {
                         const h = data.history || {};
                         setProfile({
