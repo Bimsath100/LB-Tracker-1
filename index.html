@@ -2829,7 +2829,7 @@
         };
 
         const BadgesView = ({ history, marks, streak }) => {
-            const totalHrs = Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0);
+            const totalHrs = Object.keys(history).reduce((a, k) => a + (/^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0), 0);
             const totalPapers = marks ? marks.length : 0;
 
             const badges = [
@@ -2991,7 +2991,7 @@
             const dailyTarget = (history && history.target) || 24;
             const weekHrs = [...Array(7)].reduce((a, _, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return a + (history && Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); }, 0);
             const monthHrs = [...Array(30)].reduce((a, _, i) => { const d = new Date(); d.setDate(d.getDate() - i); const k = getLocalISODate(d); return a + (history && Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0); }, 0);
-            const totalHrs = history ? Object.values(history).reduce((a, b) => a + (Array.isArray(b) ? b.filter(Boolean).length : 0), 0) : 0;
+            const totalHrs = history ? Object.keys(history).reduce((a, k) => a + (/^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(history[k]) ? history[k].filter(Boolean).length : 0), 0) : 0;
             const toggleH = (i) => {
                 const currentHistory = latestHistoryRef.current || history || {};
                 const h = [...(currentHistory[viewDate] || new Array(24).fill(false))];
@@ -4434,7 +4434,7 @@
                         let totalAllTime = 0;
                         if (data.history) {
                             Object.keys(data.history).forEach(k => {
-                                if (k.includes('-') && Array.isArray(data.history[k])) {
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(data.history[k])) {
                                     totalAllTime += data.history[k].filter(Boolean).length;
                                 }
                             });
@@ -4504,7 +4504,7 @@
                     if (leadData) {
                         const scored = leadData.map(u => {
                             let hrs = 0;
-                            if (u.history) { Object.keys(u.history).forEach(k => { if (k.includes('-') && Array.isArray(u.history[k])) hrs += u.history[k].filter(Boolean).length; }); }
+                            if (u.history) { Object.keys(u.history).forEach(k => { if (/^\d{4}-\d{2}-\d{2}$/.test(k) && Array.isArray(u.history[k])) hrs += u.history[k].filter(Boolean).length; }); }
                             return { name: u.name, district: u.district, hrs };
                         }).filter(u => u.hrs > 0).sort((a, b) => b.hrs - a.hrs).slice(0, 10);
                         setGlobalLeaders(scored);
