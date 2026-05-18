@@ -4209,16 +4209,25 @@
                     }, (payload) => {
                         console.log("Live Sync: Data changed!", payload.new);
                         if (payload.new) {
+                            let shouldUpdateMarks = false;
                             if (payload.new.history) {
                                 const incomingUpdate = payload.new.history.last_updated;
                                 const currentUpdate = latestHistoryRef.current?.last_updated;
                                 if (!currentUpdate || !incomingUpdate || new Date(incomingUpdate) > new Date(currentUpdate)) {
                                     setHistory(payload.new.history);
+                                    shouldUpdateMarks = true;
                                 } else {
                                     console.log("Ignored stale real-time broadcast to prevent race conditions.");
                                 }
+                            } else {
+                                shouldUpdateMarks = true;
                             }
-                            if (payload.new.marks) setMarks(payload.new.marks);
+                            if (shouldUpdateMarks) {
+                                const incomingMarks = (payload.new.marks && Array.isArray(payload.new.marks) && payload.new.marks.length > 0)
+                                    ? payload.new.marks
+                                    : (payload.new.history?._marks || []);
+                                setMarks(incomingMarks);
+                            }
                             // Also update profile if it changed on another device
                             setProfile(prev => ({
                                 ...prev,
