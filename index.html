@@ -24,8 +24,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LB Tracker">
 
+    <link rel="canonical" href="https://lbstudytracker.com/" />
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://lbstudytracker.online/">
+    <meta property="og:url" content="https://lbstudytracker.com/">
     <meta property="og:title" content="LB Study Tracker | The Elite Student Dashboard">
     <meta property="og:description"
         content="Track your study hours, manage paper marks, and achieve your A/L goals with cloud-synced progress.">
@@ -3868,7 +3869,7 @@
                 
                 const total = (parseFloat(mcqVal) || 0) + (parseFloat(strVal) || 0) + (parseFloat(esyVal) || 0);
                 if (total === 0) {
-                    alert("⚠️ කරුණාකර අවම වශයෙන් එක් කොටසකටවත් ලකුණු ඇතුළත් කරන්න!");
+                    window.showAlert("⚠️ කරුණාකර අවම වශයෙන් එක් කොටසකටවත් ලකුණු ඇතුළත් කරන්න!", "error");
                     return;
                 }
                 
@@ -4343,30 +4344,45 @@
                 if (!file) return;
 
                 if (file.size > 2 * 1024 * 1024) {
-                    alert("Image size should be less than 2MB.");
+                    window.showAlert("Image size should be less than 2MB.", "error");
                     return;
                 }
 
                 setIsUploading(true);
                 try {
-                    const compressed = await compressImage(file, 100, 100, 0.2);
-                    const fileName = `${user.id}-${Math.random().toString(36).substring(7)}.jpg`;
-                    const filePath = `avatars/${fileName}`;
+                    // Compress to a highly efficient Base64 JPEG string (120x120 thumbnail)
+                    const base64Data = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.src = e.target.result;
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const maxWidth = 120;
+                                const maxHeight = 120;
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                                } else {
+                                    if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                                }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                resolve(canvas.toDataURL('image/jpeg', 0.5));
+                            };
+                            img.onerror = () => reject(new Error("Failed to load image for compression"));
+                        };
+                        reader.onerror = () => reject(new Error("Failed to read file"));
+                    });
 
-                    const { error: uploadError } = await sb.storage
-                        .from('community_assets')
-                        .upload(filePath, compressed);
-
-                    if (uploadError) throw new Error(uploadError.message || "Upload failed");
-
-                    const { data: { publicUrl } } = sb.storage
-                        .from('community_assets')
-                        .getPublicUrl(filePath);
-
-                    setForm(f => ({ ...f, avatarUrl: publicUrl }));
+                    setForm(f => ({ ...f, avatarUrl: base64Data }));
+                    window.showAlert("Image selected and compressed successfully! 📸✅", "success");
                 } catch (error) {
                     console.error('Error uploading image:', error);
-                    alert('Upload Error: ' + (error.message || 'Check your connection and storage settings'));
+                    window.showAlert('Compression Error: ' + (error.message || 'Failed to process image'), 'error');
                 } finally {
                     setIsUploading(false);
                 }
@@ -4519,8 +4535,14 @@
             const isPerformingAction = useRef(false);
             const [activeModal, setActiveModal] = useState(null);
 
-            const showSuccess = (msg) => { setGlobalSuccess(msg); setTimeout(() => setGlobalSuccess(''), 3000); };
-            const showError = (msg) => { setGlobalError(msg); setTimeout(() => setGlobalError(''), 3000); };
+            const showSuccess = (msg) => { setGlobalSuccess(msg); setTimeout(() => setGlobalSuccess(''), 4000); };
+            const showError = (msg) => { setGlobalError(msg); setTimeout(() => setGlobalError(''), 4000); };
+            useEffect(() => {
+                window.showAlert = (msg, type = 'error') => {
+                    if (type === 'success' || type === 'info') showSuccess(msg);
+                    else showError(msg);
+                };
+            }, []);
 
             // Global Timer State
             const [timerFocus, setTimerFocus] = useState(() => parseInt(localStorage.getItem('timer_focus')) || 25);
@@ -5007,9 +5029,9 @@
 
                 if (!error) {
                     setAnnouncement(announcementInput);
-                    alert('Broadcast updated successfully! ✅');
+                    window.showAlert('Broadcast updated successfully! ✅', 'success');
                 } else {
-                    alert('Error updating broadcast: ' + error.message);
+                    window.showAlert('Error updating broadcast: ' + error.message, 'error');
                 }
             };
 
@@ -5190,7 +5212,7 @@
 
                 // File size check (2MB limit)
                 if (file.size > 2 * 1024 * 1024) {
-                    alert("Image too large! Please choose a photo smaller than 2MB.");
+                    window.showAlert("Image too large! Please choose a photo smaller than 2MB.", "error");
                     return;
                 }
 
@@ -5198,35 +5220,43 @@
                     setLoading(true);
                     console.log("Starting upload for:", file.name);
 
-                    const compressed = await compressImage(file, 100, 100, 0.2);
-                    const fileName = `${user.id}-${Math.random().toString(36).substring(7)}.jpg`;
-                    const filePath = `avatars/${fileName}`;
-
-                    // Attempt upload to 'community_assets'
-                    const { error: uploadError } = await sb.storage
-                        .from('community_assets')
-                        .upload(filePath, compressed);
-
-                    if (uploadError) {
-                        console.error("Storage Error:", uploadError);
-                        throw new Error("Could not upload to server. Your Supabase storage might not be configured. Error: " + uploadError.message);
-                    }
-
-                    const { data: { publicUrl } } = sb.storage
-                        .from('community_assets')
-                        .getPublicUrl(filePath);
-
-                    console.log("Upload successful! Public URL:", publicUrl);
+                    // Compress to a highly efficient Base64 JPEG string (120x120 thumbnail)
+                    const base64Data = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.src = e.target.result;
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const maxWidth = 120;
+                                const maxHeight = 120;
+                                let width = img.width;
+                                let height = img.height;
+                                if (width > height) {
+                                    if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                                } else {
+                                    if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                                }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                resolve(canvas.toDataURL('image/jpeg', 0.5));
+                            };
+                            img.onerror = () => reject(new Error("Failed to load image for compression"));
+                        };
+                        reader.onerror = () => reject(new Error("Failed to read file"));
+                    });
 
                     // Update local state and save to DB
-                    const updatedProfile = { ...profile, avatarUrl: publicUrl };
+                    const updatedProfile = { ...profile, avatarUrl: base64Data };
                     setProfile(updatedProfile);
                     await saveProfile(updatedProfile);
 
-                    alert("Profile picture updated successfully! 📸✅");
+                    window.showAlert("Profile picture updated successfully! 📸✅", "success");
                 } catch (error) {
                     console.error('Final Upload Error:', error);
-                    alert('Upload failed: ' + error.message + "\n\nYou can still use an image link in 'Edit Profile' if this continues.");
+                    window.showAlert('Upload failed: ' + error.message, 'error');
                 } finally {
                     setLoading(false);
                 }
