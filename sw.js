@@ -76,24 +76,27 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 2. Stale-While-Revalidate for local files (index.html, styles, manifest, images)
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      const fetchPromise = fetch(e.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(e.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Fall back quietly if network fails
-      });
+  // 2. Only intercept local origin requests (static assets) for Stale-While-Revalidate
+  if (url.origin === self.location.origin) {
+    e.respondWith(
+      caches.match(e.request).then((cachedResponse) => {
+        const fetchPromise = fetch(e.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && e.request.method === 'GET') {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(e.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        }).catch(() => {
+          // Fall back quietly if network fails
+        });
 
-      return cachedResponse || fetchPromise;
-    })
-  );
+        return cachedResponse || fetchPromise;
+      })
+    );
+    return;
+  }
 });
 
 self.addEventListener('message', (event) => {
