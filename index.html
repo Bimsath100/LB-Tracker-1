@@ -4212,13 +4212,13 @@
                                 } else {
                                     console.log("Ignored stale real-time broadcast to prevent race conditions.");
                                 }
-                            } else {
+                            } else if (payload.new.marks && Array.isArray(payload.new.marks)) {
                                 shouldUpdateMarks = true;
                             }
                             if (shouldUpdateMarks) {
-                                const incomingMarks = (payload.new.marks && Array.isArray(payload.new.marks) && payload.new.marks.length > 0)
+                                const incomingMarks = (payload.new.marks && Array.isArray(payload.new.marks))
                                     ? payload.new.marks
-                                    : (payload.new.history?._marks || []);
+                                    : (payload.new.history?._marks && Array.isArray(payload.new.history._marks) ? payload.new.history._marks : []);
                                 setMarks(incomingMarks);
                             }
                             // Also update profile if it changed on another device
@@ -4620,7 +4620,10 @@
                             is_banned: data.is_banned
                         });
                         setHistory(h);
-                        setMarks(data.marks || h._marks || []);
+                        const incomingMarks = (data.marks && Array.isArray(data.marks))
+                            ? data.marks
+                            : (h._marks && Array.isArray(h._marks) ? h._marks : []);
+                        setMarks(incomingMarks);
                     }
                 } catch (e) { console.error("Fetch Error:", e); }
                 setLoading(false);
