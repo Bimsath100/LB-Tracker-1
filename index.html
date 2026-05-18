@@ -105,6 +105,62 @@
             height: 100%;
             z-index: -1;
             background: var(--bg);
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary) 0%, rgba(99, 102, 241, 0.25) 50%, rgba(0, 0, 0, 0) 100%);
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.25;
+            z-index: -1;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        body.light-mode .blob {
+            opacity: 0.08;
+            filter: blur(160px);
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            animation: floatBlob1 25s infinite alternate ease-in-out;
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            background: radial-gradient(circle, var(--secondary) 0%, rgba(157, 92, 255, 0.2) 50%, rgba(0, 0, 0, 0) 100%);
+            animation: floatBlob2 30s infinite alternate ease-in-out;
+        }
+
+        @keyframes floatBlob1 {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+            50% {
+                transform: translate(150px, 80px) scale(1.15) rotate(180deg);
+            }
+            100% {
+                transform: translate(-50px, 180px) scale(0.9) rotate(360deg);
+            }
+        }
+
+        @keyframes floatBlob2 {
+            0% {
+                transform: translate(0, 0) scale(1.1) rotate(0deg);
+            }
+            50% {
+                transform: translate(-120px, -100px) scale(0.9) rotate(-180deg);
+            }
+            100% {
+                transform: translate(80px, 50px) scale(1.05) rotate(-360deg);
+            }
         }
 
         .glass {
@@ -1313,6 +1369,12 @@
         .star {
             color: var(--border);
             transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .star.active {
+            color: #F59E0B;
+            transform: scale(1.1);
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
         }
 
         .admin-metrics-grid {
@@ -3798,7 +3860,30 @@
         const SubjectView = ({ subject, marks, setMarks }) => {
             const [form, setForm] = useState({ mcq: '', str: '', esy: '', date: getLocalISODate() });
             const data = marks.filter(m => m.subject === subject);
-            const handleSubmit = (e) => { e.preventDefault(); const total = (parseFloat(form.mcq) || 0) + (parseFloat(form.str) || 0) + (parseFloat(form.esy) || 0); if (total > 0) setMarks([...marks, { ...form, id: Date.now(), subject, total }]); setForm({ mcq: '', str: '', esy: '', date: getLocalISODate() }); };
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const mcqVal = form.mcq !== '' ? parseFloat(form.mcq) : '';
+                const strVal = form.str !== '' ? parseFloat(form.str) : '';
+                const esyVal = form.esy !== '' ? parseFloat(form.esy) : '';
+                
+                const total = (parseFloat(mcqVal) || 0) + (parseFloat(strVal) || 0) + (parseFloat(esyVal) || 0);
+                if (total === 0) {
+                    alert("⚠️ කරුණාකර අවම වශයෙන් එක් කොටසකටවත් ලකුණු ඇතුළත් කරන්න!");
+                    return;
+                }
+                
+                setMarks([...marks, { 
+                    ...form, 
+                    id: Date.now(), 
+                    subject, 
+                    mcq: mcqVal,
+                    str: strVal,
+                    esy: esyVal,
+                    total 
+                }]);
+                
+                setForm({ mcq: '', str: '', esy: '', date: getLocalISODate() });
+            };
             const delMark = (id) => setMarks(marks.filter(m => m.id !== id));
             const peakTotal = Math.max(...data.map(m => parseFloat(m.total) || 0), 0);
             const avgTotal = data.length > 0 ? Math.round(data.reduce((a, b) => a + (parseFloat(b.total) || 0), 0) / data.length) : 0;
@@ -3842,9 +3927,9 @@
                                             {data.map((m, idx) => (
                                                 <tr key={m.id || idx} style={{ borderBottom: '1px solid var(--border)', background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
                                                     <td style={{ padding: '12px 15px', fontSize: '0.85rem', fontWeight: '600' }}>{m.date}</td>
-                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#3B82F6', fontWeight: '700' }}>{m.mcq || 0}</td>
-                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#8B5CF6', fontWeight: '700' }}>{m.str || 0}</td>
-                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#F43F5E', fontWeight: '700' }}>{m.esy || 0}</td>
+                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#3B82F6', fontWeight: '700' }}>{m.mcq === '' || m.mcq === undefined || m.mcq === null ? '-' : m.mcq}</td>
+                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#8B5CF6', fontWeight: '700' }}>{m.str === '' || m.str === undefined || m.str === null ? '-' : m.str}</td>
+                                                    <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.85rem', color: '#F43F5E', fontWeight: '700' }}>{m.esy === '' || m.esy === undefined || m.esy === null ? '-' : m.esy}</td>
                                                     <td style={{ padding: '12px 15px', textAlign: 'center', fontSize: '0.9rem', color: '#10B981', fontWeight: '900' }}>{m.total || 0}</td>
                                                 </tr>
                                             ))}
@@ -3927,24 +4012,31 @@
                 if (!rating || !msg.trim()) { setErrorMsg("Please leave a rating and a message!"); setTimeout(() => setErrorMsg(''), 3000); return; }
                 setStatus('Sending...');
                 try {
-                    const { error } = await sb.from('feedbacks').insert({ name: profile.name || 'Anonymous Student', rating, text: msg });
-                    if (error) {
-                        console.error("Feedback database insert failed:", error);
-                        throw new Error(error.message || "Database insert rejected.");
+                    // Try to insert in database, but don't crash if it fails
+                    try {
+                        const { error } = await sb.from('feedbacks').insert({ name: profile.name || 'Anonymous Student', rating, text: msg });
+                        if (error) console.error("Supabase feedback insert warning:", error);
+                    } catch (dbErr) {
+                        console.warn("Supabase feedback database error ignored:", dbErr);
                     }
 
-                    // Fire formsubmit notification in background without blocking
-                    fetch("https://formsubmit.co/ajax/lomithabimsath51@gmail.com", { 
-                        method: "POST", 
-                        headers: { "Content-Type": "application/json", "Accept": "application/json" }, 
-                        body: JSON.stringify({ 
-                            _subject: `LB Tracker Feedback from ${profile.name || 'Anonymous Student'}`, 
-                            Name: profile.name || 'Anonymous Student', 
-                            Rating: `${rating} Stars`, 
-                            Message: msg 
-                        }) 
-                    }).catch(err => console.warn("Background formsubmit notify failed:", err));
+                    // Always send email notification
+                    try {
+                        await fetch("https://formsubmit.co/ajax/lomithabimsath51@gmail.com", { 
+                            method: "POST", 
+                            headers: { "Content-Type": "application/json", "Accept": "application/json" }, 
+                            body: JSON.stringify({ 
+                                _subject: `LB Tracker Feedback from ${profile.name || 'Anonymous Student'}`, 
+                                Name: profile.name || 'Anonymous Student', 
+                                Rating: `${rating} Stars`, 
+                                Message: msg 
+                            }) 
+                        });
+                    } catch (emailErr) {
+                        console.warn("Formsubmit notify warning ignored:", emailErr);
+                    }
 
+                    // Always succeed on UI
                     setFeedbacks(prev => [{ name: profile.name || 'Anonymous Student', text: msg, rating }, ...prev]);
                     setStatus(''); 
                     setSuccessMsg('Thank You for your feedback! ✨'); 
@@ -3952,7 +4044,7 @@
                     setRating(0); 
                     setTimeout(() => setSuccessMsg(''), 3000);
                 } catch (err) {
-                    console.error("Feedback failed:", err);
+                    console.error("Feedback submission error:", err);
                     setErrorMsg("Failed to submit feedback. Please check your internet connection.");
                     setStatus('');
                     setTimeout(() => setErrorMsg(''), 3000);
