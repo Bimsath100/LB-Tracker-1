@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lb-study-tracker-v4';
+const CACHE_NAME = 'lb-study-tracker-v7';
 const STATIC_ASSETS = [
   './',
   './index.html',
