@@ -2954,16 +2954,9 @@
                 };
                 fetchLeaders();
 
-                const channel = sb.channel('leaders-realtime')
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => {
-                        fetchLeaders();
-                    })
-                    .subscribe();
-
-                const inv = setInterval(fetchLeaders, 10000);
+                const inv = setInterval(fetchLeaders, 300000); // Poll every 5 minutes to save egress
                 return () => {
                     clearInterval(inv);
-                    sb.removeChannel(channel);
                 };
             }, []);
 
@@ -4517,25 +4510,14 @@
                     fetchMarked();
                     fetchTotalUsers();
                     
-                    // Use a dedicated channel for database changes to avoid conflict with shared broadcast channels
-                    const dbChannel = sb.channel('app-db-sync-' + user.id)
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'study_tracker_v2' }, () => { 
-                            // Only update global counts in real-time
-                            fetchMarked(); 
-                            fetchTotalUsers(); 
-                            // Removed fetchAllStudents() from here to prevent the list from jumping
-                        })
-                        .subscribe();
-                        
-                    // Only refresh counts on interval, not the full student list
+                    // Refresh counts on a 5-minute interval to save egress
                     const inv = setInterval(() => { 
                         fetchMarked(); 
                         fetchTotalUsers(); 
-                    }, 60000); // Increased to 60 seconds
+                    }, 300000); 
                     
                     return () => { 
                         clearInterval(inv); 
-                        sb.removeChannel(dbChannel); 
                     };
                 }
             }, [user]);
