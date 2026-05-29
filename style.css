@@ -4,26 +4,28 @@
 */
 
 :root {
-    /* True Black Aesthetic & Neon Accents */
-    --bg-dark: #03000a;          /* තද කළු පසුබිම */
-    --card-bg: rgba(15, 11, 28, 0.7); 
+    /* Vercel True Black Aesthetic & Neon Accents */
+    --bg-dark: #000000;          /* Vercel 100% True Black */
+    --card-bg: rgba(10, 10, 10, 0.7); 
     --accent: #9d5cff;
     --accent-glow: rgba(157, 92, 255, 0.4);
     --text-primary: #FFFFFF;
-    --text-secondary: #94a3b8;
-    --glass-border: rgba(157, 92, 255, 0.15);
+    --text-secondary: #a1a1aa;
+    --glass-border: rgba(255, 255, 255, 0.08);
     --success: #10B981;
 
-    /* Product Sans Font Variable */
-    --google-font: 'Product Sans', sans-serif;
+    /* Vercel Dashboard Premium Font */
+    --vercel-font: 'Geist', sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--google-font); /* මුළු සයිට් එකේම Font එක Product Sans වලට මාරු කරා */
-    letter-spacing: -0.01em; 
+    /* මුළු සයිට් එකේම Font එක Geist වලට මාරු කරා */
+    font-family: var(--vercel-font);
+    /* Vercel Look එකටම අකුරු අතර පරතරය සකස් කිරීම */
+    letter-spacing: -0.03em; 
 }
 
 body {
@@ -60,8 +62,8 @@ body {
 }
 
 .glass:hover {
-    border-color: rgba(157, 92, 255, 0.4);
-    box-shadow: 0 8px 32px 0 rgba(157, 92, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.02);
 }
 
 /* Navbar / Header */
@@ -73,10 +75,10 @@ header {
     padding: 1.5rem 2rem;
 }
 
-/* Headings, Buttons සහ Logos වලට Product Sans Bold font එක */
+/* Headings සහ Titles වලට Vercel එකේ වගේම Semi-Bold Look එකක් දුන්නා */
 .logo, .countdown-value, .tracker-title, h2, h3, .btn, .hour-number {
-    font-family: var(--google-font) !important;
-    font-weight: 700; /* Bold Look */
+    font-family: var(--vercel-font) !important;
+    font-weight: 600; /* Vercel එකේ තියෙන ගාණටම බෝල්ඩ් වෙන පෙනුම */
 }
 
 .logo {
@@ -84,7 +86,6 @@ header {
     background: linear-gradient(to right, #fff, var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: -0.5px;
 }
 
 /* Countdown */
@@ -104,10 +105,10 @@ header {
     text-shadow: 0 0 15px var(--accent-glow);
 }
 
-/* සාමාන්‍ය කුඩා Text සඳහා Regular weight එක */
+/* සාමාන්‍ය Text සඳහා Regular/Medium weight එක */
 .countdown-label, .history-item, input[type="date"] {
-    font-family: var(--google-font);
-    font-weight: 400; /* Regular Look */
+    font-family: var(--vercel-font);
+    font-weight: 400; 
 }
 
 .countdown-label {
@@ -216,7 +217,7 @@ header {
 }
 
 input[type="date"] {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
     color: white;
     padding: 0.8rem;
