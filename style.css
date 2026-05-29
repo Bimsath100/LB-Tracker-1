@@ -14,16 +14,16 @@
     --glass-border: rgba(157, 92, 255, 0.15);
     --success: #10B981;
 
-    /* නවීන Elite Fonts මෙතනට ඇඩ් කරා */
-    --font-main: 'Poppins', sans-serif;
-    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    /* Product Sans Font Variable */
+    --google-font: 'Product Sans', sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--font-main); /* මුළු සයිට් එකේම Text වලට Poppins Font එක */
+    font-family: var(--google-font); /* මුළු සයිට් එකේම Font එක Product Sans වලට මාරු කරා */
+    letter-spacing: -0.01em; 
 }
 
 body {
@@ -73,11 +73,14 @@ header {
     padding: 1.5rem 2rem;
 }
 
-/* Headings සහ Logos වලට Plus Jakarta Sans font එක දුන්නා */
+/* Headings, Buttons සහ Logos වලට Product Sans Bold font එක */
+.logo, .countdown-value, .tracker-title, h2, h3, .btn, .hour-number {
+    font-family: var(--google-font) !important;
+    font-weight: 700; /* Bold Look */
+}
+
 .logo {
-    font-family: var(--font-heading);
     font-size: 1.5rem;
-    font-weight: 700;
     background: linear-gradient(to right, #fff, var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -96,16 +99,18 @@ header {
 }
 
 .countdown-value {
-    font-family: var(--font-heading);
     font-size: 2rem;
-    font-weight: 700;
-    display: block;
     color: var(--accent);
     text-shadow: 0 0 15px var(--accent-glow);
 }
 
+/* සාමාන්‍ය කුඩා Text සඳහා Regular weight එක */
+.countdown-label, .history-item, input[type="date"] {
+    font-family: var(--google-font);
+    font-weight: 400; /* Regular Look */
+}
+
 .countdown-label {
-    font-family: var(--font-main);
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -120,10 +125,8 @@ header {
 }
 
 .tracker-title {
-    font-family: var(--font-heading);
     font-size: 2.5rem;
     margin-bottom: 2rem;
-    font-weight: 700;
 }
 
 .hour-grid {
@@ -172,9 +175,7 @@ header {
 }
 
 .hour-number {
-    font-family: var(--font-heading);
     font-size: 1.5rem;
-    font-weight: 700;
     color: var(--text-secondary);
 }
 
@@ -223,7 +224,6 @@ input[type="date"] {
     width: 100%;
     margin-top: 1rem;
     outline: none;
-    font-family: var(--font-main);
     transition: border-color 0.3s;
 }
 
@@ -239,13 +239,10 @@ input[type="date"]:focus {
 }
 
 h2 {
-    font-family: var(--font-heading);
     margin-bottom: 1.5rem;
-    font-weight: 600;
 }
 
 h3 {
-    font-family: var(--font-main);
     margin-top: 1.5rem;
     font-size: 1.1rem;
     color: var(--text-secondary);
@@ -257,12 +254,10 @@ h3 {
     border: none;
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
-    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
     display: inline-block;
     text-align: center;
-    font-family: var(--font-main);
 }
 
 .btn-full {
