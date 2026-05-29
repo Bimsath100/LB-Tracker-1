@@ -18,7 +18,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 body {
@@ -68,7 +68,7 @@ header {
 }
 
 .logo {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(to right, #fff, var(--accent));
@@ -89,7 +89,7 @@ header {
 }
 
 .countdown-value {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-size: 2rem;
     font-weight: 700;
     display: block;
@@ -112,7 +112,7 @@ header {
 }
 
 .tracker-title {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-size: 2.5rem;
     margin-bottom: 2rem;
     font-weight: 700;
@@ -138,7 +138,7 @@ header {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    cursor: poRajdhani;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
@@ -214,7 +214,7 @@ input[type="date"] {
     width: 100%;
     margin-top: 1rem;
     outline: none;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Rajdhani', sans-serif;
     transition: border-color 0.3s;
 }
 
@@ -230,13 +230,13 @@ input[type="date"]:focus {
 }
 
 h2 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     margin-bottom: 1.5rem;
     font-weight: 600;
 }
 
 h3 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     margin-top: 1.5rem;
     font-size: 1.1rem;
     color: var(--text-secondary);
@@ -249,7 +249,7 @@ h3 {
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: poRajdhani;
     transition: all 0.3s;
     display: inline-block;
     text-align: center;
@@ -283,3 +283,4 @@ h3 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
+
