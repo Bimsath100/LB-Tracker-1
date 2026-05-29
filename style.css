@@ -4,21 +4,26 @@
 */
 
 :root {
-    --bg-dark: #070514;
-    --card-bg: #14112c;
+    /* True Black Aesthetic & Neon Accents */
+    --bg-dark: #03000a;          /* තද කළු පසුබිම */
+    --card-bg: rgba(15, 11, 28, 0.7); 
     --accent: #9d5cff;
     --accent-glow: rgba(157, 92, 255, 0.4);
     --text-primary: #FFFFFF;
     --text-secondary: #94a3b8;
-    --glass-border: rgba(157, 92, 255, 0.2);
+    --glass-border: rgba(157, 92, 255, 0.15);
     --success: #10B981;
+
+    /* නවීන Elite Fonts මෙතනට ඇඩ් කරා */
+    --font-main: 'Poppins', sans-serif;
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: var(--font-main); /* මුළු සයිට් එකේම Text වලට Poppins Font එක */
 }
 
 body {
@@ -46,16 +51,17 @@ body {
 /* Glassmorphism utility */
 .glass {
     background: var(--card-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 24px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass:hover {
-    border-color: rgba(139, 92, 246, 0.3);
+    border-color: rgba(157, 92, 255, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(157, 92, 255, 0.1);
 }
 
 /* Navbar / Header */
@@ -67,8 +73,9 @@ header {
     padding: 1.5rem 2rem;
 }
 
+/* Headings සහ Logos වලට Plus Jakarta Sans font එක දුන්නා */
 .logo {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(to right, #fff, var(--accent));
@@ -89,7 +96,7 @@ header {
 }
 
 .countdown-value {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-heading);
     font-size: 2rem;
     font-weight: 700;
     display: block;
@@ -98,6 +105,7 @@ header {
 }
 
 .countdown-label {
+    font-family: var(--font-main);
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -112,7 +120,7 @@ header {
 }
 
 .tracker-title {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-heading);
     font-size: 2.5rem;
     margin-bottom: 2rem;
     font-weight: 700;
@@ -138,18 +146,18 @@ header {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: poRajdhani;
+    cursor: pointer;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.02);
     position: relative;
     overflow: hidden;
 }
 
 .hour-box:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
     border-color: var(--accent);
 }
 
@@ -164,6 +172,7 @@ header {
 }
 
 .hour-number {
+    font-family: var(--font-heading);
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-secondary);
@@ -214,7 +223,7 @@ input[type="date"] {
     width: 100%;
     margin-top: 1rem;
     outline: none;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: var(--font-main);
     transition: border-color 0.3s;
 }
 
@@ -230,13 +239,13 @@ input[type="date"]:focus {
 }
 
 h2 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-heading);
     margin-bottom: 1.5rem;
     font-weight: 600;
 }
 
 h3 {
-    font-family: 'Orbitron', sans-serif;
+    font-family: var(--font-main);
     margin-top: 1.5rem;
     font-size: 1.1rem;
     color: var(--text-secondary);
@@ -249,10 +258,11 @@ h3 {
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
-    cursor: poRajdhani;
+    cursor: pointer;
     transition: all 0.3s;
     display: inline-block;
     text-align: center;
+    font-family: var(--font-main);
 }
 
 .btn-full {
@@ -283,4 +293,3 @@ h3 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent);
 }
-

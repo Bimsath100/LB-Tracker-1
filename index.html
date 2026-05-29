@@ -2,6 +2,10 @@
 <html lang="en">
 
 <head>
+    <!-- Google Fonts ලින්ක් එක HTML <head> එක ඇතුළට දාන්න -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">                
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -39,7 +43,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <script defer src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script defer src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -84,7 +88,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -265,7 +269,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-weight: 800;
             font-size: 1.6rem;
             letter-spacing: -0.5px;
@@ -641,7 +645,7 @@
         }
 
         .setup-title {
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 2rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
@@ -761,7 +765,7 @@
         }
 
         .card-title {
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 1.5rem;
             font-weight: 800;
             word-wrap: break-word;
@@ -796,7 +800,7 @@
         }
 
         .stat-val {
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 2.5rem;
             font-weight: 800;
             color: var(--text-main);
@@ -841,7 +845,7 @@
             border-radius: 14px;
             font-weight: 800;
             font-size: 1.2rem;
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             color: var(--text-main);
             background: var(--input-bg);
             border: var(--glass-border);
@@ -1002,7 +1006,7 @@
             border-radius: 12px;
             padding: 12px;
             color: var(--text-main);
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 0.9rem;
             resize: none;
             margin-bottom: 10px;
@@ -1238,7 +1242,7 @@
         }
 
         .countdown-num {
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 2.2rem;
             font-weight: 900;
             color: var(--primary);
@@ -2348,7 +2352,7 @@
         }
 
         .admin-stat-info .val {
-            font-family: 'Orbitron';
+            font-family: 'Outfit';
             font-size: 1.8rem;
             font-weight: 800;
             line-height: 1.1;
@@ -2660,10 +2664,10 @@
                             <circle cx="50" cy="50" r={r} stroke="var(--input-bg)" strokeWidth="10" fill="none" />
                             <circle cx="50" cy="50" r={r} stroke={color} strokeWidth="10" fill="none" strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
                         </svg>
-                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1rem', color: 'var(--text-main)' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', color: 'var(--text-main)' }}>{percent}<span style={{ fontSize: '0.6rem' }}>%</span></div>
                     </div>
                     <div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{label}</div>
-                    <div style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron', color: 'var(--text-main)' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>/ {max}</span></div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit', color: 'var(--text-main)' }}>{value} <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>/ {max}</span></div>
                 </div>
             );
         };
@@ -2746,7 +2750,7 @@
                                 grid: { color: 'rgba(148, 163, 184, 0.12)' },
                                 pointLabels: {
                                     color: '#94A3B8',
-                                    font: { size: 12, weight: '700', family: 'Orbitron' }
+                                    font: { size: 12, weight: '700', family: 'Outfit' }
                                 },
                                 ticks: {
                                     color: '#64748B',
@@ -2998,7 +3002,7 @@
                 <div className="glass card" style={{ textAlign: 'center', padding: '2rem', position: 'relative' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                         <div style={{ textAlign: 'left' }}>
-                            <div style={{ fontWeight: '800', fontSize: '1.1rem', fontFamily: 'Orbitron' }}>Focus Timer ⏳</div>
+                            <div style={{ fontWeight: '800', fontSize: '1.1rem', fontFamily: 'Outfit' }}>Focus Timer ⏳</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: '600' }}>{mode === 'focus' ? 'STAY FOCUSED' : 'TAKE A BREAK'}</div>
                         </div>
                         <button onClick={() => setShowSettings(!showSettings)} style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '10px', width: '36px', height: '36px', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙️</button>
@@ -3034,7 +3038,7 @@
                                     <circle cx="50" cy="50" r="46" stroke="var(--input-bg)" strokeWidth="4" fill="none" />
                                     <circle cx="50" cy="50" r="46" stroke={strokeColor} strokeWidth="4" fill="none" strokeDasharray="289" strokeDashoffset={289 - (progress / 100) * 289} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear', filter: `drop-shadow(0 0 8px ${strokeColor}40)` }} />
                                 </svg>
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Orbitron', fontWeight: '900', fontSize: '3rem', color: 'var(--text-main)', letterSpacing: '-1px' }}>
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontFamily: 'Outfit', fontWeight: '900', fontSize: '3rem', color: 'var(--text-main)', letterSpacing: '-1px' }}>
                                     {m}:{s}
                                 </div>
                             </div>
@@ -3177,7 +3181,7 @@
                 <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem', textAlign: 'left', borderLeft: '4px solid var(--primary)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '15px' }}>
                         <div>
-                            <h3 style={{ margin: 0, fontFamily: 'Orbitron', fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '800' }}>Study Roadmap 🗺️</h3>
+                            <h3 style={{ margin: 0, fontFamily: 'Outfit', fontSize: '1.4rem', color: 'var(--text-main)', fontWeight: '800' }}>Study Roadmap 🗺️</h3>
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', marginTop: '4px', fontWeight: '600' }}>Current Phase: <span style={{ color: 'var(--primary)' }}>{phase.label}</span></div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -3208,7 +3212,7 @@
             return (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ margin: 0, fontFamily: 'Orbitron', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '2.5px', fontWeight: '800' }}>{label}</h3>
+                        <h3 style={{ margin: 0, fontFamily: 'Outfit', color: 'var(--text-dim)', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '2.5px', fontWeight: '800' }}>{label}</h3>
                     </div>
                     <div style={{ position: 'relative', width: '180px', height: '180px' }}>
                         <svg width="180" height="180" viewBox="0 0 180 180" style={{ transform: 'rotate(-90deg)' }}>
@@ -3229,7 +3233,7 @@
                                 }} />
                         </svg>
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: '900', fontFamily: 'Orbitron', color: 'var(--text-main)', lineHeight: '1' }}>{Math.round(percent * 100)}%</div>
+                            <div style={{ fontSize: '2.5rem', fontWeight: '900', fontFamily: 'Outfit', color: 'var(--text-main)', lineHeight: '1' }}>{Math.round(percent * 100)}%</div>
                             <div style={{ fontSize: '0.7rem', fontWeight: '800', color: 'var(--text-dim)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>{value} / {max} HRS</div>
                         </div>
                     </div>
@@ -3353,7 +3357,7 @@
                                         {streak > 0 && <div style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '4px 12px', borderRadius: '100px', color: '#F59E0B', fontWeight: '800', fontSize: '0.75rem' }}>🔥 {streak} Day Streak</div>}
                                         <div style={{ background: 'var(--primary-glow)', padding: '4px 12px', borderRadius: '100px', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: '800' }}>{getStudentID(profile?.id)}</div>
                                     </div>
-                                    <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: '800', marginBottom: '4px', color: 'var(--text-main)', letterSpacing: '-1px' }}>
+                                    <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(1.8rem, 6vw, 2.5rem)', fontWeight: '800', marginBottom: '4px', color: 'var(--text-main)', letterSpacing: '-1px' }}>
                                         Hello, <span style={{ color: 'var(--primary)' }}>{profile?.name || 'User'}</span>!
                                         {profile?.name === 'Bimsath Walpola' && <span style={{ fontSize: '0.4em', background: 'var(--primary)', color: 'white', padding: '2px 8px', borderRadius: '6px', verticalAlign: 'middle', marginLeft: '10px', fontWeight: '800', letterSpacing: '1px' }}>OWNER</span>}
                                     </h1>
@@ -3440,12 +3444,12 @@
                                             <div style={{ width: '40px', height: '40px', background: 'var(--primary-glow)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', border: '1px solid var(--primary)', animation: 'livePulse 2s infinite' }}>📢</div>
                                             <div>
                                                 <div style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Notice Board</div>
-                                                <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', fontFamily: 'Orbitron' }}>Official Notices</div>
+                                                <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', fontFamily: 'Outfit' }}>Official Notices</div>
                                             </div>
                                         </div>
                                         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '20px', padding: '2rem', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '220px' }}>
                                             {announcement ? (
-                                                <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6', margin: 0, textAlign: 'center', fontFamily: 'Orbitron' }}>
+                                                <p style={{ fontSize: '1.1rem', fontWeight: '600', color: 'var(--text-main)', lineHeight: '1.6', margin: 0, textAlign: 'center', fontFamily: 'Outfit' }}>
                                                     {announcement}
                                                 </p>
                                             ) : (
@@ -3544,7 +3548,7 @@
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1000px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                         <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💻</div>
-                        <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800' }}>Your Workspace</h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: '800' }}>Your Workspace</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Manage your focus, tasks, and resources in one place.</p>
                         <div style={{ marginTop: '1.5rem', display: 'inline-flex', alignItems: 'center', background: 'var(--input-bg)', padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--glass-border)' }}>
                             <label style={{ fontSize: '0.85rem', color: 'var(--text-dim)', fontWeight: '700', marginRight: '10px' }}>🎯 Daily Target:</label>
@@ -3797,7 +3801,7 @@
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>🌍</div>
-                        <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Global Community</h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Global Community</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Connect, share resources, and excel together.</p>
                     </div>
 
@@ -3807,7 +3811,7 @@
                                 <div className="glass card" style={{ padding: '2.5rem', height: '100%', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                     <div>
                                         <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '10px' }}>Daily Focus</div>
-                                        <h2 style={{ fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1.8rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Master Your Potential 🚀</h2>
+                                        <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.8rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Master Your Potential 🚀</h2>
                                         <p style={{ color: 'var(--text-dim)', fontSize: '1rem', lineHeight: '1.6' }}>
                                             "The difference between ordinary and extraordinary is that little extra." Keep pushing your limits, mark your hours consistently, and watch yourself climb the leaderboard!
                                         </p>
@@ -3835,7 +3839,7 @@
                         <div style={{ gridColumn: 'span 5' }}>
                             <Reveal delay={0.1}>
                                 <div className="glass card" style={{ padding: '1.5rem', marginBottom: '1.5rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                    <h3 style={{ margin: 0, fontFamily: 'Orbitron', marginBottom: '1.5rem' }}>Top Scholars 🏆</h3>
+                                    <h3 style={{ margin: 0, fontFamily: 'Outfit', marginBottom: '1.5rem' }}>Top Scholars 🏆</h3>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, overflowY: 'auto' }}>
                                         {globalLeaders.slice(0, 15).map((l, i) => (
                                             <div key={i} style={{ display: 'flex', alignItems: 'center', background: 'var(--input-bg)', padding: '12px 15px', borderRadius: '12px', border: '1px solid var(--border)' }}>
@@ -3894,7 +3898,7 @@
                 <div>
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                         <div style={{ fontSize: 'clamp(3rem, 10vw, 4rem)', marginBottom: '0.5rem' }}>{SUBJECT_ICONS[subject] || '📚'}</div>
-                        <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.2rem, 8vw, 3.5rem)', fontWeight: '800', letterSpacing: '-1px' }}>{subject}</h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.2rem, 8vw, 3.5rem)', fontWeight: '800', letterSpacing: '-1px' }}>{subject}</h1>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginTop: '15px' }}>
                             <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--primary)', border: '1px solid var(--primary-glow)' }}>STUDY MODULE</div>
                             <div className="glass" style={{ padding: '6px 16px', borderRadius: '100px', fontSize: '0.7rem', fontWeight: '700', color: 'var(--success)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>{avgMastery}% MASTERY</div>
@@ -3905,9 +3909,9 @@
                         <Reveal delay={0.1}><div className="glass card" style={{ maxHeight: '400px', overflowY: 'auto' }}><span className="card-title">Paper History</span><div style={{ marginTop: '1rem' }}>{data.sort((a, b) => new Date(b.date) - new Date(a.date)).map(m => (<div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', background: 'var(--input-bg)', borderRadius: '14px', marginBottom: '8px', alignItems: 'center' }}><div><div style={{ fontWeight: '800', fontSize: '0.9rem' }}>{m.total} Marks</div><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>{m.date}</div></div><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>M:{m.mcq || 0} S:{m.str || 0} E:{m.esy || 0}</div><div className="delete-btn" onClick={() => delMark(m.id)}>🗑️</div></div></div>))}{data.length === 0 && <div style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.9rem', padding: '2rem' }}>No papers added yet.</div>}</div></div></Reveal>
                     </div>
                     <div className="stats-grid-3">
-                        <Reveal delay={0.1}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>🏆 Peak Mark</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Orbitron', color: '#10B981' }}>{peakTotal}</div></div></Reveal>
-                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📊 Average</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Orbitron', color: '#6366F1' }}>{avgTotal}</div></div></Reveal>
-                        <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📝 Papers</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Orbitron', color: '#F59E0B' }}>{data.length}</div></div></Reveal>
+                        <Reveal delay={0.1}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>🏆 Peak Mark</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#10B981' }}>{peakTotal}</div></div></Reveal>
+                        <Reveal delay={0.2}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📊 Average</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#6366F1' }}>{avgTotal}</div></div></Reveal>
+                        <Reveal delay={0.3}><div className="glass card" style={{ padding: '1.5rem', textAlign: 'center' }}><div style={{ fontSize: '0.65rem', fontWeight: '700', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>📝 Papers</div><div style={{ fontSize: '2rem', fontWeight: '800', fontFamily: 'Outfit', color: '#F59E0B' }}>{data.length}</div></div></Reveal>
                     </div>
                     {data.length > 0 && (
                         <Reveal delay={0.3}>
@@ -3961,7 +3965,7 @@
                             <div className="glass card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <div>
-                                        <div style={{ fontWeight: '800', fontSize: '1rem', fontFamily: 'Orbitron', color: 'var(--text-main)' }}>Skill Radar 🕷️</div>
+                                        <div style={{ fontWeight: '800', fontSize: '1rem', fontFamily: 'Outfit', color: 'var(--text-main)' }}>Skill Radar 🕷️</div>
                                         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '4px' }}>Latest Paper vs All-Time Average</div>
                                     </div>
                                     <div className="glass" style={{ padding: '4px 12px', borderRadius: '100px', fontSize: '0.65rem', fontWeight: '700', color: '#8B5CF6', border: '1px solid rgba(139, 92, 246, 0.2)' }}>{data.length} PAPERS</div>
@@ -4053,7 +4057,7 @@
             };
             return (
                 <div style={{ paddingBottom: '2rem' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💌</div><h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Voice Matters</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාලගෙ අදහස මොකද්ද මේක ගැන?</p></div>
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💌</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Voice Matters</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ඔයාලගෙ අදහස මොකද්ද මේක ගැන?</p></div>
                     <div className="glass card" style={{ maxWidth: '500px', margin: '0 auto', padding: '2.5rem', position: 'relative' }}>
                         {errorMsg && <div className="error-toast">⚠️ {errorMsg}</div>}
                         {successMsg && <div className="success-toast">✅ {successMsg}</div>}
@@ -4091,7 +4095,7 @@
             return (
                 <div style={{ animation: 'fadeIn 0.5s ease-out', maxWidth: '1400px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'left', marginBottom: '2.5rem' }}>
-                        <h1 style={{ fontFamily: 'Orbitron', fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.2rem' }}>Admin Center</h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: '2.5rem', fontWeight: '800', marginBottom: '0.2rem' }}>Admin Center</h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', fontWeight: '500' }}>Manage students and oversee platform activity.</p>
                     </div>
 
@@ -4176,7 +4180,7 @@
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
-                                <h3 style={{ fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span>📢</span> Broadcast Notice
                                 </h3>
                                 <textarea className="admin-textarea" value={announcementInput} onChange={e => setAnnouncementInput(e.target.value)} placeholder="Type a message for all students..." style={{ background: 'var(--input-bg)', border: '1px solid var(--border)', borderRadius: '14px', color: 'var(--text-main)', padding: '12px', width: '100%', height: '100px', resize: 'none', marginBottom: '10px' }} />
@@ -4184,7 +4188,7 @@
                             </div>
 
                             <div className="card" style={{ padding: '1.5rem', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '24px' }}>
-                                <h3 style={{ fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.1rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span>⚡</span> Active Sessions
                                 </h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -4220,7 +4224,7 @@
                 <div style={{ paddingBottom: '4rem', animation: 'fadeIn 0.8s ease-out' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                         <div style={{ fontSize: '3.5rem', marginBottom: '1rem', filter: 'drop-shadow(0 0 20px var(--primary-glow))' }}>📖</div>
-                        <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '900', letterSpacing: '-1.5px', marginBottom: '10px' }}>Master the <span style={{ color: 'var(--primary)' }}>Tracker</span></h1>
+                        <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '900', letterSpacing: '-1.5px', marginBottom: '10px' }}>Master the <span style={{ color: 'var(--primary)' }}>Tracker</span></h1>
                         <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto', fontWeight: '500' }}>LB Tracker එක පාවිච්චි කරලා ඔයාගේ A/L හීනයට ලඟා වෙන්න මේ දේවල් දැනගන්න.</p>
                     </div>
 
@@ -4230,9 +4234,9 @@
                                 <div className="glass card" style={{ padding: '2rem', height: '100%', borderTop: `4px solid ${s.color}`, display: 'flex', flexDirection: 'column', gap: '1rem', transition: '0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div style={{ width: '50px', height: '50px', background: `${s.color}20`, borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', color: s.color }}>{s.icon}</div>
-                                        <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--border)', opacity: 0.5, fontFamily: 'Orbitron' }}>{s.id}</span>
+                                        <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--border)', opacity: 0.5, fontFamily: 'Outfit' }}>{s.id}</span>
                                     </div>
-                                    <h2 style={{ fontFamily: 'Orbitron', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{s.title}</h2>
+                                    <h2 style={{ fontFamily: 'Outfit', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>{s.title}</h2>
                                     <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', lineHeight: '1.7', margin: 0, fontWeight: '500' }}>{s.desc}</p>
                                 </div>
                             </Reveal>
@@ -4250,7 +4254,7 @@
 
         const SubjectsGridView = ({ subjects, onSelect, marks }) => (
             <div>
-                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div><h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Subjects</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ප්‍රගතිය බලන්න විශයක් තෝරන්න.</p></div>
+                <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}><div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>📚</div><h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.5rem, 8vw, 3.5rem)', fontWeight: '800' }}>Your Subjects</h1><p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>ප්‍රගතිය බලන්න විශයක් තෝරන්න.</p></div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
                     {subjects.map((s, i) => {
                         const subMarks = marks.filter(m => m.subject === s);
@@ -4259,7 +4263,7 @@
                             <Reveal key={s} delay={i * 0.05}>
                                 <div className="glass card" onClick={() => onSelect(s)} style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                                     <div style={{ fontSize: '2.5rem' }}>{SUBJECT_ICONS[s] || '📚'}</div>
-                                    <div><div style={{ fontFamily: 'Orbitron', fontSize: '1.3rem', fontWeight: '800' }}>{s}</div>{SINHALA_NAMES[s] && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '-4px' }}>{SINHALA_NAMES[s]}</div>}<div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>{avgMastery}% MASTERY</div></div>
+                                    <div><div style={{ fontFamily: 'Outfit', fontSize: '1.3rem', fontWeight: '800' }}>{s}</div>{SINHALA_NAMES[s] && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '-4px' }}>{SINHALA_NAMES[s]}</div>}<div style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: '700', marginTop: '4px' }}>{avgMastery}% MASTERY</div></div>
                                     <div style={{ marginLeft: 'auto', fontSize: '1.2rem', color: 'var(--text-dim)' }}>➡️</div>
                                 </div>
                             </Reveal>
@@ -4274,7 +4278,7 @@
                 <div className="sidebar-logo" style={{ width: '80px', height: '80px', background: 'transparent', animation: 'pulse 1.5s infinite' }}>
                     <img src="lb-icon-192.png" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '15px' }} alt="Logo" />
                 </div>
-                <div style={{ fontSize: '1.2rem', fontFamily: 'Orbitron', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px' }}>LB TRACKER</div>
+                <div style={{ fontSize: '1.2rem', fontFamily: 'Outfit', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '2px' }}>LB TRACKER</div>
             </div>
         );
         const LandingPage = ({ onLogin, deferredPrompt, onInstall }) => (
@@ -4291,7 +4295,7 @@
                 </Reveal>
 
                 <Reveal delay={0.1}>
-                    <h1 style={{ fontFamily: 'Orbitron', fontSize: 'clamp(2.8rem, 10vw, 5rem)', fontWeight: '800', lineHeight: 1, marginBottom: '1.5rem', color: 'var(--text-main)', letterSpacing: '-2px' }}>
+                    <h1 style={{ fontFamily: 'Outfit', fontSize: 'clamp(2.8rem, 10vw, 5rem)', fontWeight: '800', lineHeight: 1, marginBottom: '1.5rem', color: 'var(--text-main)', letterSpacing: '-2px' }}>
                         Empowering <span style={{ background: 'linear-gradient(to right, var(--primary), #D946EF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Sri Lankan</span><br />A/L Students
                     </h1>
                 </Reveal>
@@ -4448,7 +4452,7 @@
                 <div className={`global-timer-pill ${isVisible ? 'visible' : ''}`}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1rem' }}>{mode === 'focus' ? '⚡' : '☕'}</span>
-                        <div style={{ fontFamily: 'Orbitron', fontWeight: '900', fontSize: '1.2rem', color: 'var(--text-main)', width: '60px' }}>
+                        <div style={{ fontFamily: 'Outfit', fontWeight: '900', fontSize: '1.2rem', color: 'var(--text-main)', width: '60px' }}>
                             {m}:{s}
                         </div>
                     </div>
@@ -5344,14 +5348,14 @@
 
                             <div className="mobile-only-brand" onClick={(e) => { e.stopPropagation(); setCurrentPage('dashboard'); window.scrollTo(0, 0); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                 <img src="lb-icon-192.png" style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '8px', background: 'white' }} alt="Logo" />
-                                <span style={{ fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1rem', letterSpacing: '1px' }}>LB TRACKER</span>
+                                <span style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1rem', letterSpacing: '1px' }}>LB TRACKER</span>
                             </div>
 
                             <div className="header-actions-group" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                                 {/* Desktop Page Title */}
                                 <div className="page-breadcrumb" style={{ display: 'flex', flexDirection: 'column', animation: 'fadeInDown 0.5s ease-out' }}>
                                     <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--primary)', letterSpacing: '2px', textTransform: 'uppercase' }}>LB Study Tracker</span>
-                                    <h1 style={{ fontFamily: 'Orbitron', fontSize: '1.4rem', fontWeight: '800', margin: 0, textTransform: 'capitalize', color: 'var(--text-main)', lineHeight: '1.1' }}>
+                                    <h1 style={{ fontFamily: 'Outfit', fontSize: '1.4rem', fontWeight: '800', margin: 0, textTransform: 'capitalize', color: 'var(--text-main)', lineHeight: '1.1' }}>
                                         {currentPage === 'dashboard' ? 'My Dashboard' : currentPage}
                                     </h1>
                                 </div>
@@ -5455,7 +5459,7 @@
                         <div className="admin-modal-overlay" onClick={() => setSelectedStudent(null)}>
                             <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '750px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                                    <h2 style={{ fontFamily: 'Orbitron', fontWeight: '800' }}>Student Details</h2>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800' }}>Student Details</h2>
                                     <button onClick={() => setSelectedStudent(null)} style={{ background: 'var(--input-bg)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                                 </div>
 
@@ -5524,7 +5528,7 @@
                         <div className="admin-modal-overlay" style={{ zIndex: 10000 }}>
                             <div className="admin-modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '2.5rem', animation: 'modalPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
                                 <div style={{ fontSize: '3.5rem', marginBottom: '1.2rem' }}>{confirmAction.type === 'danger' ? '⚠️' : '🔔'}</div>
-                                <h2 style={{ fontFamily: 'Orbitron', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem', textAlign: 'center' }}>{confirmAction.title}</h2>
+                                <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', marginBottom: '0.8rem', fontSize: '1.5rem', textAlign: 'center' }}>{confirmAction.title}</h2>
                                 <p style={{ color: 'var(--text-dim)', fontSize: '0.95rem', marginBottom: '2rem', lineHeight: '1.6', fontWeight: '500', textAlign: 'center' }}>{confirmAction.msg}</p>
                                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                                     <button className="btn-primary" style={{ flex: 1, background: 'var(--input-bg)', color: 'var(--text-main)', border: '1px solid var(--border)', height: '50px' }} onClick={() => setConfirmAction(null)}>Cancel</button>
@@ -5538,7 +5542,7 @@
                         <div className="admin-modal-overlay" onClick={() => setActiveModal(null)} style={{ zIndex: 11000 }}>
                             <div className="admin-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '650px', maxHeight: '80vh', overflowY: 'auto', textAlign: 'left', padding: '2.5rem', borderRadius: '24px', border: '1px solid var(--border)', background: 'var(--card-bg)', backdropFilter: 'blur(20px)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '15px' }}>
-                                    <h2 style={{ fontFamily: 'Orbitron', fontWeight: '800', fontSize: '1.6rem', color: 'var(--text-main)', margin: 0 }}>
+                                    <h2 style={{ fontFamily: 'Outfit', fontWeight: '800', fontSize: '1.6rem', color: 'var(--text-main)', margin: 0 }}>
                                         {activeModal === 'privacy' && 'Privacy Policy 🛡️'}
                                         {activeModal === 'terms' && 'Terms of Service 📜'}
                                         {activeModal === 'contact' && 'Contact Us 📬'}
@@ -5549,27 +5553,27 @@
                                     {activeModal === 'privacy' && (
                                         <div>
                                             <p>Welcome to <strong>LB Study Tracker</strong> (accessible via <a href="https://lbstudytracker.online" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: '700' }}>https://lbstudytracker.online</a>). Your privacy is of paramount importance to us. This Privacy Policy documents the types of information we collect, how we use it, and our cookie management policies.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>1. Information We Collect</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>1. Information We Collect</h3>
                                             <p>We collect personal information that you voluntarily provide to us when registering, such as your Name, Email address, Target Exam details, District, and Profile Avatar. We also store your logged study hours and test scores to enable study progress tracking.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>2. How We Use Your Information</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>2. How We Use Your Information</h3>
                                             <p>We use your information to operate, maintain, and personalize your experience on LB Study Tracker, calculate streak points, showcase study leaderboards, and communicate updates.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>3. Cookies & Google AdSense Compliance</h3>
-                                            <p>LB Study Tracker may use standard 'cookies' to store visitors' preferences and session configurations. Additionally, third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to our website. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our site and/or other sites on the internet.</p>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>3. Cookies & Google AdSense Compliance</h3>
+                                            <p>LB Study Tracker may use standard 'cookies' to store visitors' preferences and session configurations. Additionally, third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to our website. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our site and/or other sites on the Internet.</p>
                                             <p>Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: '700' }}>Google Ads Settings</a>. For more information, please refer to Google's official privacy documentation.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>4. Data Security</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>4. Data Security</h3>
                                             <p>All student data is securely transmitted over HTTPS and hosted using industry-standard cloud encryption services (Supabase/PostgreSQL). We do not share, sell, or lease your private data to third parties.</p>
                                         </div>
                                     )}
                                     {activeModal === 'terms' && (
                                         <div>
                                             <p>By accessing <strong>LB Study Tracker</strong> (at <a href="https://lbstudytracker.online" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', fontWeight: '700' }}>https://lbstudytracker.online</a>), you agree to comply with and be bound by the following Terms of Service.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>1. Acceptance of Terms</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>1. Acceptance of Terms</h3>
                                             <p>By registering an account and using the services provided by LB Study Tracker, you signify your agreement to these Terms. If you do not agree, you must discontinue use immediately.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>2. Account Responsibilities</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>2. Account Responsibilities</h3>
                                             <p>You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your study tracker profile. Accounts violating platform integrity, cheating on study times, or posting abusive content in the Global Hub are subject to termination or suspension by our administrative team.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>3. Permitted & Fair Use</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>3. Permitted & Fair Use</h3>
                                             <p>LB Study Tracker is created solely for personal academic tracking and student connection. Commercial exploitation, automated scripting, bot integration, or scraping data from our community forum is strictly prohibited.</p>
-                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Orbitron' }}>4. Disclaimer & Limitations</h3>
+                                            <h3 style={{ margin: '1.5rem 0 0.5rem', color: 'var(--primary)', fontSize: '1.1rem', fontWeight: '800', fontFamily: 'Outfit' }}>4. Disclaimer & Limitations</h3>
                                             <p>The services and performance analysis dashboards are provided on an "as is" basis. While we strive to ensure 100% cloud sync availability, LB Study Tracker makes no warranties regarding uninterrupted service, sync data loss, or server downtime.</p>
                                         </div>
                                     )}
@@ -5608,4 +5612,3 @@
 </body>
 
 </html>
-
